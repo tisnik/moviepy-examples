@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# vim: set fileencoding=utf-8
+
 from moviepy.editor import VideoClip
 import numpy
 
@@ -8,6 +11,7 @@ index = 0
 
 
 def make_frame(t):
+    """Vytvoreni jednoho snimku videa."""
     global index
     print("time: {t}, index: {i}".format(t=t, i=index))
 
@@ -27,11 +31,17 @@ def make_frame(t):
 # vytvoreni video klipu
 animation = VideoClip(make_frame, duration=10)
 
-# export videa do formatu GIF
-# animation.write_gif("colors.gif", fps=25)
+# export videa do formatu Ogg Video File
+animation.write_videofile("colors.ogv", fps=25)
 
 # znovunastaveni pocitadla
 index = 0
 
 # export videa do formatu MPEG-4
 animation.write_videofile("colors.mp4", fps=25)
+
+# znovunastaveni pocitadla
+index = 0
+
+# export videa do formatu GIF
+animation.write_gif("colors.gif", fps=25)
