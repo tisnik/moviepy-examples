@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# vim: set fileencoding=utf-8
+
 from moviepy.editor import VideoClip
 import numpy
 
@@ -26,6 +29,12 @@ animation = VideoClip(make_frame, duration=10)
 
 # export videa do formatu MPEG-4
 animation.write_videofile("line.mp4", fps=24)
+
+# znovunastaveni pocitadla
+line = 0
+
+# export videa do formatu Ogg Video File
+animation.write_videofile("line.ogv", fps=24)
 
 # znovunastaveni pocitadla
 line = 0
