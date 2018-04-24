@@ -27,6 +27,7 @@ def calc_corner(c_width, c_height, xpos, ypos, scale):
 
 
 def calc_mandelbrot(width, height, maxiter, palette, xpos, ypos, scale, array):
+
     xmin, ymin, xmax, ymax = calc_corner(2.0, 1.5, xpos, ypos, scale)
     c = complex(xmin, ymin)
     for y in range(0, height):
@@ -73,10 +74,11 @@ def make_frame(t):
 animation = VideoClip(make_frame, duration=15)
 
 # export videa do formatu Ogg Video File
-animation.write_videofile("mandelbrot_zoom.ogv", fps=20, progress_bar=False, bitrate="900000")
+# animation.write_videofile("mandelbrot_zoom.ogv", fps=20, progress_bar=False, bitrate="2000000")
+animation.write_videofile("mandelbrot_zoom.ogv", fps=20, progress_bar=False, bitrate="300000")
 
 # export videa do formatu MPEG-4
-# animation.write_videofile("colors.mp4", fps=25)
+# animation.write_videofile("mandelbrot_zoom.mp4", fps=20, progress_bar=False, bitrate="700000")
 
 # export videa do formatu GIF
 # animation.write_gif("colors.gif", fps=25)
