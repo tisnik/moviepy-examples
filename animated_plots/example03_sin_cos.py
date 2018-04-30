@@ -25,6 +25,7 @@ x = np.linspace(0, 2 * np.pi, 100)
 # + nastavení rozlišení obrázku (resp. jednotlivých rámců)
 fig, axis = plt.subplots(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
 
+
 def make_frame(t):
     axis.clear()
 
@@ -37,9 +38,14 @@ def make_frame(t):
     # hodnoty na y-ové ose: druhá funkce
     y2 = np.cos(x - offset)
 
+    # hodnoty na y-ové ose: součet funkcí
+    y3 = y1 + y2
+
     # vykreslení průběhu funkce
     axis.plot(x, y1)
     axis.plot(x, y2)
+    axis.plot(x, y3)
+    axis.set_ylim(-2, 2)
 
     # konverze na objekt typu "frame"
     return mplfig_to_npimage(fig)

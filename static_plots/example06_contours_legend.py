@@ -2,7 +2,6 @@
 
 # Knihovny Numpy a matplotlib
 #
-# Dvacátý třetí demonstrační příklad:
 # - zobrazení kontur funkce typu z=f(x,y)
 # - zobrazení hodnot u jednotlivých "vrstevnic"
 # - přidání legendy

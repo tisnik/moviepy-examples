@@ -2,7 +2,6 @@
 
 # Knihovny Numpy a matplotlib
 #
-# Dvacátý čtvrtý demonstrační příklad:
 # - zobrazení 3D grafu funkce typu z=f(x,y)
 
 from mpl_toolkits.mplot3d import axes3d
