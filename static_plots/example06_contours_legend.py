@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# vim: set fileencoding=utf-8
 
 # Knihovny Numpy a matplotlib
 #
