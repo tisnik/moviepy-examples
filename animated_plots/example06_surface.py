@@ -15,8 +15,8 @@ HEIGHT = 300
 DPI = 100
 
 # parametry animace
-DURATION = 4
-FPS = 10
+DURATION = 8
+FPS = 15
 
 fig = plt.figure(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
 axis = fig.add_subplot(111, projection="3d")
