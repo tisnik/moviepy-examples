@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# vim: set fileencoding=utf-8
+
 # Knihovny Numpy a matplotlib
 #
 # - zobrazení 3D grafu funkce typu z=f(x,y)
