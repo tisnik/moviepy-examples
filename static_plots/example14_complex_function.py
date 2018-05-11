@@ -37,6 +37,14 @@ def colorize(z):
     return c
 
 
+def show_graph(w):
+    # obarveni vysledku
+    img = colorize(w)
+
+    # vykresleni grafu
+    plt.imshow(img)
+    plt.show()
+
 # rozmery mrizky
 N=1000
 
@@ -46,12 +54,30 @@ x, y = np.ogrid[-5:5:N*1j, -5:5:N*1j]
 # prevod na komplexni cisla
 z = x + 1j*y
 
-# w = 1/(z+1j)**2 + 1/(z-2)**2
+w = z
+show_graph(w)
+
+w = 1/z
+show_graph(w)
+
+w = z**2
+show_graph(w)
+
+w = z**z+z
+show_graph(w)
+
+w = (z**2+4)/(z**2-4)
+show_graph(w)
+
+w = np.tan(z)
+show_graph(w)
+
+w = np.tan(10/z)
+show_graph(w)
+
 w = np.sin(z**2)
+show_graph(w)
 
-# obarveni vysledku
-img = colorize(w)
+w = 1/(z+1j)**2 + 1/(z-2)**2
+show_graph(w)
 
-# vykresleni grafu
-plt.imshow(img)
-plt.show()
