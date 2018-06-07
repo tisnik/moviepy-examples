@@ -18,6 +18,7 @@ import matplotlib.pyplot as plt
 
 
 def fourier_serie(x, order):
+    """Vypocet Fourierovy rady zadaneho radu."""
     sum = 0
     for i in range(0, order):
         n = 2 * i + 1
@@ -38,6 +39,7 @@ ys = np.vectorize(fourier_serie)
 # Fourierova syntéza
 N = 4
 
+# vykresleni vsech prubehu Fourierovy rady
 for order in range(1, N+1):
     approx = ys(x, order)
     plt.plot(x, approx, label='order {o}'.format(o=order))
