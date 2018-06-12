@@ -13,6 +13,8 @@
 #      Pavel Tisnovsky
 #
 
+"""Vygenerovani sceny obsahujici vertikalne se posunujici usecku."""
+
 from moviepy.editor import VideoClip
 import numpy
 
@@ -23,8 +25,9 @@ line = 0
 
 
 def make_frame(t):
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     global line
-    print("time: {t}, line: {l}".format(t=t, l=line))
+    print("time: {time}, line: {lime}".format(time=t, line=line))
 
     # vyplneni trojrozmerneho pole nulami
     frame = numpy.zeros((HEIGHT, WIDTH, 3))
