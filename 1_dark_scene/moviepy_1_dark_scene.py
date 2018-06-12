@@ -13,6 +13,8 @@
 #      Pavel Tisnovsky
 #
 
+"""Vygenerovani sceny obsahujici pouze 10 sekund cernych snimku s frekvenci 24 snimku za sekundu."""
+
 from moviepy.editor import VideoClip
 import numpy
 
@@ -21,6 +23,7 @@ HEIGHT = 240
 
 
 def make_frame(t):
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     print("time: {t}".format(t=t))
     # vyplneni trojrozmerneho pole nulami
     frame = numpy.zeros((HEIGHT, WIDTH, 3))
