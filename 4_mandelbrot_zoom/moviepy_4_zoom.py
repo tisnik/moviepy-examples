@@ -13,6 +13,8 @@
 #      Pavel Tisnovsky
 #
 
+"""Vygenerovani videa se zoomem do Mandelbrotovy mnoziny."""
+
 from moviepy.editor import VideoClip
 import numpy
 import palette_mandmap
@@ -32,6 +34,7 @@ scale_factor = 0.97
 
 
 def calc_corner(c_width, c_height, xpos, ypos, scale):
+    """Vypocet mezi v Mandelbrotove mnozine pro zadane meritko."""
     return xpos - c_width * scale, \
            ypos - c_height * scale, \
            xpos + c_width * scale, \
@@ -39,7 +42,7 @@ def calc_corner(c_width, c_height, xpos, ypos, scale):
 
 
 def calc_mandelbrot(width, height, maxiter, palette, xpos, ypos, scale, array):
-
+    """Vypocet Mandelbrotovy mnoziny pro zadane meritko, pocet iteraci a rozliseni."""
     xmin, ymin, xmax, ymax = calc_corner(2.0, 1.5, xpos, ypos, scale)
     c = complex(xmin, ymin)
     for y in range(0, height):
@@ -65,7 +68,7 @@ def calc_mandelbrot(width, height, maxiter, palette, xpos, ypos, scale, array):
             # posun na dalsi bod na radku
             c += (xmax - xmin) / width
         # posun na dalsi radek
-        c += 1J*(ymax - ymin) / height
+        c += 1J * (ymax - ymin) / height
 
 
 def make_frame(t):
