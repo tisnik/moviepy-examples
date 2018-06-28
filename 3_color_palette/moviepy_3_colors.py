@@ -13,6 +13,8 @@
 #      Pavel Tisnovsky
 #
 
+"""Vygenerovani sceny obsahujici animaci zmeny barvove palety."""
+
 from moviepy.editor import VideoClip
 import numpy
 
@@ -23,7 +25,7 @@ index = 0
 
 
 def make_frame(t):
-    """Vytvoreni jednoho snimku videa."""
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     global index
     print("time: {t}, index: {i}".format(t=t, i=index))
 
