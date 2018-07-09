@@ -17,6 +17,10 @@
 #
 # První demonstrační příklad:
 # - vykreslení animovaného průběhu funkce sin
+# - výsledkem by měl být animovaný GIF
+
+
+"""Vykresleni animovaneho prubehu funkce sin."""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -36,6 +40,7 @@ fig, axis = plt.subplots()
 
 
 def make_frame(t):
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     axis.clear()
 
     # offset v rozmezí 0 .. 2*Pi
@@ -51,5 +56,8 @@ def make_frame(t):
     return mplfig_to_npimage(fig)
 
 
+# vytvoreni video klipu
 animation = VideoClip(make_frame, duration=DURATION)
+
+# export videa do formatu GIF
 animation.write_gif('sinus_A.gif', fps=FPS)
