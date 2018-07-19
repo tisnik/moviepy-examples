@@ -38,6 +38,7 @@ x = np.linspace(0, 2 * np.pi, 100)
 
 
 def make_frame(t):
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     # offset v rozmezí 0 .. 2*Pi
     offset = 2 * np.pi * t / DURATION
 
@@ -55,5 +56,8 @@ def make_frame(t):
     return mplfig_to_npimage(fig)
 
 
+# vytvoreni video klipu
 animation = VideoClip(make_frame, duration=DURATION)
+
+# export videa do formatu GIF
 animation.write_gif('sinus_C.gif', fps=FPS)
