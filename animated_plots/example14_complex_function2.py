@@ -1,18 +1,6 @@
 #!/usr/bin/env python3
 # vim: set fileencoding=utf-8
 
-#
-#  (C) Copyright 2018  Pavel Tisnovsky
-#
-#  All rights reserved. This program and the accompanying materials
-#  are made available under the terms of the Eclipse Public License v1.0
-#  which accompanies this distribution, and is available at
-#  http://www.eclipse.org/legal/epl-v10.html
-#
-#  Contributors:
-#      Pavel Tisnovsky
-#
-
 import numpy as np
 from numpy import pi
 import pylab as plt
@@ -75,6 +63,7 @@ subplot = fig.add_subplot(111)
 
 
 def make_frame(t):
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     power = 5 * t / DURATION - 2
 
     w = 1/(z+2j)**power + 1/(z-2)**power
@@ -86,5 +75,8 @@ def make_frame(t):
     return mplfig_to_npimage(fig)
 
 
+# vytvoreni video klipu
 animation = VideoClip(make_frame, duration=DURATION)
+
+# export videa do formatu Ogg/Vorbis
 animation.write_videofile('complex2.ogv', fps=FPS, progress_bar=True, bitrate="800000")
