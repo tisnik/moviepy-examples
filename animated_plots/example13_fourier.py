@@ -54,7 +54,9 @@ fig, axis = plt.subplots()
 # viz: https://github.com/Zulko/moviepy/issues/155
 order = 0
 
+
 def make_frame(t):
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     axis.clear()
 
     # Fourierova syntéza
@@ -72,5 +74,8 @@ def make_frame(t):
     return mplfig_to_npimage(fig)
 
 
+# vytvoreni video klipu
 animation = VideoClip(make_frame, duration=DURATION)
+
+# export videa do formatu GIF
 animation.write_gif('fourier_square_wave.gif', fps=FPS)
