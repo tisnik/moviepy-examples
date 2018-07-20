@@ -69,6 +69,7 @@ z = x + 1j*y
 
 
 def make_frame(t):
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     offset = 4 * t / DURATION - 2
     print(offset)
 
@@ -87,5 +88,8 @@ def make_frame(t):
     return mplfig_to_npimage(fig)
 
 
+# vytvoreni video klipu
 animation = VideoClip(make_frame, duration=DURATION)
+
+# export videa do formatu Ogg/Vorbis
 animation.write_videofile('complex.ogv', fps=FPS, progress_bar=False, bitrate="800000")
