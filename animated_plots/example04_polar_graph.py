@@ -36,6 +36,7 @@ axis = fig.add_subplot(111, projection="polar")
 
 
 def make_frame(t):
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     axis.clear()
 
     # offset v rozmezí 0 .. 2*Pi
@@ -55,5 +56,8 @@ def make_frame(t):
     return mplfig_to_npimage(fig)
 
 
+# vytvoreni video klipu
 animation = VideoClip(make_frame, duration=DURATION)
+
+# export videa do formatu GIF
 animation.write_gif('polar.gif', fps=FPS)
