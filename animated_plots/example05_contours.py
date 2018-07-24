@@ -38,6 +38,7 @@ fig, axis = plt.subplots(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DP
 
 
 def make_frame(t):
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     axis.clear()
 
     # offset v rozmezí 0 .. 2*Pi
@@ -74,5 +75,9 @@ def make_frame(t):
     # konverze na objekt typu "frame"
     return mplfig_to_npimage(fig)
 
+
+# vytvoreni video klipu
 animation = VideoClip(make_frame, duration=DURATION)
+
+# export videa do formatu GIF
 animation.write_gif('contour.gif', fps=FPS)
