@@ -12,7 +12,6 @@
 #      Pavel Tisnovsky
 #
 
-
 # Knihovny Numpy a matplotlib
 #
 # - Lorenzův atraktor
@@ -50,7 +49,9 @@ axis = fig.add_subplot(111, projection="3d")
 
 max = 0
 
+
 def make_frame(t):
+    """Deklarace callback funkce zavolane pri renderingu kazdeho snimku videa."""
     axis.clear()
 
     global max
@@ -85,6 +86,9 @@ def make_frame(t):
     return mplfig_to_npimage(fig)
 
 
+# vytvoreni video klipu
 animation = VideoClip(make_frame, duration=DURATION)
+
+# export videa do formatu GIF
 # animation.write_gif('lorenz1.gif', fps=FPS)
 animation.write_videofile('lorenz1.ogv', fps=FPS, progress_bar=True)
