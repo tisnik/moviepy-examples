@@ -22,5 +22,5 @@ clip = VideoFileClip('input_video.mp4', audio=False)
 # inverzni video
 inversed_clip = clip.fx(invert_colors)
 
-# ulozeni video klipu do jineho souboru
+# ulozeni video klipu do jineho souboru ve formatu Ogg/Theora
 inversed_clip.write_videofile('10_inverse_video.ogv', bitrate='600000')

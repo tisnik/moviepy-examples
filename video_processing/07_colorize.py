@@ -23,5 +23,5 @@ clip = VideoFileClip('input_video.mp4', audio=False)
 # velmi primitivni "kolorizace"
 recolored_clip = clip.fx(colorx, 2.50)
 
-# ulozeni video klipu do jineho souboru
+# ulozeni video klipu do jineho souboru ve formatu Ogg/Theora
 recolored_clip.write_videofile('07_output_recolored.ogv', bitrate='700000')

@@ -22,5 +22,5 @@ clip = VideoFileClip('input_video.mp4', audio=False)
 # aplikace rozmazani pohybem
 blurred_clip = clip.fx(supersample, 0.25, 10)
 
-# ulozeni video klipu do jineho souboru
+# ulozeni video klipu do jineho souboru ve formatu Ogg/Theora
 blurred_clip.write_videofile('11_motion_blur.ogv', bitrate='600000')

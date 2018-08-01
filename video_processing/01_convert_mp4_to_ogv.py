@@ -18,5 +18,5 @@ from moviepy.editor import VideoClip, VideoFileClip
 # nacteni video klipu
 clip = VideoFileClip('input_video.mp4', audio=False)
 
-# ulozeni video klipu do jineho souboru s pouzitim odlisneho kodeku
+# ulozeni video klipu do jineho souboru ve formatu Ogg/Theora
 clip.write_videofile('01_output_normal.ogv')

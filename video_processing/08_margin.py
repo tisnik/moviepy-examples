@@ -20,5 +20,5 @@ import numpy
 # nacteni video klipu
 clip = VideoFileClip('input_video.mp4', audio=False).margin(20)
 
-# ulozeni video klipu do jineho souboru
+# ulozeni video klipu do jineho souboru ve formatu Ogg/Theora
 clip.write_videofile('08_output_with_margin.ogv', bitrate='700000')

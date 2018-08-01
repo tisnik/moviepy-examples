@@ -25,5 +25,5 @@ mask = ImageClip('mask.png', ismask=True)
 # aplikace masky
 final = CompositeVideoClip([clip.set_mask(mask)])
 
-# ulozeni video klipu do jineho souboru
+# ulozeni video klipu do jineho souboru ve formatu Ogg/Theora
 final.write_videofile('09_output_masked.ogv', bitrate='600000')

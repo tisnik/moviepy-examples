@@ -23,5 +23,5 @@ clip = VideoFileClip('input_video.mp4', audio=False)
 # novy klip predstavujici video zmensene na 1/4 puvodni velikosti
 resized_clip = clip.fx(resize, 0.25)
 
-# ulozeni video klipu do jineho souboru
+# ulozeni video klipu do jineho souboru ve formatu Ogg/Theora
 resized_clip.write_videofile('06_output_smaller.ogv', bitrate='700000')

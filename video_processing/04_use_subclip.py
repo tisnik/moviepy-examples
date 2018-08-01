@@ -22,5 +22,5 @@ clip = VideoFileClip('input_video.mp4', audio=False)
 # novy objekt reprezentujici video klip od 5 do 10 sekundy
 sub_clip = clip.subclip(5.0, 10.0)
 
-# ulozeni video klipu do jineho souboru
+# ulozeni video klipu do jineho souboru ve formatu Ogg/Theora
 sub_clip.write_videofile('04_output_subclip.ogv', bitrate='700000')

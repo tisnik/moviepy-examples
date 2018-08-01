@@ -22,5 +22,5 @@ clip = VideoFileClip('input_video.mp4', audio=False)
 # novy objekt reprezentujici zrychleny video klip
 faster_clip = clip.speedx(1.5)
 
-# ulozeni video klipu do jineho souboru
+# ulozeni video klipu do jineho souboru ve formatu Ogg/Theora
 faster_clip.write_videofile('03_output_faster_clip.ogv', bitrate='700000')
