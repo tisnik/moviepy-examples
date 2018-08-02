@@ -13,7 +13,7 @@
 #      Pavel Tisnovsky
 #
 
-from moviepy.editor import VideoClip, VideoFileClip
+from moviepy.editor import VideoFileClip
 import numpy
 
 # nacteni video klipu

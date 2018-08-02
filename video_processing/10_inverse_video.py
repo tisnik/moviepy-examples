@@ -13,7 +13,7 @@
 #      Pavel Tisnovsky
 #
 
-from moviepy.editor import ImageClip, VideoClip, VideoFileClip, CompositeVideoClip
+from moviepy.editor import ImageClip, VideoFileClip, CompositeVideoClip
 from moviepy.video.fx.all import *
 
 # nacteni video klipu

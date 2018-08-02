@@ -13,7 +13,7 @@
 #      Pavel Tisnovsky
 #
 
-from moviepy.editor import VideoClip, VideoFileClip
+from moviepy.editor import VideoFileClip
 
 # nacteni video klipu
 clip = VideoFileClip('input_video.mp4', audio=False)
