@@ -1,0 +1,2096 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Použití MoviePy společně s knihovnou Vapory a raytracerem POV-Ray</title>
+<meta name="Author" content="Pavel Tisnovsky" />
+<meta name="Generator" content="vim" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<style type="text/css">
+         body {color:#000000; background:#ffffff;}
+         h1  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#c00000; text-align:center; padding-left:1em}
+         h2  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#0000c0; padding-left:1em; text-align:left}
+         h3  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#c0c0c0; padding-left:1em; text-align:left}
+         h4  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#e0e0e0; padding-left:1em; text-align:left}
+         a   {font-family: arial, helvetica, sans-serif;}
+         li  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ol  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ul  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         p   {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify;}
+         pre {background:#e0e0e0}
+</style>
+</head>
+
+<body>
+
+<h1>Použití MoviePy společně s knihovnou Vapory a raytracerem POV-Ray</h1>
+
+<h3>Pavel Tišnovský</h3>
+
+<p></p>
+
+<h1>Úvodník</h1>
+
+<p>V dnešním článku spojíme dvě témata, kterým jsme se věnovali v předchozích týdnech. Jednalo se o knihovnu MoviePy určenou pro manipulaci a vytváření video souborů a o knihovnu Vapory, která umožňuje deklarovat 3D scény pro raytracer POV-Ray.</p>
+
+
+
+<h2>Obsah</h2>
+
+<p><a href="#k01">1. Přidání elementů, které Vapory ve svém výchozím nastavení nepodporuje</a></p>
+<p><a href="#k02">2. Mapy barev a jejich použití s&nbsp;některými typy procedurálních textur</a></p>
+<p><a href="#k03">3. Testovací scéna napsaná přímo pro POV-Ray, která obsahuje torus</a></p>
+<p><a href="#k04">4. Shodná testovací scéna napsaná v&nbsp;Pythonu s&nbsp;využitím Vapory a nové třídy <strong>Torus</strong></a></p>
+<p><a href="#k05">5. Zjednodušený zápis mapy barev &ndash; scéna popsaná v&nbsp;jazyku POV-Ray</a></p>
+<p><a href="#k06">6. Zjednodušený zápis mapy barev &ndash; scéna popsaná v&nbsp;jazyku Python s&nbsp;využitím Vapory</a></p>
+<p><a href="#k07">7. Využití implicitních ploch (blobs, metaballs) v&nbsp;POV-Rayi</a></p>
+<p><a href="#k08">8. Rozšíření možností CSG pomocí implicitních ploch</a></p>
+<p><a href="#k09">9. Konstrukce implicitních ploch s&nbsp;využitím kostry</a></p>
+<p><a href="#k10">10. Vykreslení implicitních ploch POV-Rayem</a></p>
+<p><a href="#k11">11. Vykreslení stejné scény s&nbsp;využitím knihovny Vapory</a></p>
+<p><a href="#k12">12. Idiomatický kód &ndash; použití n-tic namísto seznamů</a></p>
+<p><a href="#k13">13. Využití možností knihovny MoviePy pro jednodušší vytvoření animace</a></p>
+<p><a href="#k14">14. Úprava příkladu z&nbsp;předchozího článku: animace změny CSG tělesa a textury na toru</a></p>
+<p><a href="#k15">15. Příprava na animaci změn parametrů implicitních ploch</a></p>
+<p><a href="#k16">16. Shodná testovací scéna napsaná v&nbsp;Pythonu s&nbsp;využitím Vapory</a></p>
+<p><a href="#k17">17. Naprogramování animace &ndash; tvorba jednotlivých snímků později spojených do videa</a></p>
+<p><a href="#k18">18. Naprogramování animace &ndash; použití MoviePy</a></p>
+<p><a href="#k19">19. Repositář s&nbsp;demonstračními příklady</a></p>
+<p><a href="#k20">20. Odkazy na Internetu</a></p>
+
+
+
+<p><a name="k01"></a></p>
+<h2 id="k01">1. Přidání elementů, které Vapory ve svém výchozím nastavení nepodporuje</h2>
+
+<p>V&nbsp;dnešním článku tematicky navážeme na čtyři předchozí články,
+v&nbsp;nichž jsme se zabývali jak popisem možností nabízených knihovnou
+<i>MoviePy</i> určené pro zpracování video souborů (včetně tvorby souborů
+nových), tak i knihovny <i>Vapory</i>, která slouží pro přípravu 3D scén
+určených pro vykreslení raytracerem POV-Ray:</p>
+
+<ol>
+
+<li>Programová tvorba a nelineární editace videa s využitím knihovny MoviePy<br />
+<a href="https://www.root.cz/clanky/programova-tvorba-a-nelinearni-editace-videa-s-vyuzitim-knihovny-moviepy/">https://www.root.cz/clanky/programova-tvorba-a-nelinearni-editace-videa-s-vyuzitim-knihovny-moviepy/</a>
+</li>
+
+<li>Použití MoviePy společně s Matplotlibem pro tvorbu animovaných grafů<br />
+<a href="https://www.root.cz/clanky/pouziti-moviepy-spolecne-s-matplotlibem-pro-tvorbu-animovanych-grafu/">https://www.root.cz/clanky/pouziti-moviepy-spolecne-s-matplotlibem-pro-tvorbu-animovanych-grafu/</a>
+</li>
+
+<li>Použití MoviePy společně Matplotlibem pro tvorbu animovaných grafů (dokončení)<br />
+<a href="https://www.root.cz/clanky/pouziti-moviepy-spolecne-matplotlibem-pro-tvorbu-animovanych-grafu-dokonceni/">https://www.root.cz/clanky/pouziti-moviepy-spolecne-matplotlibem-pro-tvorbu-animovanych-grafu-dokonceni/</a>
+</li>
+
+<li>Projekt Vapory: kombinace možností Pythonu a POV-Raye<br />
+<a href="https://www.root.cz/clanky/projekt-vapory-kombinace-moznosti-pythonu-a-pov-raye/">https://www.root.cz/clanky/projekt-vapory-kombinace-moznosti-pythonu-a-pov-raye/</a>
+</li>
+
+</ol>
+
+<a href="http://i.iinfo.cz/urs/povray49_01-123540698209155.jpg"><img alt="povray4901" width="243" height="350" src="http://i.iinfo.cz/urs/povray49_01-preview-123540698209155.jpg" /></a>
+<p><i>Obrázek 1: Scéna pojmenovaná &#8222;Reach for the Stars&#8220;, která
+byla POV-Rayem vykreslena na Mezinárodní kosmické stanici (jedná se o variantu
+se zmenšeným rozlišením oproti originálu).</i></p>
+
+<p>Obě zmíněné knihovny, tj.&nbsp;jak MoviePy, tak i Vapory, jsou určeny pro
+použití v&nbsp;programovacím jazyku Python, takže se přímo nabízí otázka,
+jestli je možné jejich možnosti nějakým vhodným způsobem zkombinovat. Ve
+skutečnosti to možné je, a to navíc relativně jednoduše. Nejdříve si však
+ukážeme další možnosti nabízené knihovnou Vapory, zejména použití takzvaných
+map barev (<i>color map</i>) a taktéž rozšíření této knihovny o další 3D entity
+(což je, jak uvidíme dále, až překvapivě snadné). Ve druhé třetině článku se
+zmíníme o použití implicitních ploch a v&nbsp;závěrečné části se pak budeme
+věnovat již slíbené přímé tvorbě video souborů přímo z&nbsp;Vapory.</p>
+
+<a href="http://i.iinfo.cz/urs/povray16_07-121356400590463.jpg"><img alt="povray1607" width="450" height="337" src="http://i.iinfo.cz/urs/povray16_07-preview-121356400590463.jpg"></a>
+<p><i>Obrázek 2: Procedurální textury dřeva: od smrku přes dub až po mahagon.
+Právě v&nbsp;procedurálních texturách jsou použity mapy barev popsané
+v&nbsp;navazujících kapitolách.</i></p>
+
+<p>Pokud nějaká 3D entita není ve Vapory podporována, je ji možné do knihovny
+přidat a to velmi snadno. Postačuje vytvořit novou třídu se stejným jménem,
+jako má příslušná entita, a tuto třídu odvodit od
+<strong>POVRayElement</strong>. Třída může být prázdná (vše se pouze zdědí),
+takže se vlastně jedná o dvouřádkovou deklaraci:</p>
+
+<pre>
+class <strong>Torus</strong>(POVRayElement):
+    """Torus()"""
+</pre>
+
+<p>Nic dalšího není zapotřebí provádět!</p>
+
+
+
+<p><a name="k02"></a></p>
+<h2 id="k02">2. Mapy barev a jejich použití s&nbsp;některými typy procedurálních textur</h2>
+
+<p>U mnoha procedurálních textur, jejichž ukázky budou použity v&nbsp;dalších
+demonstračních příkladech, je nutné nějakým způsobem specifikovat způsob
+použití barev, protože se jedná o textury zadané nějakou funkcí, která pro
+každý bod v&nbsp;3D prostoru vrátí reálné číslo v&nbsp;rozsahu 0–1 (to je
+typické chování naprosté většiny procedurálních textur v&nbsp;POV-Rayi). Toto
+číslo je nutné nějakým způsobem převést na barvu. V&nbsp;případě diskrétních
+hodnot (uložených například v&nbsp;rastrových obrázcích typu BMP, GIF či PNG)
+se pro tento účel využívají barvové palety (<i>color palettes</i>),
+v&nbsp;POV-Rayi je pro převod reálných čísel na barvu použito takzvaných
+barvových map (<i>color maps</i>). Zadání barvových map v&nbsp;jazyku POV-Ray
+je poměrně jednoduché &ndash; specifikuje se vždy reálná hodnota a barva platná
+pro tuto hodnotu.</p>
+
+<a href="http://i.iinfo.cz/urs/povray16_05-121356390378902.jpg"><img alt="povray1605" width="450" height="337" src="http://i.iinfo.cz/urs/povray16_05-preview-121356390378902.jpg"></a>
+<p><i>Obrázek 3: Testovací &bdquo;panáci&ldquo; pokrytí jednoduchými
+procedurálními texturami (zleva doprava): lineárním gradientním přechodem,
+radiálním gradientním přechodem, sférickým gradientním přechodem a lineárním
+přechodem otočeným o 90°.</i></p>
+
+<p>Mezi dvojicí reálných hodnot, které by měly být zadány v&nbsp;neklesajícím
+pořadí, je pak barva dopočítána pomocí lineární (interpolační) funkce. Je
+dokonce dovoleno vytvořit &bdquo;skok&ldquo;, a to tak, že se zadá ta stejná
+reálná hodnota s&nbsp;rozdílnou barvou. Pokud se budeme k&nbsp;této hodnotě
+přibližovat zespodu (od nižších hodnot), použije se první barva (první řádek ve
+specifikaci), při přibližování shora pak barva druhá. Jednoduchá mapa barev
+může vypadat následovně. Povšimněte si skoku mezi bílou a černou barvou na
+hodnotě 0,4:</p>
+
+<pre>
+<i>// mapa barev</i>
+color_map {
+    [0.0  color rgb &lt;0.8, 0.2, 0.2&gt;]   <i>// hodnota 0 je dolní mezí, pro kterou lze specifikovat barvu</i>
+    [0.2  color rgb &lt;0.4, 0.2, 0.2&gt;]
+    [0.4  color White]                 <i>// skok</i>
+    [0.4  color Black]
+    [0.6  color rgb &lt;0.2, 0.6, 0.6&gt;]
+    [1.0  color rgb &lt;0.8, 0.2, 0.2&gt;]   <i>// hodnota 1 je naopak horní mezí</i>
+} 
+</pre>
+
+<p>Alternativně je možné na jeden řádek v&nbsp;barvové mapě zapsat obě barvy
+v&nbsp;krajních bodech rozsahu, což je možná čitelnější (a navíc nepatrně
+kratší):</p>
+
+<pre>
+<i>// mapa barev</i>
+color_map {   <i>// dvě barvy, které se na vzorku střídají</i>
+    [0.0 0.4  color red 0.36 green 0.20 blue 0.09  color red 0.36 green 0.20 blue 0.09 ]
+    [0.4 1.01 color red 0.858824 green 0.576471 blue 0.439216 color red 0.858824 green 0.576471 blue 0.439216]
+}
+</pre>
+
+<a href="http://i.iinfo.cz/urs/fractals57_1-116464029352726.jpg"><img alt="fractals57_1" width="450" height="337" src="http://i.iinfo.cz/urs/fractals57_1-preview-116464029352726.jpg"></a>
+<p><i>Obrázek 4: Trojrozměrný model vytvořený pomocí programu Lparser a vykreslený POV-Rayem.</i></p>
+
+<p>V&nbsp;knihovně <i>Vapory</i> se mapa barev zapisuje takovým způsobem, že se
+do konstruktoru třídy <strong>ColorMap</strong> předá libovolné množství
+vektorů nebo n-tic se specifikací jednotlivých barev v&nbsp;prostoru 0,1 až
+1,0:</p>
+
+<pre>
+ColorMap([0.0, 'color', [0.8, 0.2, 0.2]],
+         [0.2, 'color', [0.4, 0.2, 0.2]],
+         [0.4, 'color', 'White'],
+         [0.4, 'color', 'Black'],
+         [0.6, 'color', [0.2, 0.6, 0.6]],
+         [1.0, 'color', [0.8, 0.2, 0.2]]),
+</pre>
+
+<a href="http://i.iinfo.cz/urs/fractals57_4-116464036178044.png"><img alt="fractals57_4" width="450" height="337" src="http://i.iinfo.cz/urs/fractals57_4-preview-116464036178044.png"></a>
+<p><i>Obrázek 5: Vykreslený model L-systému Fern (kapradina) složený
+z&nbsp;trojúhelníků (non-realistic rendering).</i></p>
+
+
+
+<p><a name="k03"></a></p>
+<h2 id="k03">3. Testovací scéna napsaná přímo pro POV-Ray, která obsahuje torus</h2>
+
+<p>Podívejme se nyní na první demonstrační příklad zapsaný přímo v&nbsp;jazyku
+POV-Raye. V&nbsp;tomto příkladu jsou použity oba dva prvky, s&nbsp;nimiž jsme
+se seznámili v&nbsp;předchozích kapitolách &ndash; torus (tedy nově přidaný
+element, který původně knihovna Vapory nepodporovala) a barvové mapy. Aby byla
+situace ještě komplikovanější, jsou u toru specifikovány dvě textury, přičemž
+horní textura je v&nbsp;některých místech průsvitná, takže jí v&nbsp;těchto
+oblastech prosvítá textura spodní:</p>
+
+<pre>
+<i>// objekt ve scéně: torus (anuloid)</i>
+torus {
+    7.0, 4.0                             <i>// geometrické informace</i>
+                                         <i>// (poloměry celého toroidu a "trubky")</i>
+&nbsp;
+    <i>// spodní (podkladová) textura se základním vzorkem</i>
+    texture {
+        pigment {                        <i>// definice vzorku textury</i>
+           bozo                          <i>// typ vzorku</i>
+           color_map {                   <i>// dvě barvy, které se na vzorku střídají</i>
+            [0.0 0.4  color red 0.36 green 0.20 blue 0.09  color red 0.36 green 0.20 blue 0.09 ]
+            [0.4 1.01 color red 0.858824 green 0.576471 blue 0.439216 color red 0.858824 green 0.576471 blue 0.439216]
+            }
+            scale &lt;4, 0.15, 0.15&gt;        <i>// změna měřítka (velikosti) namapovaného vzorku</i>
+            rotate 45*y
+        }
+    }
+&nbsp;
+    <i>// horní textura, která přidává jemnější vzorek</i>
+    texture {
+        ...
+        ...
+        ...
+    }
+}
+</pre>
+
+<a href="https://www.root.cz/obrazek/331351/"><img src="https://i.iinfo.cz/images/695/vapory-moviepy-1-prev.png" class="image-331351" alt="&#160;" width="360" height="270" /></a>
+<p><i>Obrázek 6: Výsledek renderingu dnešní první demonstrační scény
+v&nbsp;POV-Rayi.</i></p>
+
+<p>Úplný zdrojový kód dnešní první demonstrační scény (v&nbsp;celkovém pořadí
+však již pátém příkladu) je možné nalézt <a
+href="https://github.com/tisnik/vapory-examples/blob/master/scene5.pov">na této
+adrese</a>):</p>
+
+<pre>
+<i>// ------------------------------------------------------------</i>
+<i>// Jednoduchá scéna s uzavřeným objektem, plochou, dvojicí světel</i>
+<i>// a jednou kamerou (pozorovatelem)</i>
+<i>//</i>
+<i>// rendering lze spustit příkazem:</i>
+<i>//     povray +W800 +H600 +B +FN +D +Iscene5.pov +Oscene5.png</i>
+<i>// (pro náhled postačí zadat povray scene5.pov)</i>
+<i>//</i>
+<i>// Založeno na souboru původně vytvořeném Danem Farmerem (leden 2002)</i>
+<i>// ------------------------------------------------------------</i>
+&nbsp;
+#version 3.5;
+&nbsp;
+<i>// globální nastavení parametrů scény</i>
+<strong>global_settings</strong> {
+    assumed_gamma 2.2
+}
+&nbsp;
+<i>// načtení všech potřebných externích souborů</i>
+#include "colors.inc"
+&nbsp;
+<i>// nastavení kamery (pozorovatele)</i>
+<strong>camera</strong> {
+    location  &lt;0, 20, -15&gt;               <i>// pozice kamery</i>
+    look_at   &lt;0, -2,   0&gt;               <i>// bod, na který kamera směřuje</i>
+}
+&nbsp;
+<i>// první (silnější) světelný zdroj s bílou barvou</i>
+<strong>light_source</strong> {
+    &lt;-50, 100, -80&gt;                      <i>// pozice světelného zdroje</i>
+    color rgb 1                          <i>// barva světla (všech tří složek)</i>
+}
+&nbsp;
+<i>// druhý (slabší) světelný zdroj</i>
+<strong>light_source</strong> {
+    &lt;250, 25, -100&gt;                      <i>// pozice světelného zdroje</i>
+    color red 0.85 green 0.53 blue 0.10  <i>// barva světla</i>
+}
+&nbsp;
+<i>// objekt ve scéně: torus (anuloid)</i>
+<strong>torus</strong> {
+    7.0, 4.0                             <i>// geometrické informace</i>
+                                         <i>// (poloměry celého toroidu a "trubky")</i>
+&nbsp;
+    <i>// spodní (podkladová) textura se základním vzorkem</i>
+    texture {
+        pigment {                        <i>// definice vzorku textury</i>
+           bozo                          <i>// typ vzorku</i>
+           color_map {                   <i>// dvě barvy, které se na vzorku střídají</i>
+            [0.0 0.4  color red 0.36 green 0.20 blue 0.09  color red 0.36 green 0.20 blue 0.09 ]
+            [0.4 1.01 color red 0.858824 green 0.576471 blue 0.439216 color red 0.858824 green 0.576471 blue 0.439216]
+            }
+            scale &lt;4, 0.15, 0.15&gt;        <i>// změna měřítka (velikosti) namapovaného vzorku</i>
+            rotate 45*y
+        }
+    }
+&nbsp;
+    <i>// horní textura, která přidává jemnější vzorek</i>
+    texture {
+        finish {                         <i>// vlastnosti materiálu</i>
+            phong 1                      <i>// intenzita a</i>
+            phong_size 100               <i>// velikost odlesků</i>
+            brilliance 3                 <i>// míra změny odlesků s úhlem dopadu světelných paprsků</i>
+            ambient 0.2                  <i>// ambientní složka (pro simulaci všesměrového světla)</i>
+            diffuse 0.8                  <i>// difúzní složka (pro simulaci směrového světla)</i>
+        }
+        pigment {                        <i>// definice vzorku textury</i>
+            wood                         <i>// typ vzorku</i>
+            turbulence 0.025
+            color_map {                  <i>// čtyři barvy, které se ve vzorku střídají</i>
+                [0.00 0.15 color red 0.42 green 0.26 blue 0.15 color red 0.85 green 0.53 blue 0.10 ]
+                [0.15 0.40 color red 0.85 green 0.53 blue 0.10 color rgbf 1 ]
+                [0.40 0.80 color rgbf 1  color red 0.85 green 0.53 blue 0.10 ]
+                [0.80 1.01 color red 0.85 green 0.53 blue 0.10 color red 0.42 green 0.26 blue 0.15 ]
+            }
+            scale &lt;3.5, 1, 1&gt;            <i>// změna měřítka a natočení vzorku</i>
+            translate -50*y
+            rotate 1.5*z
+        }
+    }
+}
+&nbsp;
+<strong>plane</strong> {                                  <i>// rovina tvořící pozadí scény</i>
+    &lt;0, 1, 0&gt;, -6                        <i>// posun a orientace roviny</i>
+    texture {                            <i>// textura - vlastnosti povrchu</i>
+        pigment {                        <i>// vlastní vzorek textury</i>
+            checker color Gray color White*0.9
+        }
+        finish {                         <i>// optické vlastnosti materiálu</i>
+            reflection 0.10
+        }
+        scale 4
+    }
+}
+&nbsp;
+&nbsp;
+&nbsp;
+<i>// ------------------------------------------------------------</i>
+<i>// finito</i>
+<i>// ------------------------------------------------------------ </i>
+</pre>
+
+
+
+<p><a name="k04"></a></p>
+<h2 id="k04">4. Shodná testovací scéna napsaná v&nbsp;Pythonu s&nbsp;využitím Vapory a nové třídy <strong>Torus</strong></h2>
+
+<p>Nyní si pojďme předchozí scénu přepsat do Vapory. Ve skutečnosti to není nic
+složitého, jen nesmíme na začátku zapomenout na deklaraci nové třídy
+<strong>Torus</strong>, která bude odvozena od třídy
+<strong>POVRayElement</strong>:</p>
+
+<pre>
+class <strong>Torus</strong>(POVRayElement):
+    """Torus()"""
+</pre>
+
+<p>Úplný zdrojový kód tohoto příkladu naleznete na adrese <a
+href="https://github.com/tisnik/vapory-examples/blob/master/scene5.py">https://github.com/tisnik/vapory-examples/blob/master/scene5.py</a>:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from vapory import *
+&nbsp;
+&nbsp;
+class <strong>Torus</strong>(POVRayElement):
+    """Torus()"""
+&nbsp;
+&nbsp;
+y = [0, 1, 0]
+z = [0, 0, 1]
+&nbsp;
+camera = <strong>Camera</strong>('location', [0, 20, -15],
+                'look_at',  [0, -2, 0])
+&nbsp;
+<i># dva světelné zdroje</i>
+&nbsp;
+<i># první (silnější) světelný zdroj s bílou barvou</i>
+light1 = <strong>LightSource</strong>([-50, 100, -80],
+                     'color', [1.0, 1.0, 1.0])
+&nbsp;
+<i># druhý (slabší) světelný zdroj</i>
+light2 = <strong>LightSource</strong>([250, 25, -100],
+                     'color', [0.85, 0.53, 0.10])
+&nbsp;
+&nbsp;
+<i># objekt ve scéně: torus (anuloid)</i>
+torus = <strong>Torus</strong>(7.0, 4.0,
+              <i># spodní (podkladová) textura se základním vzorkem</i>
+              Texture(
+                  Pigment('bozo',
+                          ColorMap([0.0, 0.4, 'color', [0.36, 0.20, 0.09],
+                                              'color', [0.36, 0.20, 0.09]],
+                                   [0.4, 1.01, 'color', [0.85, 0.57, 0.44],
+                                               'color', [0.85, 0.57, 0.44]]),
+                          'scale', [4, 0.15, 0.15],
+                          'rotate', '45*y')),
+              <i># horní textura, která přidává jemnější vzorek</i>
+              Texture(
+                  Pigment('wood',
+                          'turbulence', 0.025,
+                          <i># čtyři barvy, které se ve vzorku střídají</i>
+                          ColorMap([0.00, 0.15, 'color', [0.42, 0.26, 0.15],
+                                                'color', [0.85, 0.53, 0.10]],
+                                   [0.15, 0.40, 'color', [0.85, 0.53, 0.10],
+                                                'color', [1.00, 1.00, 1.00, 1.00]],
+                                   [0.40, 0.80, 'color', [1.00, 1.00, 1.00, 1.00],
+                                                'color', [0.85, 0.53, 0.10]],
+                                   [0.80, 1.01, 'color', [0.85, 0.53, 0.10],
+                                                'color', [0.42, 0.26, 0.15]]),
+                          'scale', [3.5, 1, 1],
+                          'translate', [0, -50, 0],
+                          'rotate', [0, 0, 1.5]
+                          ),
+                  Finish('phong', 1,
+                         'phong_size', 100,
+                         'brilliance', 3,
+                         'ambient', 0.2,
+                         'diffuse', 0.8)))
+&nbsp;
+<i># druhý objekt - nekonečná rovina</i>
+plane = <strong>Plane</strong>(y,
+              -6,
+              Texture(
+                  Pigment('checker',
+                          'color', 'Gray',
+                          'color', 'White*0.9'),
+                  Finish('reflection', 0.10),
+                  'scale', 4))
+&nbsp;
+scene = <strong>Scene</strong>(camera, objects=[light1, light2, plane, torus],
+              included=['colors.inc'],
+              global_settings=['assumed_gamma 2.2'])
+&nbsp;
+scene.render('scene5_vapory.png', width=400, height=300)
+</pre>
+
+
+
+<p><a name="k05"></a></p>
+<h2 id="k05">5. Zjednodušený zápis mapy barev &ndash; scéna popsaná v&nbsp;jazyku POV-Ray</h2>
+
+<p>V&nbsp;předchozím příkladu se pro deklaraci barvové mapy používal tento
+zápis, v&nbsp;němž se v&nbsp;každém vektoru specifikovaly dvě barvy pro dvě
+hodnoty z&nbsp;intervalu 0,0 až 1,0:</p>
+
+<pre>
+color_map {                   <i>// dvě barvy, které se na vzorku střídají</i>
+    [0.0 0.4  color red 0.36 green 0.20 blue 0.09  color red 0.36 green 0.20 blue 0.09 ]
+    [0.4 1.01 color red 0.858824 green 0.576471 blue 0.439216 color red 0.858824 green 0.576471 blue 0.439216]
+}
+</pre>
+
+<p>Samozřejmě můžeme použít i alternativní (delší) zápis, který by však měl
+vést k&nbsp;totožnému obrázku:</p>
+
+<pre>
+color_map {                   <i>// dvě barvy, které se na vzorku střídají</i>
+    [0.0 color red 0.36 green 0.20 blue 0.09]
+    [0.4 color red 0.36 green 0.20 blue 0.09]
+    [0.4 color red 0.858824 green 0.576471 blue 0.439216]
+    [1.01 color red 0.858824 green 0.576471 blue 0.439216]
+}
+</pre>
+
+<a href="https://www.root.cz/obrazek/331352/"><img src="https://i.iinfo.cz/images/695/vapory-moviepy-2-prev.png" class="image-331352" alt="&#160;" width="360" height="270" /></a>
+<p><i>Obrázek 7: Tento obrázek je (v&nbsp;každém pixelu) totožný
+s&nbsp;obrázkem číslo 6, i když barvová mapa byla deklarována odlišným
+způsobem.</i></p>
+
+<p>Pro jistotu se podívejme na úplný zdrojový kód upravené scény, který je
+možné nalézt <a
+href="https://github.com/tisnik/vapory-examples/blob/master/scene6.pov">na této
+adrese</a>):</p>
+
+<pre>
+<i>// ------------------------------------------------------------</i>
+<i>// Jednoduchá scéna s uzavřeným objektem, plochou, dvojicí světel</i>
+<i>// a jednou kamerou (pozorovatelem)</i>
+<i>//</i>
+<i>// rendering lze spustit příkazem:</i>
+<i>//     povray +W800 +H600 +B +FN +D +Iscene6.pov +Oscene6.png</i>
+<i>// (pro náhled postačí zadat povray scene6.pov)</i>
+<i>//</i>
+<i>// Založeno na souboru původně vytvořeném Danem Farmerem (leden 2002)</i>
+<i>// ------------------------------------------------------------</i>
+&nbsp;
+#version 3.5;
+&nbsp;
+<i>// globální nastavení parametrů scény</i>
+<strong>global_settings</strong> {
+    assumed_gamma 2.2
+}
+&nbsp;
+<i>// načtení všech potřebných externích souborů</i>
+#include "colors.inc"
+&nbsp;
+<i>// nastavení kamery (pozorovatele)</i>
+<strong>camera</strong> {
+    location  &lt;0, 20, -15&gt;               <i>// pozice kamery</i>
+    look_at   &lt;0, -2,   0&gt;               <i>// bod, na který kamera směřuje</i>
+}
+&nbsp;
+<i>// první (silnější) světelný zdroj s bílou barvou</i>
+<strong>light_source</strong> {
+    &lt;-50, 100, -80&gt;                      <i>// pozice světelného zdroje</i>
+    color rgb 1                          <i>// barva světla (všech tří složek)</i>
+}
+&nbsp;
+<i>// druhý (slabší) světelný zdroj</i>
+<strong>light_source</strong> {
+    &lt;250, 25, -100&gt;                      <i>// pozice světelného zdroje</i>
+    color red 0.85 green 0.53 blue 0.10  <i>// barva světla</i>
+}
+&nbsp;
+<i>// objekt ve scéně: torus (anuloid)</i>
+<strong>torus</strong> {
+    7.0, 4.0                             <i>// geometrické informace</i>
+                                         <i>// (poloměry celého toroidu a "trubky")</i>
+&nbsp;
+    <i>// spodní (podkladová) textura se základním vzorkem</i>
+    texture {
+        pigment {                        <i>// definice vzorku textury</i>
+           bozo                          <i>// typ vzorku</i>
+           color_map {                   <i>// dvě barvy, které se na vzorku střídají</i>
+            [0.0 color red 0.36 green 0.20 blue 0.09]
+            [0.4 color red 0.36 green 0.20 blue 0.09]
+            [0.4 color red 0.858824 green 0.576471 blue 0.439216]
+            [1.01 color red 0.858824 green 0.576471 blue 0.439216]
+            }
+            scale &lt;4, 0.15, 0.15&gt;        <i>// změna měřítka (velikosti) namapovaného vzorku</i>
+            rotate 45*y
+        }
+    }
+&nbsp;
+    <i>// horní textura, která přidává jemnější vzorek</i>
+    texture {
+        finish {                         <i>// vlastnosti materiálu</i>
+            phong 1                      <i>// intenzita a</i>
+            phong_size 100               <i>// velikost odlesků</i>
+            brilliance 3                 <i>// míra změny odlesků s úhlem dopadu světelných paprsků</i>
+            ambient 0.2                  <i>// ambientní složka (pro simulaci všesměrového světla)</i>
+            diffuse 0.8                  <i>// difúzní složka (pro simulaci směrového světla)</i>
+        }
+        pigment {                        <i>// definice vzorku textury</i>
+            wood                         <i>// typ vzorku</i>
+            turbulence 0.025
+            color_map {                  <i>// čtyři barvy, které se ve vzorku střídají</i>
+                [0.00 color red 0.42 green 0.26 blue 0.15]
+                [0.15 color red 0.85 green 0.53 blue 0.10]
+                [0.40 color rgbf 1]
+                [0.80 color red 0.85 green 0.53 blue 0.10]
+                [1.01 color red 0.42 green 0.26 blue 0.15]
+            }
+            scale &lt;3.5, 1, 1&gt;            <i>// změna měřítka a natočení vzorku</i>
+            translate -50*y
+            rotate 1.5*z
+        }
+    }
+}
+&nbsp;
+<strong>plane</strong> {                                  <i>// rovina tvořící pozadí scény</i>
+    &lt;0, 1, 0&gt;, -6                        <i>// posun a orientace roviny</i>
+    texture {                            <i>// textura - vlastnosti povrchu</i>
+        pigment {                        <i>// vlastní vzorek textury</i>
+            checker color Gray color White*0.9
+        }
+        finish {                         <i>// optické vlastnosti materiálu</i>
+            reflection 0.10
+        }
+        scale 4
+    }
+}
+&nbsp;
+&nbsp;
+&nbsp;
+<i>// ------------------------------------------------------------</i>
+<i>// finito</i>
+<i>// ------------------------------------------------------------ </i>
+</pre>
+
+
+
+<p><a name="k06"></a></p>
+<h2 id="k06">6. Zjednodušený zápis mapy barev &ndash; scéna popsaná v&nbsp;jazyku Python s&nbsp;využitím Vapory</h2>
+
+<p>Přepis předchozího příkladu do Pythonu s&nbsp;použitím knihovny Vapory <a
+href="https://github.com/tisnik/vapory-examples/blob/master/scene6.py">dopadne
+následovně</a>:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from vapory import *
+&nbsp;
+&nbsp;
+class <strong>Torus</strong>(POVRayElement):
+    """Torus()"""
+&nbsp;
+&nbsp;
+y = [0, 1, 0]
+z = [0, 0, 1]
+&nbsp;
+camera = <strong>Camera</strong>('location', [0, 20, -15],
+                'look_at',  [0, -2, 0])
+&nbsp;
+<i># dva světelné zdroje</i>
+&nbsp;
+<i># první (silnější) světelný zdroj s bílou barvou</i>
+light1 = <strong>LightSource</strong>([-50, 100, -80],
+                     'color', [1.0, 1.0, 1.0])
+&nbsp;
+<i># druhý (slabší) světelný zdroj</i>
+light2 = <strong>LightSource</strong>([250, 25, -100],
+                     'color', [0.85, 0.53, 0.10])
+&nbsp;
+&nbsp;
+<i># objekt ve scéně: torus (anuloid)</i>
+torus = <strong>Torus</strong>(7.0, 4.0,
+              <i># spodní (podkladová) textura se základním vzorkem</i>
+              Texture(
+                  Pigment('bozo',
+                          ColorMap([0.00, 'color', [0.36, 0.20, 0.09]],
+                                   [0.40, 'color', [0.36, 0.20, 0.09]],
+                                   [0.40, 'color', [0.85, 0.57, 0.44]],
+                                   [1.01, 'color', [0.85, 0.57, 0.44]]),
+                          'scale', [4, 0.15, 0.15],
+                          'rotate', '45*y')),
+              <i># horní textura, která přidává jemnější vzorek</i>
+              Texture(
+                  Pigment('wood',
+                          'turbulence', 0.025,
+                          <i># čtyři barvy, které se ve vzorku střídají</i>
+                          ColorMap([0.00, 'color', [0.42, 0.26, 0.15]],
+                                   [0.15, 'color', [0.85, 0.53, 0.10]],
+                                   [0.40, 'color', [1.00, 1.00, 1.00, 1.00]],
+                                   [0.80, 'color', [0.85, 0.53, 0.10]],
+                                   [1.01, 'color', [0.42, 0.26, 0.15]]),
+                          'scale', [3.5, 1, 1],
+                          'translate', [0, -50, 0],
+                          'rotate', [0, 0, 1.5]
+                          ),
+                  Finish('phong', 1,
+                         'phong_size', 100,
+                         'brilliance', 3,
+                         'ambient', 0.2,
+                         'diffuse', 0.8)))
+&nbsp;
+<i># druhý objekt - nekonečná rovina</i>
+plane = <strong>Plane</strong>(y,
+              -6,
+              Texture(
+                  Pigment('checker',
+                          'color', 'Gray',
+                          'color', 'White*0.9'),
+                  Finish('reflection', 0.10),
+                  'scale', 4))
+&nbsp;
+scene = <strong>Scene</strong>(camera, objects=[light1, light2, plane, torus],
+              included=['colors.inc'],
+              global_settings=['assumed_gamma 2.2'])
+&nbsp;
+scene.render('scene6_vapory.png', width=400, height=300)
+</pre>
+
+
+
+<p><a name="k07"></a></p>
+<h2 id="k07">7. Využití implicitních ploch (blobs, metaballs) v&nbsp;POV-Rayi</h2>
+
+<p>Raytracer POV-Ray podporuje, podobně jako některé další modelovací a
+renderovací nástroje (například <i>Blender</i>), modelování složitých těles
+s&nbsp;využitím takzvaných <i>implicitních ploch</i>. Jedná se o velmi
+zajímavou techniku, která byla převzata z&nbsp;jiného (dnes již nevyvíjeného)
+raytraceru nazvaného <i>Polyray</i> Alexandra Enzmanna, ve kterém byly
+implicitní plochy použity v&nbsp;mnohem obecnějším pojetí než v&nbsp;POV-Rayi.
+Při popisu tělesa s&nbsp;využitím implicitních ploch se těleso nepopisuje
+hranicí (jak je tomu například u klasických polygonálních či parametrických
+reprezentací) ani vyčíslením obsazeného objemu v&nbsp;prostoru, ale množinou
+implicitních funkcí spolu se specifikací jejich vzájemné kombinace.</p>
+
+<a href="http://i.iinfo.cz/urs/povray06_01-120691024622527.png"><img alt="povray0601" width="450" height="337" src="http://i.iinfo.cz/urs/povray06_01-preview-120691024622527.png" /></a>
+<p><i>Obrázek 8: Implicitní plocha vytvořená pomocí tří prvků kostry.</i></p>
+
+<p>Jen ve stručnosti si řekněme teorii, na níž je vykreslování implicitních
+ploch založeno. Základem je implicitní funkce, která je určena rovnicí, která
+každému bodu v&nbsp;prostoru přiřazuje určitou hodnotu. Tuto hodnotu můžeme
+považovat například za hustotu tělesa či intenzitu síly v&nbsp;daném místě
+prostoru. V&nbsp;rovnici popisující implicitní plochu vystupují implicitní
+funkce, jejichž hodnota je závislá na poloze bodu (v&nbsp;Euklidovském
+trojrozměrném prostoru E3 jde o běžně používané souřadnice x, y a z). Vlastní
+vykreslení spočívá ve volbě hranice (<i>threshold</i>) zmíněné hustoty/síly,
+pomocí které je určena <i>izoplocha</i> (<i>isosurface</i>), která je
+s&nbsp;využitím analytických či numerických metod vykreslena. Díky funkci
+&bdquo;hustoty&ldquo; je navíc zřejmé, která část prostoru leží uvnitř tělesa a
+která vně.</p>
+
+<a href="http://i.iinfo.cz/urs/povray06_02-120691031088066.png"><img alt="povray0602" width="450" height="307" src="http://i.iinfo.cz/urs/povray06_02-preview-120691031088066.png" /></a>
+<p><i>Obrázek 9: Model vytvořený především z&nbsp;(jediné) implicitní plochy
+v&nbsp;dnes již historickém modelovacím programu. Vytvoření modelu bylo otázkou
+doslova několika minut, protože modelovací možnosti implicitních ploch jsou
+poměrně vysoké.</i></p>
+
+
+
+<p><a name="k08"></a></p>
+<h2 id="k08">8. Rozšíření možností CSG pomocí implicitních ploch</h2>
+
+<p>Implicitní plochy lze považovat také za určitou alternativu či rozšíření ke
+konstruktivní geometrii těles (CSG), o které jsme se zmínili již <a
+href="https://www.root.cz/clanky/projekt-vapory-kombinace-moznosti-pythonu-a-pov-raye/">minule</a>.
+Z&nbsp;tohoto důvodu se také modelování s&nbsp;využitím implicitních ploch
+někdy označuje jako <i>Implicit Solid Modelling</i> neboli <i>ISM</i>. Výhodou
+ISM oproti CSG je poměrně jednoduchý výpočet celkového tělesa, které vzniká
+sloučením základních primitiv. Zatímco v&nbsp;CSG reprezentaci se musí (často
+složitě traverzací n-árního stromu) počítat průsečíky jednotlivých základních
+těles, v&nbsp;ISM reprezentaci se pozice průsečíků nemusí vyčíslit, protože se
+celkový tvar tělesa vyjadřuje pomocí jednoduché směšovací funkce (<i>blending
+function)</i>. Nelze tak sice dosáhnout numericky naprosto přesných výsledků,
+ale v&nbsp;mnoha praktických aplikacích je kvalita a přesnost vizuálního
+výsledku více než dostačující.</p>
+
+<a href="http://i.iinfo.cz/urs/povray06_03-120691040523135.png"><img alt="povray0603" width="450" height="337" src="http://i.iinfo.cz/urs/povray06_03-preview-120691040523135.png" /></a>
+<p><i>Obrázek 10: Složitější model, jehož ústřední část tvoří implicitní plochy.</i></p>
+
+
+
+<p><a name="k09"></a></p>
+<h2 id="k09">9. Konstrukce implicitních ploch s&nbsp;využitím kostry</h2>
+
+<p>Implicitní plocha se konstruuje pomocí takzvané <i>kostry</i>
+(<i>skeleton</i>). Kostra se skládá z&nbsp;jednodušších částí nazývaných prvky
+kostry, kde každý prvek odpovídá jedné implicitní funkci. Prvky kostry jsou ve
+své nejjednodušší podobě vyjádřeny svým středem a intenzitou, kterou působí na
+své okolí. Tato intenzita je největší ve středu prvku kostry a se vzrůstající
+vzdáleností od tohoto středu se snižuje.</p>
+
+<a href="http://i.iinfo.cz/urs/fractals57_6-116464039435818.png"><img alt="fractals57_6" width="450" height="337" src="http://i.iinfo.cz/urs/fractals57_6-preview-116464039435818.png"></a>
+<p><i>Obrázek 11: Vykreslený model L-systému Airhorse složený z&nbsp;více
+objektů s&nbsp;bloby.</i></p>
+
+<p>V&nbsp;původní definici funkce pro vyjádření intenzity byla intenzita
+v&nbsp;každém bodě prostoru kladná (a tedy nenulová), protože pro popis
+intenzity se používala exponenciální funkce. Pro urychlení výpočtů se zavádí
+jistá zjednodušení, která zaručí, že od určité vzdálenosti od středu prvku
+kostry bude intenzita nulová. Definici implicitní plochy lze rozšířit tak, že
+k&nbsp;prvku kostry povolíme přiřazovat zápornou intenzitu, což nám dovolí
+jednoduše modelovat i děravé objekty nebo objekty vzniklé odebíráním hmoty od
+základního tvaru (což POV-Ray umožňuje).</p>
+
+<img src="https://i.iinfo.cz/urs/povray06_04-120691052786560.gif" alt="blobs1" />
+<p><i>Obrázek 12: Ukázka vzájemného prolínání dvou bodových prvků kostry při
+tvorbě izoplochy. V&nbsp;dolní části animace jsou zobrazeny dva bodové prvky
+kostry spolu s&nbsp;poloměrem dosahu jejich sil. Při vzájemném přibližování
+dochází ke sčítání sil a &bdquo;slévání&ldquo; obou tvarů. V&nbsp;horní části
+je zobrazen průběh sil v&nbsp;řezu procházejícím přes oba bodové prvky kostry
+se silou=0,7, přičemž je na grafu zvýrazněna prahová hodnota
+threshold=0,5.</i></p>
+
+<p>Pro algoritmy pracující s&nbsp;implicitními plochami je důležité vyjádřit
+hranici tělesa. Proto je definována globální proměnná <i>T</i> (označení
+<i>T</i> je odvozeno od slova <i>threshold</i> &ndash; hranice hodnot, práh),
+která určuje mez, kde se nachází hranice (obálka) implicitní plochy. Je-li
+intenzita v&nbsp;určitém bodě v&nbsp;prostoru větší než zadaná mez, leží bod
+uvnitř tělesa, je-li naopak intenzita menší než mez, leží bod vně tělesa. Body,
+jejichž intenzita je rovna proměnné <i>T</i>, leží přesně na povrchu implicitní
+plochy &ndash; tvoří <i>izoplochu</i>. Pro osamocené body, které tvoří prvky
+kostry, nabývá obálka implicitní plochy tvar kružnice v&nbsp;ploše a koule
+v&nbsp; prostoru, pro úsečky má obálka tvar válce s&nbsp;polokulovitými
+základnami atd.</p>
+
+<img src="https://i.iinfo.cz/urs/povray06_05-120691059701894.gif" alt="blobs2" />
+<p><i>Obrázek 13: Ukázka vzájemného prolínání dvou bodových prvků kostry při
+zvýšení sil obou bodových prvků kostry na hodnotu 1,0.</i></p>
+
+
+
+<p><a name="k10"></a></p>
+<h2 id="k10">10. Vykreslení implicitních ploch POV-Rayem</h2>
+
+<p>Jak jsme si již řekli v&nbsp;předchozích kapitolách, podporuje POV-Ray
+přímou deklaraci implicitních ploch. Pro tento účel se používá 3D entita
+nazvaná <i>blob</i>, která může obsahovat prakticky libovolné množství prvků
+kostry, přičemž každý prvek kostry se zapisuje slovem
+<strong>component</strong>, za nímž následuje specifikace poloměru, síly a
+umístění prvku v&nbsp;3D prostoru. Nesmíme zapomenout ani na deklaraci hraniční
+hodnoty (<i>threshold</i>), která je pochopitelně pro všechny prvky kostry
+konstantní:</p>
+
+<pre>
+<strong>blob</strong> {
+    <strong>threshold</strong> 0.6                        <i>// hraniční hodnota</i>
+    <strong>component</strong> 1.0, 1.0, &lt; 0.750,  0, 0&gt;  <i>// prvek kostry: síla, poloměr, souřadnice v prostoru</i>
+    <strong>component</strong> 1.0, 1.0, &lt;-0.375,  0.64952, 0&gt; <i>// druhý prvek kostry</i>
+    <strong>component</strong> 1.0, 1.0, &lt;-0.375, -0.64952, 0&gt; <i>// třetí prvek kostry</i>
+    ...
+    ...
+    ...
+}
+</pre>
+
+<p>Výsledek může po doplnění kamery, osvětlení a nezbytných textur vypadat
+následovně:</p>
+
+<a href="https://www.root.cz/obrazek/331353/"><img src="https://i.iinfo.cz/images/695/vapory-moviepy-3-prev.png" class="image-331353" alt="&#160;" width="360" height="270" /></a>
+<p><i>Obrázek 14: Výsledek tohoto demonstračního příkladu vypočtený
+POV-Rayem.</i></p>
+
+<p>Opět se podívejme na úplný zdrojový kód této scény, který je možné nalézt <a
+href="https://github.com/tisnik/vapory-examples/blob/master/scene7.pov">na této
+adrese</a>):</p>
+
+<pre>
+<i>// ------------------------------------------------------------</i>
+<i>// Jednoduchá scéna s jednou implicitní plochou vymodelovanou</i>
+<i>// pomocí tří prvků kostry.</i>
+<i>//</i>
+<i>// rendering lze spustit příkazem:</i>
+<i>//     povray +W800 +H600 +B +FN +D +Iscene7.pov +Oscene7.png</i>
+<i>// (pro náhled postačí zadat povray scene7.pov)</i>
+<i>// ------------------------------------------------------------</i>
+&nbsp;
+#version 3.5;
+&nbsp;
+#include "colors.inc"
+&nbsp;
+<strong>global_settings</strong> {
+    assumed_gamma 2.2
+}
+&nbsp;
+<strong>camera</strong> {
+   location &lt;0, 0, -2.5&gt;                 <i>// umístění kamery</i>
+   up       y                            <i>// a nahoru</i>
+   right    4/3 * x                      <i>// vektor směřující doprava</i>
+   look_at  &lt;0, 0, 0&gt;                    <i>// bod, na který se kamera zaměřila</i>
+}
+&nbsp;
+<strong>light_source</strong> {                           <i>// první světelný zdroj</i>
+    &lt;2, 10, -10&gt;                         <i>// pozice světelného zdroje</i>
+    color red 0.7 green 0.7 blue 0.7     <i>// barva světelného zdroje</i>
+}
+&nbsp;
+<strong>light_source</strong> {                           <i>// druhý světelný zdroj</i>
+    &lt;0, 0, -10000&gt;                       <i>// pozice světelného zdroje</i>
+    color red 0.7 green 0.7 blue 0.7     <i>// barva světelného zdroje</i>
+    shadowless
+}
+&nbsp;
+<strong>plane</strong> {                                  <i>// rovina tvořící pozadí scény</i>
+    &lt;0, 0, 1&gt;, 2                         <i>// posun a orientace roviny</i>
+    <i>// hollow on</i>
+    pigment {                            <i>// procedurální textura</i>
+        agate
+        agate_turb 0.3
+    }
+    finish {                             <i>// optické vlastnosti materiálu povrchu</i>
+        ambient 0.1
+        diffuse 0.4
+    }
+}
+&nbsp;
+<strong>blob</strong> {
+    threshold 0.6                        <i>// hraniční hodnota</i>
+    component 1.0, 1.0, &lt; 0.750,  0, 0&gt;  <i>// prvek kostry: síla, poloměr, souřadnice v prostoru</i>
+    component 1.0, 1.0, &lt;-0.375,  0.64952, 0&gt; <i>// druhý prvek kostry</i>
+    component 1.0, 1.0, &lt;-0.375, -0.64952, 0&gt; <i>// třetí prvek kostry</i>
+&nbsp;
+    texture {
+        pigment {
+            color red 0 green 0 blue 1   <i>// barva materiálu</i>
+        }
+        finish {                         <i>// optické vlastnosti materiálu povrchu</i>
+            ambient  0.2
+            diffuse  0.4
+            specular 0.6
+            phong    0.6
+            phong_size 3
+            reflection 0
+        }
+    }
+}
+&nbsp;
+<i>// ------------------------------------------------------------</i>
+<i>// finito</i>
+<i>// ------------------------------------------------------------ </i>
+</pre>
+
+
+
+<p><a name="k11"></a></p>
+<h2 id="k11">11. Vykreslení stejné scény s&nbsp;využitím knihovny Vapory</h2>
+
+<p><a href="#k10">Předchozí scénu</a> popsanou v&nbsp;jazyku POV-Raye
+samozřejmě můžeme přepsat do Vapory a to relativně snadno. Nejdříve musíme
+vytvořit novou třídu nazvanou <strong>Blob</strong>, která bude představovat
+jakoukoli implicitní plochu:</p>
+
+<pre>
+class <strong>Blob</strong>(POVRayElement):
+    """Blob()"""
+</pre>
+
+<p>Následně, a to bez nutnosti jakýchkoliv dalších úprav, je již možné vytvořit
+novou implicitní plochu s&nbsp;libovolným počtem prvků kostry:</p>
+
+<pre>
+<i># první objekt - blob/metaball</i>
+blob = <strong>Blob</strong>('threshold', 0.6,
+            'component', 1.0, 1.0, [0.750, 0.000, 0.000],
+            'component', 1.0, 1.0, [-.375, 0.64952, 0.000],
+            'component', 1.0, 1.0, [-.375, -0.64952, 0.000],
+            ...
+            ...
+            ...
+</pre>
+
+<p>Opět se podívejme na úplný zdrojový kód tohoto demonstračního příkladu,
+který v&nbsp;případě potřeby naleznete na adrese <a
+href="https://github.com/tisnik/vapory-examples/blob/master/scene7.py">https://github.com/tisnik/vapory-examples/blob/master/scene7.py</a>:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from vapory import *
+&nbsp;
+&nbsp;
+class <strong>Blob</strong>(POVRayElement):
+    """Blob()"""
+&nbsp;
+&nbsp;
+y = [0, 1, 0]
+z = [0, 0, 1]
+&nbsp;
+camera = <strong>Camera</strong>('location', [ 0.0, 0.0, -2.5],
+                'up',       [ 0.0, 1.0, 0.0],
+                'right',    [ 4/3, 0.0, 0.0],
+                'look_at',  [ 0.0, 0.0, 0.0])
+&nbsp;
+<i># dva světelné zdroje</i>
+light1 = <strong>LightSource</strong>([2, 10, -10],
+                     'color', [0.7, 0.7, 0.7])
+&nbsp;
+light2 = <strong>LightSource</strong>([0, 0, -10000],
+                     'color', [0.7, 0.7, 0.7],
+                     'shadowless')
+&nbsp;
+<i># první objekt - blob/metaball</i>
+blob = <strong>Blob</strong>('threshold', 0.6,
+            'component', 1.0, 1.0, [0.750, 0.000, 0.000],
+            'component', 1.0, 1.0, [-.375, 0.64952, 0.000],
+            'component', 1.0, 1.0, [-.375, -0.64952, 0.000],
+            Texture(
+                Pigment('color', [0, 0, 1]),
+                Finish('ambient', 0.2,
+                       'diffuse', 0.4,
+                       'specular', 0.6,
+                       'phong', 0.6,
+                       'phong_size', 3,
+                       'reflection', 0)))
+&nbsp;
+<i># druhý objekt - nekonečná rovina</i>
+plane = <strong>Plane</strong>(z,
+              2,
+              'hollow', 'on',
+              Texture(
+                  Pigment('agate',
+                          'agate_turb', 0.3),
+                  Finish('ambient', 0.1,
+                         'diffuse', 0.4)))
+&nbsp;
+scene = <strong>Scene</strong>(camera, objects=[light1, light2, plane, blob],
+              included=['colors.inc'],
+              global_settings=['assumed_gamma 2.2'])
+&nbsp;
+scene.render('scene7_vapory.png', width=400, height=300)
+</pre>
+
+
+
+<p><a name="k12"></a></p>
+<h2 id="k12">12. Idiomatický kód &ndash; použití n-tic namísto seznamů</h2>
+
+<p>Ve všech předchozích příkladech naprogramovaných v&nbsp;Pythonu
+s&nbsp;využitím knihovny Vapory jsme pro popis vektorů (světelných složek,
+souřadnic v&nbsp;3D prostoru, vektorů kamery atd.) používali datovou strukturu
+seznam (<i>list</i>). Vzhledem k&nbsp;tomu, že se v&nbsp;naprosté většině
+případů jedná o neměnné (<i>immutable</i>) datové struktury, bude lepší provést
+přepis a namísto seznamů na všech místech použít n-tice (<i>tuple</i>).
+Upravený příklad bude vypadat následovně (jeho funkcionalita se v&nbsp;tomto
+případě nijak nezmění):</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from vapory import *
+&nbsp;
+&nbsp;
+class <strong>Blob</strong>(POVRayElement):
+    """Blob()"""
+&nbsp;
+&nbsp;
+y = (0, 1, 0)
+z = (0, 0, 1)
+&nbsp;
+camera = <strong>Camera</strong>('location', ( 0.0, 0.0, -2.5),
+                'up',       ( 0.0, 1.0, 0.0),
+                'right',    ( 4/3, 0.0, 0.0),
+                'look_at',  ( 0.0, 0.0, 0.0))
+&nbsp;
+<i># dva světelné zdroje</i>
+light1 = <strong>LightSource</strong>((2, 10, -10),
+                     'color', (0.7, 0.7, 0.7))
+&nbsp;
+light2 = <strong>LightSource</strong>((0, 0, -10000),
+                     'color', (0.7, 0.7, 0.7),
+                     'shadowless')
+&nbsp;
+<i># první objekt - blob/metaball</i>
+blob = <strong>Blob</strong>('threshold', 0.6,
+            'component', 1.0, 1.0, (0.750, 0.000, 0.000),
+            'component', 1.0, 1.0, (-.375, 0.64952, 0.000),
+            'component', 1.0, 1.0, (-.375, -0.64952, 0.000),
+            Texture(
+                Pigment('color', (0, 0, 1)),
+                Finish('ambient', 0.2,
+                       'diffuse', 0.4,
+                       'specular', 0.6,
+                       'phong', 0.6,
+                       'phong_size', 3,
+                       'reflection', 0)))
+&nbsp;
+<i># druhý objekt - nekonečná rovina</i>
+plane = <strong>Plane</strong>(z,
+              2,
+              'hollow', 'on',
+              Texture(
+                  Pigment('agate',
+                          'agate_turb', 0.3),
+                  Finish('ambient', 0.1,
+                         'diffuse', 0.4)))
+&nbsp;
+scene = <strong>Scene</strong>(camera, objects=(light1, light2, plane, blob),
+              included=('colors.inc',),
+              global_settings=('assumed_gamma 2.2',))
+&nbsp;
+scene.render('scene7_vapory_B.png', width=400, height=300)
+</pre>
+
+
+
+<p><a name="k13"></a></p>
+<h2 id="k13">13. Využití možností knihovny MoviePy pro jednodušší vytvoření animace</h2>
+
+<p>Poslední zajímavou vlastností projektu Vapory je podpora pro přímé vytváření
+video souborů. Již minule jsme si ukázali, že nám pochopitelně nic nebrání
+vytvářet (renderovat) jednotlivé snímky, ty postupně ukládat do formátu PNG či
+TGA a následně z&nbsp;těchto snímků vytvořit výsledné video například
+s&nbsp;využitím externího nástroje <strong>ffmpeg</strong>. Připomeňme si, že
+celý postup vypadal zhruba takto &ndash; scénu nově vytváříme pro každý snímek
+(<i>frame</i>) a ukládáme ji do očíslovaného souboru, aby
+<strong>ffmpeg</strong> dovedl jednotlivé snímky korektně zařadit:</p>
+
+<pre>
+def <strong>construct_scene</strong>(t):
+    ...
+    ... příprava objektů pro scénu
+    ...
+    return Scene(camera,
+                 objects=[light1, light2, light3, csg_object, plane],
+                 included=["colors.inc", "stones.inc", "woods.inc"],
+                 global_settings=["assumed_gamma 2.2"])
+&nbsp;
+FRAMES = 100
+&nbsp;
+<i># vykreslení všech snímků</i>
+for frame in range(0, FRAMES):
+    t = frame / float(FRAMES)
+    scene = construct_scene(t)
+    filename = "frame_{:03d}.png".format(frame)
+    scene.render(filename, width=400, height=300)
+</pre>
+
+<p>Ve skutečnosti však máme ještě jednu alternativu, a to přímo zkombinovat
+možnosti projektu Vapory s&nbsp;knihovnou MoviePy. Nejprve musíme provést
+korektní import všech potřebných modulů:</p>
+
+<pre>
+from vapory import *
+from moviepy.editor import VideoClip
+</pre>
+
+<p>Následně budeme postupovat naprosto stejným způsobem, jako při tvorbě
+jakéhokoli jiného videa v&nbsp;MoviePy &ndash; připravíme si callback funkci
+nazvanou <strong>make_frame</strong>, která bude automaticky volána při
+renderingu videa a bude se jí předávat čas snímku (reálné číslo):</p>
+
+<pre>
+<i># parametry animace</i>
+DURATION = 10
+FPS = 20
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    scene = construct_scene(t / DURATION)
+    return scene.render(width=400, height=300, antialiasing=0.001)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_videofile('scene4.ogv', fps=FPS, progress_bar=True, bitrate="800000")
+</pre>
+
+<p>Povšimněte si, že funkce <strong>make_frame</strong> vrací objekt
+představující snímek PO vykreslení. Interně se jedná o datovou strukturu typu
+<strong>ndarray</strong>, a to z&nbsp;toho důvodu, že jsme metodě
+<strong>Scene.render()</strong> nepředali jméno výstupního souboru. A jak již
+víme <a
+href="https://www.root.cz/clanky/programova-tvorba-a-nelinearni-editace-videa-s-vyuzitim-knihovny-moviepy/#k07">z&nbsp;úvodního
+článku</a>, zpracovává MoviePy snímky reprezentované právě polem typu
+<strong>ndarray</strong>:</p>
+
+<pre>
+class <strong>Scene</strong>:
+    <i>""" A scene contains Items and can be written to a file.</i>
+&nbsp;
+    def <strong>render</strong>(self, outfile=None, height=None, width=None,
+                     quality=None, antialiasing=None, remove_temp=True,
+                     auto_camera_angle = True  ):
+&nbsp;
+        <i>""" Renders the scene to a PNG, a numpy array, or the IPython Notebook.</i>
+&nbsp;
+        <i>Parameters</i>
+        <i>------------</i>
+&nbsp;
+        <i>outfile</i>
+          <i>Name of the output:</i>
+          <i>- "myfile.png" to output a PNG file</i>
+          <i>- None to output a numpy array (if numpy is installed).</i>
+          <i>- 'ipython' (and call this function last in an IPython Notebook)</i>
+&nbsp;  
+        height
+          height in pixels
+&nbsp;
+        <i>width</i>
+          <i>width in pixels</i>
+&nbsp;
+        <i>"""</i>
+</pre>
+
+
+
+<p><a name="k14"></a></p>
+<h2 id="k14">14. Úprava příkladu z&nbsp;předchozího článku: animace změny CSG tělesa a textury na toru</h2>
+
+<p>Minule jsme si ukazovali jednoduchou animaci založenou na postupné změně
+pozice těles, která se vzájemně kombinují s&nbsp;využitím <i>CSG</i>
+(<i>Constructive Solid Geometry</i>). Animace byla vytvořena
+z&nbsp;jednotlivých snímků, které musely být nejdříve uloženy na disk a teprve
+poté se spustil <strong>ffmpeg</strong>, aby je zpracoval a vytvořil
+z&nbsp;nich soubor s&nbsp;videem (použití klasické pipeline v&nbsp;tomto
+případě není možné, protože snímky do kodeku obecně vstupují v&nbsp;náhodném
+pořadí). Pokud ovšem zkombinujeme možnosti nabízené knihovnami <i>Vapory</i> a
+<i>MoviePy</i>, celý kód s&nbsp;deklarací scény se do jisté míry
+zjednoduší.</p>
+
+<p>Výsledné video:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video11.htm">https://tisnik.github.io/moviepy-videos/video11.htm</a>
+
+<p>Zdrojový kód upraveného příkladu vypadá následovně:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from vapory import *
+from moviepy.editor import VideoClip
+&nbsp;
+&nbsp;
+y = [0, 1, 0]
+z = [0, 0, 1]
+&nbsp;
+camera = <strong>Camera</strong>('location', [1.65, 5.5,-5.0],
+                'up',       [ 0.0, 1.0, 0.0],
+                'right',    [ 4/3, 0.0, 0.0],
+                'look_at',  [ 0.0, 0.5,-1.0])
+&nbsp;
+<i># tři světelné zdroje</i>
+light1 = <strong>LightSource</strong>([-30, 11, 20],
+                     'color', 'White')
+&nbsp;
+light2 = <strong>LightSource</strong>([31, 12, -20],
+                     'color', 'White')
+&nbsp;
+light3 = <strong>LightSource</strong>([32, 11, -20],
+                     'color', 'LightGray')
+&nbsp;
+VEL = 1.45  <i># velikost krychle</i>
+&nbsp;
+box = <strong>Box</strong>([-VEL, -VEL, -VEL],
+          [VEL, VEL, VEL],
+          Texture(
+              'T_Wood23',
+              Finish('phong', 1,
+                     'phong_size', 300,
+                     'reflection', 0.15)))
+&nbsp;
+<i># druhý objekt - nekonečná rovina</i>
+plane = <strong>Plane</strong>(y,
+              -1.5,
+              Texture(
+                  'T_Stone1',
+                  Pigment('octaves', 3,
+                          'rotate', [i * 90 for i in z]),
+                  Finish('reflection', 0.10)))
+&nbsp;
+def <strong>construct_scene</strong>(t):
+    sphere = Sphere([0, 3.3 - 7.0*t, 0],
+                    1.8,
+                    Texture(
+                        'T_Wood24',
+                        Finish('phong', 1,
+                               'phong_size', 300,
+                               'reflection', 0.15)))
+&nbsp;
+    csg_object = Difference(box, sphere)
+&nbsp;
+    return Scene(camera,
+                 objects=[light1, light2, light3, csg_object, plane],
+                 included=["colors.inc", "stones.inc", "woods.inc"],
+                 global_settings=["assumed_gamma 2.2"])
+&nbsp;
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 20
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    scene = construct_scene(t / DURATION)
+    return scene.render(width=400, height=300, antialiasing=0.001)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_videofile('scene4.ogv', fps=FPS, progress_bar=True, bitrate="800000")
+</pre>
+
+<p>Další video...</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video12.htm">https://tisnik.github.io/moviepy-videos/video12.htm</a>
+
+<p>vzniklo z&nbsp;této scény:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from vapory import *
+from moviepy.editor import VideoClip
+&nbsp;
+&nbsp;
+class <strong>Torus</strong>(POVRayElement):
+    """Torus()"""
+&nbsp;
+&nbsp;
+y = [0, 1, 0]
+z = [0, 0, 1]
+&nbsp;
+camera = <strong>Camera</strong>('location', [0, 20, -15],
+                'look_at',  [0, -2, 0])
+&nbsp;
+<i># dva světelné zdroje</i>
+&nbsp;
+<i># první (silnější) světelný zdroj s bílou barvou</i>
+light1 = <strong>LightSource</strong>([-50, 100, -80],
+                     'color', [1.0, 1.0, 1.0])
+&nbsp;
+<i># druhý (slabší) světelný zdroj</i>
+light2 = <strong>LightSource</strong>([250, 25, -100],
+                     'color', [0.85, 0.53, 0.10])
+&nbsp;
+&nbsp;
+<i># objekt - nekonečná rovina</i>
+plane = <strong>Plane</strong>(y,
+              -6,
+              Texture(
+                  Pigment('checker',
+                          'color', 'Gray',
+                          'color', 'White*0.9'),
+                  Finish('reflection', 0.10),
+                  'scale', 4))
+&nbsp;
+&nbsp;
+<i># objekt ve scéně: torus (anuloid)</i>
+def <strong>create_torus</strong>(t):
+    return <strong>Torus</strong>(7.0, 4.0,
+                 <i># spodní (podkladová) textura se základním vzorkem</i>
+                 Texture(
+                     Pigment('bozo',
+                             ColorMap([0.0, 0.4, 'color', [0.36, 0.20, 0.09],
+                                                 'color', [0.36, 0.20, 0.09]],
+                                      [0.4, 1.01, 'color', [0.85, 0.57, 0.44],
+                                                  'color', [0.85, 0.57, 0.44]]),
+                             'scale', [4, 0.15, 0.15],
+                             'rotate', [0, 45, 0])),
+                 <i># horní textura, která přidává jemnější vzorek</i>
+                 Texture(
+                     Pigment('wood',
+                             'turbulence', 0.025,
+                             <i># čtyři barvy, které se ve vzorku střídají</i>
+                             ColorMap([0.00, 0.15, 'color', [0.42, 0.26, 0.15],
+                                                   'color', [0.85, 0.53, 0.10]],
+                                      [0.15, 0.40, 'color', [0.85, 0.53, 0.10],
+                                                   'color', [1.00, 1.00, 1.00, 1.00]],
+                                      [0.40, 0.80, 'color', [1.00, 1.00, 1.00, 1.00],
+                                                   'color', [0.85, 0.53, 0.10]],
+                                      [0.80, 1.01, 'color', [0.85, 0.53, 0.10],
+                                                   'color', [0.42, 0.26, 0.15]]),
+                             'scale', [3.5, 1, 1],
+                             'translate', [0, -50, 0],
+                             'rotate', [0, 0, 10.0 * t]
+                             ),
+                     Finish('phong', 1,
+                            'phong_size', 100,
+                            'brilliance', 3,
+                            'ambient', 0.2,
+                            'diffuse', 0.8)))
+&nbsp;
+&nbsp;
+def <strong>construct_scene</strong>(t):
+    torus = create_torus(t)
+&nbsp;
+    return <strong>Scene</strong>(camera, objects=[light1, light2, plane, torus],
+                 included=['colors.inc'],
+                 global_settings=['assumed_gamma 2.2'])
+&nbsp;
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 20
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    scene = construct_scene(t / DURATION)
+    return scene.render(width=400, height=300, antialiasing=0.001)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_videofile('scene5.ogv', fps=FPS, progress_bar=True, bitrate="800000")
+</pre>
+
+
+
+<p><a name="k15"></a></p>
+<h2 id="k15">15. Příprava na animaci změn parametrů implicitních ploch</h2>
+
+<p>Nyní když víme, jakým způsobem lze velmi snadno generovat video soubory
+přímo z&nbsp;Vapory, si můžeme ukázat další příklad, v&nbsp;němž se budou
+postupně měnit parametry výše popsaných implicitních ploch (<i>blobs</i>,
+<i>metaballs</i>).</p>
+
+<p>Výsledkem by mělo být toto video:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video13.htm">https://tisnik.github.io/moviepy-videos/video13.htm</a>
+
+<p>Nejprve si ukažme statickou podobu této scény:</p>
+
+<pre>
+<i>// ------------------------------------------------------------</i>
+<i>// Jednoduchá scéna s několika implicitními plochami (blobs),</i>
+<i>// které se liší pouze hodnotou threshold.</i>
+<i>//</i>
+<i>// rendering lze spustit příkazem:</i>
+<i>//     povray +W800 +H600 +B100 +FN +D +Iscene8.pov +Oscene8.png</i>
+<i>// (pro náhled postačí zadat povray scene8.pov)</i>
+<i>// ------------------------------------------------------------</i>
+&nbsp;
+#version 3.5;
+&nbsp;
+#include "colors.inc"
+&nbsp;
+<strong>global_settings</strong> {
+    assumed_gamma 2.2
+}
+&nbsp;
+<strong>camera</strong> {
+   orthographic                          <i>// vypnutí perspektivy</i>
+   location &lt;0, 0, -1&gt;                   <i>// umístění kamery</i>
+   right    5*4/3 * x                    <i>// vektor směřující doprava</i>
+   up       y*5                          <i>// a nahoru</i>
+   look_at  &lt;0, 0, 0&gt;                    <i>// bod, na který se kamera zaměřila</i>
+&nbsp;
+}
+&nbsp;
+<strong>light_source</strong> {                           <i>// první světelný zdroj</i>
+    &lt;2, 10, -10&gt;                         <i>// pozice světelného zdroje</i>
+    color red 0.7 green 0.7 blue 0.7     <i>// barva světelného zdroje</i>
+}
+&nbsp;
+<strong>light_source</strong> {                           <i>// druhý světelný zdroj</i>
+    &lt;0, 0, -10000&gt;                       <i>// pozice světelného zdroje</i>
+    color red 0.7 green 0.7 blue 0.7     <i>// barva světelného zdroje</i>
+    shadowless
+}
+&nbsp;
+<strong>plane</strong> {                                  <i>// rovina tvořící pozadí scény</i>
+    &lt;0, 0, 1&gt;, 2                         <i>// posun a orientace roviny</i>
+    hollow on
+    pigment {                            <i>// procedurální textura</i>
+        agate
+        agate_turb 0.9
+    }
+    finish {                             <i>// optické vlastnosti materiálu povrchu</i>
+        ambient 0.1
+        diffuse 0.4
+    }
+}
+&nbsp;
+#declare Tex =
+<strong>texture</strong> {
+    pigment {
+        color red 0.6 green 0.8 blue 1
+    }
+    finish {
+        ambient 0.2 diffuse 0.4 phong 0.5 phong_size 5
+    }
+}
+&nbsp;
+<strong>blob</strong> {
+    threshold 0.4                        <i>// hraniční hodnota</i>
+    component 1.0, 1.0, &lt; 0, -0.6, 0&gt;    <i>// prvek kostry: síla, poloměr, souřadnice v prostoru</i>
+    component 1.0, 1.0, &lt; 0,  0.6, 0&gt;    <i>// druhý prvek kostry</i>
+    texture {Tex}
+    translate &lt;-2.0, -1.2, 0&gt;
+}
+&nbsp;
+<strong>blob</strong> {
+    threshold 0.5                        <i>// hraniční hodnota</i>
+    component 1.0, 1.0, &lt; 0, -0.6, 0&gt;    <i>// prvek kostry: síla, poloměr, souřadnice v prostoru</i>
+    component 1.0, 1.0, &lt; 0,  0.6, 0&gt;    <i>// druhý prvek kostry</i>
+    texture {Tex}
+    translate &lt;-0.65, -1.2, 0&gt;
+}
+&nbsp;
+<strong>blob</strong> {
+    threshold 0.6                        <i>// hraniční hodnota</i>
+    component 1.0, 1.0, &lt; 0, -0.6, 0&gt;    <i>// prvek kostry: síla, poloměr, souřadnice v prostoru</i>
+    component 1.0, 1.0, &lt; 0,  0.6, 0&gt;    <i>// druhý prvek kostry</i>
+    texture {Tex}
+    translate &lt; 0.65, -1.2, 0&gt;
+}
+&nbsp;
+<strong>blob</strong> {
+    threshold 0.7                        <i>// hraniční hodnota</i>
+    component 1.0, 1.0, &lt; 0, -0.6, 0&gt;    <i>// prvek kostry: síla, poloměr, souřadnice v prostoru</i>
+    component 1.0, 1.0, &lt; 0,  0.6, 0&gt;    <i>// druhý prvek kostry</i>
+    texture {Tex}
+    translate &lt; 2.0, -1.2, 0&gt;
+}
+&nbsp;
+<strong>blob</strong> {
+    threshold 0.75                       <i>// hraniční hodnota</i>
+    component 1.0, 1.0, &lt; 0, -0.6, 0&gt;    <i>// prvek kostry: síla, poloměr, souřadnice v prostoru</i>
+    component 1.0, 1.0, &lt; 0,  0.6, 0&gt;    <i>// druhý prvek kostry</i>
+    texture {Tex}
+    translate &lt;-2.0, 1.2, 0&gt;
+}
+&nbsp;
+<strong>blob</strong> {
+    threshold 0.8                        <i>// hraniční hodnota</i>
+    component 1.0, 1.0, &lt; 0, -0.6, 0&gt;    <i>// prvek kostry: síla, poloměr, souřadnice v prostoru</i>
+    component 1.0, 1.0, &lt; 0,  0.6, 0&gt;    <i>// druhý prvek kostry</i>
+    texture {Tex}
+    translate &lt;-0.65, 1.2, 0&gt;
+}
+&nbsp;
+<strong>blob</strong> {
+    threshold 0.82                       <i>// hraniční hodnota</i>
+    component 1.0, 1.0, &lt; 0, -0.6, 0&gt;    <i>// prvek kostry: síla, poloměr, souřadnice v prostoru</i>
+    component 1.0, 1.0, &lt; 0,  0.6, 0&gt;    <i>// druhý prvek kostry</i>
+    texture {Tex}
+    translate &lt; 0.65, 1.2, 0&gt;
+}
+&nbsp;
+<strong>blob</strong> {
+    threshold 0.9                        <i>// hraniční hodnota</i>
+    component 1.0, 1.0, &lt; 0, -0.6, 0&gt;    <i>// prvek kostry: síla, poloměr, souřadnice v prostoru</i>
+    component 1.0, 1.0, &lt; 0,  0.6, 0&gt;    <i>// druhý prvek kostry</i>
+    texture {Tex}
+    translate &lt; 2.0, 1.2, 0&gt;
+}
+&nbsp;
+<i>// ------------------------------------------------------------</i>
+<i>// finito</i>
+<i>// ------------------------------------------------------------</i>
+</pre>
+
+<a href="https://www.root.cz/obrazek/331354/"><img src="https://i.iinfo.cz/images/695/vapory-moviepy-4-prev.png" class="image-331354" alt="&#160;" width="360" height="270" /></a>
+<p><i>Obrázek 15: Výsledek renderingu předchozího příkladu.</i></p>
+
+
+
+<p><a name="k16"></a></p>
+<h2 id="k16">16. Shodná testovací scéna napsaná v&nbsp;Pythonu s&nbsp;využitím Vapory</h2>
+
+<p>Přepis do Vapory je snadný a nečekají zde na nás žádné problémy. Jen si
+dovolím poukázat na imperativní způsob tvorby metaballs, který je kratší a
+vlastně i obecnější, než ruční specifikace jednotlivých prvků kostry tak, jak
+jsme to viděli v&nbsp;případě zdrojového kódu napsaného přímo v&nbsp;jazyku
+POV-Raye:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from vapory import *
+&nbsp;
+&nbsp;
+class <strong>Blob</strong>(POVRayElement):
+    """Blob()"""
+&nbsp;
+&nbsp;
+y = (0, 1, 0)
+z = (0, 0, 1)
+&nbsp;
+camera = <strong>Camera</strong>('orthographic',
+                'location', (0, 0, -1),
+                'right', '5*4/3*x',
+                'up', 'y*5',
+                'look_at', (0, 0, 0))
+&nbsp;
+<i># dva světelné zdroje</i>
+light1 = <strong>LightSource</strong>((2, 10, -10),
+                     'color', (0.7, 0.7, 0.7))
+&nbsp;
+light2 = <strong>LightSource</strong>((0, 0, -10000),
+                     'color', (0.7, 0.7, 0.7),
+                     'shadowless')
+&nbsp;
+&nbsp;
+<i># objekt - nekonečná rovina</i>
+plane = <strong>Plane</strong>(z,
+              2,
+              'hollow', 'on',
+              Texture(
+                  Pigment('agate',
+                          'agate_turb', 0.9),
+                  Finish('ambient', 0.1,
+                         'diffuse', 0.4)))
+&nbsp;
+def <strong>new_blob</strong>(threshold, dx, dy):
+    return <strong>Blob</strong>('threshold', threshold,
+                'component', 1.0, 1.0, (0, -0.6, 0),
+                'component', 1.0, 1.0, (0,  0.6, 0),
+                Texture(
+                      Pigment('color', (0.6, 0.8, 1.0)),
+                      Finish('ambient', 0.2,
+                             'diffuse', 0.4,
+                             'phong', 0.5,
+                             'phong_size', 5)),
+                'translate', (dx, dy, 0))
+&nbsp;
+&nbsp;
+objects=[light1, light2, plane]
+objects.append(new_blob(0.40, -2.00, -1.2))
+objects.append(new_blob(0.50, -0.65, -1.2))
+objects.append(new_blob(0.60,  0.65, -1.2))
+objects.append(new_blob(0.70,  2.00, -1.2))
+objects.append(new_blob(0.75, -2.00, 1.2))
+objects.append(new_blob(0.80, -0.65, 1.2))
+objects.append(new_blob(0.82,  0.65, 1.2))
+objects.append(new_blob(0.90,  2.00, 1.2))
+&nbsp;
+scene = <strong>Scene</strong>(camera, objects=objects,
+              included=('colors.inc',),
+              global_settings=('assumed_gamma 2.2',))
+&nbsp;
+scene.render('scene8_vapory.png', width=400, height=300, auto_camera_angle=False)
+</pre>
+
+
+
+<p><a name="k17"></a></p>
+<h2 id="k17">17. Naprogramování animace &ndash; tvorba jednotlivých snímků později spojených do videa</h2>
+
+<p>Celý postup pro vytvoření animace z&nbsp;jednotlivých snímků již známe,
+takže jen krátce:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from vapory import *
+from math import *
+&nbsp;
+&nbsp;
+class <strong>Blob</strong>(POVRayElement):
+    """Blob()"""
+&nbsp;
+&nbsp;
+y = (0, 1, 0)
+z = (0, 0, 1)
+&nbsp;
+camera = <strong>Camera</strong>('orthographic',
+                'location', (0, 0, -1),
+                'right', '5*4/3*x',
+                'up', 'y*5',
+                'look_at', (0, 0, 0))
+&nbsp;
+<i># dva světelné zdroje</i>
+light1 = <strong>LightSource</strong>((2, 10, -10),
+                     'color', (0.7, 0.7, 0.7))
+&nbsp;
+light2 = <strong>LightSource</strong>((0, 0, -10000),
+                     'color', (0.7, 0.7, 0.7),
+                     'shadowless')
+&nbsp;
+&nbsp;
+<i># objekt - nekonečná rovina</i>
+plane = <strong>Plane</strong>(z,
+              2,
+              'hollow', 'on',
+              Texture(
+                  Pigment('agate',
+                          'agate_turb', 0.9),
+                  Finish('ambient', 0.1,
+                         'diffuse', 0.4)))
+&nbsp;
+&nbsp;
+def <strong>new_blob</strong>(threshold, dx, dy, t):
+    delta = 0.3 * sin(2*pi*t)
+    return <strong>Blob</strong>('threshold', threshold,
+                'component', 1.0, 1.0, (0, -0.5 - delta, 0),
+                'component', 1.0, 1.0, (0,  0.5 + delta, 0),
+                Texture(
+                      Pigment('color', (0.6, 0.8, 1.0)),
+                      Finish('ambient', 0.2,
+                             'diffuse', 0.4,
+                             'phong', 0.5,
+                             'phong_size', 5)),
+                'translate', (dx, dy, 0))
+&nbsp;
+&nbsp;
+def <strong>construct_scene</strong>(t):
+    objects = [light1, light2, plane]
+    objects.append(new_blob(0.40, -2.00, -1.2, t))
+    objects.append(new_blob(0.50, -0.65, -1.2, t))
+    objects.append(new_blob(0.60,  0.65, -1.2, t))
+    objects.append(new_blob(0.70,  2.00, -1.2, t))
+    objects.append(new_blob(0.75, -2.00, 1.2, t))
+    objects.append(new_blob(0.80, -0.65, 1.2, t))
+    objects.append(new_blob(0.82,  0.65, 1.2, t))
+    objects.append(new_blob(0.90,  2.00, 1.2, t))
+&nbsp;
+    return Scene(camera, objects=objects,
+                 included=('colors.inc',),
+                 global_settings=('assumed_gamma 2.2',))
+&nbsp;
+&nbsp;
+FRAMES = 200
+&nbsp;
+for frame in range(0, FRAMES):
+    t = frame / float(FRAMES)
+    scene = construct_scene(t)
+    filename = "frame_{:03d}.png".format(frame)
+    scene.render(filename, width=400, height=300, auto_camera_angle=False)
+</pre>
+
+
+
+<p><a name="k18"></a></p>
+<h2 id="k18">18. Naprogramování animace &ndash; použití MoviePy</h2>
+
+<p>A na samotný závěr vytvoření videa s&nbsp;využitím knihovny MoviePy:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from vapory import *
+from moviepy.editor import VideoClip
+from math import *
+&nbsp;
+&nbsp;
+class <strong>Blob</strong>(POVRayElement):
+    """Blob()"""
+&nbsp;
+&nbsp;
+y = (0, 1, 0)
+z = (0, 0, 1)
+&nbsp;
+camera = <strong>Camera</strong>('orthographic',
+                'location', (0, 0, -1),
+                'right', '5*4/3*x',
+                'up', 'y*5',
+                'look_at', (0, 0, 0))
+&nbsp;
+<i># dva světelné zdroje</i>
+light1 = <strong>LightSource</strong>((2, 10, -10),
+                     'color', (0.7, 0.7, 0.7))
+&nbsp;
+light2 = <strong>LightSource</strong>((0, 0, -10000),
+                     'color', (0.7, 0.7, 0.7),
+                     'shadowless')
+&nbsp;
+&nbsp;
+<i># objekt - nekonečná rovina</i>
+plane = <strong>Plane</strong>(z,
+              2,
+              'hollow', 'on',
+              Texture(
+                  Pigment('agate',
+                          'agate_turb', 0.9),
+                  Finish('ambient', 0.1,
+                         'diffuse', 0.4)))
+&nbsp;
+&nbsp;
+def <strong>new_blob</strong>(threshold, dx, dy, t):
+    delta = 0.3 * sin(2*pi*t)
+    return <strong>Blob</strong>('threshold', threshold,
+                'component', 1.0, 1.0, (0, -0.5 - delta, 0),
+                'component', 1.0, 1.0, (0,  0.5 + delta, 0),
+                Texture(
+                      Pigment('color', (0.6, 0.8, 1.0)),
+                      Finish('ambient', 0.2,
+                             'diffuse', 0.4,
+                             'phong', 0.5,
+                             'phong_size', 5)),
+                'translate', (dx, dy, 0))
+&nbsp;
+&nbsp;
+def <strong>construct_scene</strong>(t):
+    objects = [light1, light2, plane]
+    objects.append(new_blob(0.40, -2.00, -1.2, t))
+    objects.append(new_blob(0.50, -0.65, -1.2, t))
+    objects.append(new_blob(0.60,  0.65, -1.2, t))
+    objects.append(new_blob(0.70,  2.00, -1.2, t))
+    objects.append(new_blob(0.75, -2.00, 1.2, t))
+    objects.append(new_blob(0.80, -0.65, 1.2, t))
+    objects.append(new_blob(0.82,  0.65, 1.2, t))
+    objects.append(new_blob(0.90,  2.00, 1.2, t))
+&nbsp;
+    return Scene(camera, objects=objects,
+                 included=('colors.inc',),
+                 global_settings=('assumed_gamma 2.2',))
+&nbsp;
+&nbsp;
+<i># parametry pro animaci</i>
+DURATION = 15
+FPS = 20
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    scene = construct_scene(t / DURATION)
+    return scene.render(width=400, height=300, antialiasing=0.001, auto_camera_angle=False)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_videofile('scene8.ogv', fps=FPS, progress_bar=True, bitrate="800000")
+</pre>
+
+
+
+<p><a name="k19"></a></p>
+<h2 id="k19">18. Repositář s&nbsp;demonstračními příklady</h2>
+
+<p>Zdrojové kódy všech dnes popsaných demonstračních příkladů určených pro
+Python 3 byly uloženy do Git repositáře dostupného na adrese <a
+href="https://github.com/tisnik/vapory-examples">https://github.com/tisnik/vapory-examples</a>
+(stále na GitHubu :-).  V&nbsp;případě, že nebudete chtít klonovat celý
+repositář (ten je ovšem stále velmi malý, stále doslova několik kilobajtů),
+můžete namísto toho použít odkazy na jednotlivé příklady, které naleznete
+v&nbsp;následující tabulce:</p>
+
+<table>
+<tr><th>Demonstrační příklad</th><th>Cesta</th></tr>
+<tr><td>scene4_moviepy.py</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene4_moviepy.py">https://github.com/tisnik/vapory-examples/blob/master/scene4_moviepy.py</a></td></tr>
+<tr><td>scene5.py</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene5.py">https://github.com/tisnik/vapory-examples/blob/master/scene5.py</a></td></tr>
+<tr><td>scene5_moviepy.py</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene5_moviepy.py">https://github.com/tisnik/vapory-examples/blob/master/scene5_moviepy.py</a></td></tr>
+<tr><td>scene6.py</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene6.py">https://github.com/tisnik/vapory-examples/blob/master/scene6.py</a></td></tr>
+<tr><td>scene7.py</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene7.py">https://github.com/tisnik/vapory-examples/blob/master/scene7.py</a></td></tr>
+<tr><td>scene7_update.py</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene7_update.py">https://github.com/tisnik/vapory-examples/blob/master/scene7_update.py</a></td></tr>
+<tr><td>scene8.py</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene8.py">https://github.com/tisnik/vapory-examples/blob/master/scene8.py</a></td></tr>
+<tr><td>scene8_anim.py</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene8_anim.py">https://github.com/tisnik/vapory-examples/blob/master/scene8_anim.py</a></td></tr>
+<tr><td>scene8_moviepy.py</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene8_moviepy.py">https://github.com/tisnik/vapory-examples/blob/master/scene8_moviepy.py</a></td></tr>
+</table>
+
+<p>Následuje tabulka s&nbsp;projekty vytvořenými přímo v&nbsp;jazyku POV-Ray
+(pro jejich vykreslení tedy postačuje pouze instalace POV-Raye):</p>
+
+<table>
+<tr><th>Demonstrační příklad</th><th>Cesta</th></tr>
+<tr><td>scene5.pov</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene5.pov">https://github.com/tisnik/vapory-examples/blob/master/scene5.pov</a></td></tr>
+<tr><td>scene6.pov</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene6.pov">https://github.com/tisnik/vapory-examples/blob/master/scene6.pov</a></td></tr>
+<tr><td>scene7.pov</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene7.pov">https://github.com/tisnik/vapory-examples/blob/master/scene7.pov</a></td></tr>
+<tr><td>scene8.pov</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene8.pov">https://github.com/tisnik/vapory-examples/blob/master/scene8.pov</a></td></tr>
+<tr><td>scene9.pov</td><td><a href="https://github.com/tisnik/vapory-examples/blob/master/scene9.pov">https://github.com/tisnik/vapory-examples/blob/master/scene9.pov</a></td></tr>
+</table>
+
+<p>Výsledná videa:</p>
+
+<ol>
+<li><a href="https://tisnik.github.io/moviepy-videos/video11.htm">https://tisnik.github.io/moviepy-videos/video11.htm</a></li>
+<li><a href="https://tisnik.github.io/moviepy-videos/video12.htm">https://tisnik.github.io/moviepy-videos/video12.htm</a></li>
+<li><a href="https://tisnik.github.io/moviepy-videos/video13.htm">https://tisnik.github.io/moviepy-videos/video13.htm</a></li>
+</ol>
+
+
+
+<p><a name="k20"></a></p>
+<h2 id="k20">20. Odkazy na Internetu</h2>
+
+<ol>
+
+<li>MoviePy 0.2.3.3 na PyPi<br />
+<a href="https://pypi.org/project/moviepy/">https://pypi.org/project/moviepy/</a>
+</li>
+
+<li>MoviePy na GitHubu<br />
+<a href="https://github.com/Zulko/moviepy">https://github.com/Zulko/moviepy</a>
+</li>
+
+<li>MoviePy - dokumentace<br />
+<a href="http://zulko.github.io/moviepy/">http://zulko.github.io/moviepy/</a>
+</li>
+
+<li>MoviePy - galerie<br />
+<a href="http://zulko.github.io/moviepy/gallery.html">http://zulko.github.io/moviepy/gallery.html</a>
+</li>
+
+<li>Data Animations With Python and MoviePy<br />
+<a href="https://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/">https://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/</a>
+</li>
+
+<li>Porovnání formátů Ogg Theora a H.264<br />
+<a href="https://www.root.cz/zpravicky/porovnani-formatu-ogg-theora-a-h-264/">https://www.root.cz/zpravicky/porovnani-formatu-ogg-theora-a-h-264/</a>
+</li>
+
+<li>Případ GIF<br />
+<a href="https://www.root.cz/clanky/pripad-gif/">https://www.root.cz/clanky/pripad-gif/</a>
+</li>
+
+<li>Pravda a mýty o GIFu<br />
+<a href="https://www.root.cz/clanky/pravda-a-myty-o-gifu/">https://www.root.cz/clanky/pravda-a-myty-o-gifu/</a>
+</li>
+
+<li>Anatomie grafického formátu GIF<br />
+<a href="https://www.root.cz/clanky/anatomie-grafickeho-formatu-gif/">https://www.root.cz/clanky/anatomie-grafickeho-formatu-gif/</a>
+</li>
+
+<li>GIF: animace a konkurence<br />
+<a href="https://www.root.cz/clanky/gif-animace-a-konkurence/">https://www.root.cz/clanky/gif-animace-a-konkurence/</a>
+</li>
+
+<li>Two python modules : MoviePy and images2gif – part 001<br />
+<a href="http://free-tutorials.org/two-python-modules-moviepy-and-images2gif-part-001/">http://free-tutorials.org/two-python-modules-moviepy-and-images2gif-part-001/</a>
+</li>
+
+<li>images2gif<br />
+<a href="https://pypi.org/project/images2gif/">https://pypi.org/project/images2gif/</a>
+</li>
+
+<li>Making GIFs from video files with Python<br />
+<a href="https://www.devbattles.com/en/sand/post-345-Making+GIFs+From+Video+Files+With+Python">https://www.devbattles.com/en/sand/post-345-Making+GIFs+From+Video+Files+With+Python</a>
+</li>
+
+<li>GIF89a specification<br />
+<a href="https://www.w3.org/Graphics/GIF/spec-gif89a.txt">https://www.w3.org/Graphics/GIF/spec-gif89a.txt</a>
+</li>
+
+<li>MPEG-4 Part 14<br />
+<a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">https://en.wikipedia.org/wiki/MPEG-4_Part_14</a>
+</li>
+
+<li>Theora video compression<br />
+<a href="https://www.theora.org/">https://www.theora.org/</a>
+</li>
+
+<li>Theora<br />
+<a href="https://en.wikipedia.org/wiki/Theora">https://en.wikipedia.org/wiki/Theora</a>
+</li>
+
+<li>NumPy<br />
+<a href="http://www.numpy.org/">http://www.numpy.org/</a>
+</li>
+
+<li>numpy 1.14.2 (on PyPi)<br />
+<a href="https://pypi.org/project/numpy/">https://pypi.org/project/numpy/</a>
+</li>
+
+<li>Integrovaná vývojová prostředí ve Fedoře: praktické použití IPython Notebooku a knihovny Numpy<br />
+<a href="https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy/">https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy/</a>
+</li>
+
+<li>Integrovaná vývojová prostředí ve Fedoře: praktické použití IPython Notebooku a knihovny Numpy (2.část)<br />
+<a href="https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy-2-cast/">https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy-2-cast/</a>
+</li>
+
+<li>Non-linear editing system<br />
+<a href="https://en.wikipedia.org/wiki/Non-linear_editing_system">https://en.wikipedia.org/wiki/Non-linear_editing_system</a>
+</li>
+
+<li>Lorenzův atraktor<br />
+<a href="http://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-iii/#k03">http://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-iii/#k03</a>
+</li>
+
+<li>Popis barvových map modulu matplotlib.cm<br />
+<a href="https://gist.github.com/endolith/2719900#id7">https://gist.github.com/endolith/2719900#id7</a>
+</li>
+
+<li>Ukázky (palety) barvových map modulu matplotlib.cm<br />
+<a href="http://matplotlib.org/examples/color/colormaps_reference.html">http://matplotlib.org/examples/color/colormaps_reference.html</a>
+</li>
+
+<li>Lorenz system<br />
+<a href="https://en.wikipedia.org/wiki/Lorenz_system">https://en.wikipedia.org/wiki/Lorenz_system</a>
+</li>
+
+<li>Customising contour plots in matplotlib<br />
+<a href="https://philbull.wordpress.com/2012/12/27/customising-contour-plots-in-matplotlib/">https://philbull.wordpress.com/2012/12/27/customising-contour-plots-in-matplotlib/</a>
+</li>
+
+<li>Graphics with Matplotlib<br />
+<a href="http://kestrel.nmt.edu/~raymond/software/python_notes/paper004.html">http://kestrel.nmt.edu/~raymond/software/python_notes/paper004.html</a>
+</li>
+
+<li>Systémy lineárních rovnic<br />
+<a href="http://www.matematika.cz/systemy-linearnich-rovnic">http://www.matematika.cz/systemy-linearnich-rovnic</a>
+</li>
+
+<li>NumPy Home Page<br />
+<a href="http://www.numpy.org/">http://www.numpy.org/</a>
+</li>
+
+<li>NumPy v1.10 Manual<br />
+<a href="http://docs.scipy.org/doc/numpy/index.html">http://docs.scipy.org/doc/numpy/index.html</a>
+</li>
+
+<li>NumPy (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/NumPy">https://en.wikipedia.org/wiki/NumPy</a>
+</li>
+
+<li>Matplotlib Home Page<br />
+<a href="http://matplotlib.org/">http://matplotlib.org/</a>
+</li>
+
+<li>vapory na GitHubu<br />
+<a href="https://github.com/Zulko/vapory">https://github.com/Zulko/vapory</a>
+</li>
+
+<li>Seriál na Rootu: Vykreslujeme 3D scény s POV-Ray<br />
+<a href="https://www.root.cz/serialy/vykreslujeme-3d-sceny-s-pov-ray/">https://www.root.cz/serialy/vykreslujeme-3d-sceny-s-pov-ray/</a>
+</li>
+
+<li>Animace v POV-Rayi<br />
+<a href="https://www.root.cz/clanky/animace-v-pov-rayi/">https://www.root.cz/clanky/animace-v-pov-rayi/</a>
+</li>
+
+<li>Tvorba pokročilejších animací v POV-Rayi<br />
+<a href="https://www.root.cz/clanky/tvorba-pokrocilejsich-animaci-v-pov-rayi/">https://www.root.cz/clanky/tvorba-pokrocilejsich-animaci-v-pov-rayi/</a>
+</li>
+
+<li>The POV-Ray Cyclopedia:<br />
+<a href="http://www.spi­ritone.com/~en­glish/cyclope­dia/index.html">http://www.spi­ritone.com/~en­glish/cyclope­dia/index.html</a>
+</li>
+
+<li>POV-Ray New Ring:<br />
+<a href="http://webrin­g.povray.org/">http://webrin­g.povray.org/</a>
+</li>
+
+<li>Animations with POV-Ray:<br />
+<a href="http://www.f-lohmueller.de/pov_tut/­animate/pov_a­nie.htm">http://www.f-lohmueller.de/pov_tut/­animate/pov_a­nie.htm</a>
+</li>
+
+<li>The POV-Ray Objects Collection:<br />
+<a href="http://objects­.povworld.org/">http://objects­.povworld.org/</a>
+</li>
+
+<li>POV-Ray Texture Library 4.0:<br />
+<a href="http://texlib­.povray.org/">http://texlib­.povray.org/</a>
+</li>
+
+<li>Galerie modelů vytvořených v Lparseru:<br />
+<a href="http://home.wa­nadoo.nl/lauren­s.lapre/lparser2­.html">http://home.wa­nadoo.nl/lauren­s.lapre/lparser2­.html</a>
+</li>
+
+<li>Charlie Chernohorsky :-) L-systémy ve FractIntu:<br />
+<a href="http://fractin­t.oblivion.cz/">http://fractin­t.oblivion.cz/</a>
+</li>
+
+<li>POV-Ray Hall of Fame,<br />
+<a href="http://hof.po­vray.org/">http://hof.po­vray.org/</a>
+</li>
+
+<li>matplotlib (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/Matplotlib">https://en.wikipedia.org/wiki/Matplotlib</a>
+</li>
+
+<li>The cell magics in IPython<br />
+<a href="http://nbviewer.jupyter.org/github/ipython/ipython/blob/1.x/examples/notebooks/Cell%20Magics.ipynb">http://nbviewer.jupyter.org/github/ipython/ipython/blob/1.x/examples/notebooks/Cell%20Magics.ipynb</a>
+</li>
+
+<li>Taylorův polynom<br />
+<a href="https://algoritmy.net/article/1576/Tayloruv-polynom">https://algoritmy.net/article/1576/Tayloruv-polynom</a>
+</li>
+
+<li>Taylor series<br />
+<a href="https://en.wikipedia.org/wiki/Taylor_series">https://en.wikipedia.org/wiki/Taylor_series</a>
+</li>
+
+<li>Taylor Series Approximation to Cosine<br />
+<a href="https://www.cut-the-knot.org/Curriculum/Calculus/TaylorSeries.shtml">https://www.cut-the-knot.org/Curriculum/Calculus/TaylorSeries.shtml</a>
+</li>
+
+<li>Fourier series<br />
+<a href="https://en.wikipedia.org/wiki/Fourier_series">https://en.wikipedia.org/wiki/Fourier_series</a>
+</li>
+
+<li>mpmath<br />
+<a href="http://mpmath.org/">http://mpmath.org/</a>
+</li>
+
+<li>Gallery of mathematical functions<br />
+<a href="http://mpmath.org/gallery/">http://mpmath.org/gallery/</a>
+</li>
+
+<li>3D visualization of complex functions with matplotlib<br />
+<a href="http://fredrikj.net/blog/2009/08/3d-visualization-of-complex-functions-with-matplotlib/">http://fredrikj.net/blog/2009/08/3d-visualization-of-complex-functions-with-matplotlib/</a>
+</li>
+
+<li>Animating the Lorenz System in 3D<br />
+<a href="https://jakevdp.github.io/blog/2013/02/16/animating-the-lorentz-system-in-3d/">https://jakevdp.github.io/blog/2013/02/16/animating-the-lorentz-system-in-3d/</a>
+</li>
+
+<li>Lorenz example<br />
+<a href="http://docs.enthought.com/mayavi/mayavi/auto/example_lorenz.html">http://docs.enthought.com/mayavi/mayavi/auto/example_lorenz.html</a>
+</li>
+
+<li>Color Graphs of Complex Functions<br />
+<a href="http://fs2.american.edu/lcrone/www/ComplexPlot.html">http://fs2.american.edu/lcrone/www/ComplexPlot.html</a>
+</li>
+
+<li>Tekno Frannansa,<br />
+<a href="http://www.zaz­zle.com/tekf">http://www.zaz­zle.com/tekf</a>
+</li>
+
+<li>Internet Raytracing Competition,<br />
+<a href="http://www.ir­tc.org/">http://www.ir­tc.org/</a>
+</li>
+
+<li>POVRay Short Code Contest – Round 3,<br />
+<a href="http://local.was­p.uwa.edu.au/~pbou­rke/exhibition/scc3/fi­nal/">http://local.was­p.uwa.edu.au/~pbou­rke/exhibition/scc3/fi­nal/</a>
+</li>
+
+<li>SCC4: POVRay Short Code Contest,<br />
+<a href="http://local.was­p.uwa.edu.au/~pbou­rke/exhibition/scc4/fi­nal/">http://local.was­p.uwa.edu.au/~pbou­rke/exhibition/scc4/fi­nal/</a>
+</li>
+
+<li>SCC5: POVRay Short Code Contest #5 – The animation round!,<br />
+<a href="http://local.was­p.uwa.edu.au/~pbou­rke/exhibition/scc5/fi­nal.html">http://local.was­p.uwa.edu.au/~pbou­rke/exhibition/scc5/fi­nal.html</a>
+</li>
+
+<li>POV-Ray posters,<br />
+<a href="http://www.po­vray.org/poster­s/">http://www.po­vray.org/poster­s/</a>
+</li>
+
+<li>Parametric Constructive Solid Geometry<br />
+<a href="http://c-csg.com/">http://c-csg.com/</a>
+</li>
+
+</ol>
+
+
+
+<p></p><p></p>
+<p><small>Autor: <a href="http://www.fit.vutbr.cz/~tisnovpa">Pavel Tišnovský</a> &nbsp; 2018</small></p>
+</body>
+</html>
+
