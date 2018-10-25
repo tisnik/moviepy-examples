@@ -1,0 +1,1084 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Použití knihovny MoviePy při úpravách videa</title>
+<meta name="Author" content="Pavel Tisnovsky" />
+<meta name="Generator" content="vim" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<style type="text/css">
+         body {color:#000000; background:#ffffff;}
+         h1  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#c00000; text-align:center; padding-left:1em}
+         h2  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#0000c0; padding-left:1em; text-align:left}
+         h3  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#c0c0c0; padding-left:1em; text-align:left}
+         h4  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#e0e0e0; padding-left:1em; text-align:left}
+         a   {font-family: arial, helvetica, sans-serif;}
+         li  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ol  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ul  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         p   {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify;}
+         pre {background:#e0e0e0}
+</style>
+</head>
+
+<body>
+
+<h1>Použití knihovny MoviePy při úpravách videa</h1>
+
+<h3>Pavel Tišnovský</h3>
+
+<p></p>
+
+<h1>Úvodník</h1>
+
+<p>Ve čtvrtém článku o knihovně MoviePy si ukážeme, jakými způsoby je možné programově upravovat videa, a to včetně aplikace různých typů filtrů poskytovaných touto knihovnou.</p>
+
+
+
+<h2>Obsah</h2>
+
+<p><a href="#k01">1. Použití knihovny MoviePy při úpravách videa</a></p>
+<p><a href="#k02">2. Princip činnosti MoviePy při zpracování existujícího videa</a></p>
+<p><a href="#k03">3. Načtení videa a jeho následné uložení do odlišného formátu</a></p>
+<p><a href="#k04">4. Specifikace bitové rychlosti výsledného videa</a></p>
+<p><a href="#k05">5. Změna rychlosti vytvářeného videa</a></p>
+<p><a href="#k06">6. Střih videa (výběr snímků na časové ose)</a></p>
+<p><a href="#k07">7. Filtry aplikované na jednotlivé snímky</a></p>
+<p><a href="#k08">8. Změna rozlišení výsledného videa</a></p>
+<p><a href="#k09">9. Modifikace kontrastu</a></p>
+<p><a href="#k10">10. Nastavení okrajů okolo videa</a></p>
+<p><a href="#k11">11. Aplikace masky na všechny snímky videa</a></p>
+<p><a href="#k12">12. Jednoduchý filtr pro inverzi všech snímků</a></p>
+<p><a href="#k13">13. Rozmazání videa v&nbsp;čase (motion blur)</a></p>
+<p><a href="#k14">14. Rozmazání s&nbsp;využitím vzdálenějších snímků</a></p>
+<p><a href="#k15">15. Jednoduchá kompozice typu &bdquo;obraz v&nbsp;obraze&ldquo;</a></p>
+<p><a href="#k16">16. Vytvoření jednoduché pipeline s&nbsp;uložením výsledku ve formě matice čtyř videoklipů</a></p>
+<p><a href="#k17">17. Vytvoření videa z&nbsp;jednotlivých snímků získaných z&nbsp;rastrových obrázků</a></p>
+<p><a href="#k18">18. Repositáře s&nbsp;demonstračními příklady a vygenerovanými videi</a></p>
+<p><a href="#k19">19. Odkazy na Internetu</a></p>
+
+
+
+<p><a name="k01"></a></p>
+<h2 id="k01">1. Použití knihovny MoviePy při úpravách videa</h2>
+
+<p>Na předchozí tři části [<a
+href="https://www.root.cz/clanky/programova-tvorba-a-nelinearni-editace-videa-s-vyuzitim-knihovny-moviepy/">1</a>]
+[<a
+href="https://www.root.cz/clanky/pouziti-moviepy-spolecne-s-matplotlibem-pro-tvorbu-animovanych-grafu/">2</a>]
+[<a
+href="https://www.root.cz/clanky/pouziti-moviepy-spolecne-matplotlibem-pro-tvorbu-animovanych-grafu-dokonceni/">3</a>]
+krátkého seriálu o užitečné knihovně <i>MoviePy</i> dnes navážeme. Řekneme si
+totiž, jakými různými způsoby je možné upravovat již existující videa.
+S&nbsp;videi lze provádět různé &bdquo;lineární&ldquo; editační operace,
+například převody do odlišného formátu (s&nbsp;použitím jiného kodeku),
+modifikaci bitové rychlosti, změnu rozměrů snímků (tím pádem i rozlišení
+výsledného videa), aplikaci různých filtrů na snímky, aplikaci mezisnímkových
+filtrů (<i>motion blur</i>), použití masky apod. Kromě toho jsou však
+podporovány i různé operace nelineární, zejména pak kombinace několika videí
+(spojení, proložení snímků, obraz v&nbsp;obrazu) apod.</p>
+
+<p>V&nbsp;závěrečné části dnešního článku si ukážeme, jakým způsobem je možné
+v&nbsp;případě potřeby vytvořit video obsahující jednoduchou animovanou
+vizualizaci. Pro jednoduchost se bude jednat o mapu, na které jsou
+v&nbsp;grafické podobě zvýrazněny naměřené veličiny (v&nbsp;našem konkrétním
+případě se bude jednat o naměřenou a interpolovanou půdní vlhkost, která je
+dnes poměrně ostře sledována). V&nbsp;tomto případě se tedy knihovna
+<i>MoviePy</i> použije až v&nbsp;závěrečné fázi celého zpracování dat &ndash;
+od jejich měření, přes interpretaci (vizualizace na mapě) až po výslednou
+animaci, která zvýrazní změnu v&nbsp;čase. Ovšem díky tomu, že jsou jednotlivé
+snímky, ze kterých se výsledné video složí, tvořeny poli (přesněji řečeno
+datovými strukturami typu <strong>ndarray</strong>), lze i v&nbsp;závěrečné
+fázi do map různým způsobem zasahovat a provádět v&nbsp;nich různé více či méně
+zásadní modifikace.</p>
+
+<p>Pro testy filtrace videa bude použita následující volně dostupné
+odpočítávání získané ze starého filmu:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_input_video.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_input_video.htm</a>
+
+
+
+<p><a name="k02"></a></p>
+<h2 id="k02">2. Princip činnosti MoviePy při zpracování existujícího videa</h2>
+
+<p>Nejprve se budeme věnovat lineární a nelineární editaci existujícího videa,
+tj.&nbsp;souborů obsahujících video zakódované nějakým podporovaným
+<i>kodekem</i> uloženým do zvoleného <i>kontejneru</i> (příkladem bude
+kombinace Ogg/Theora). Knihovna MoviePy v&nbsp;tomto případě pracuje přibližně
+následujícím způsobem:</p>
+
+<ol>
+
+<li>Vstupní soubor je postupně zpracováván známým externím nástrojem
+pojmenovaným <strong>ffmpeg</strong>. Výstupem je postupně vytvářená sekvence
+jednotlivých snímků popř.&nbsp;i audiostopy (ovšem dnes se budeme zabývat pouze
+zpracováním jednotlivých snímků, i když vstupní video obsahuje i zvukovou
+stopu).</li>
+
+<li>Jednotlivé snímky jsou v&nbsp;operační paměti počítače reprezentovány
+datovou strukturou typu <strong>ndarray</strong> <a
+href="https://www.root.cz/clanky/programova-tvorba-a-nelinearni-editace-videa-s-vyuzitim-knihovny-moviepy/#k07">z&nbsp;knihovny
+Numpy</a>. Díky tomu je možné se snímky pracovat na nejnižší úrovni modifikací
+jednotlivých pixelů.</li>
+
+<li>Na snímky nebo na jejich sekvenci lze v&nbsp;případě potřeby aplikovat
+různé filtry, které si popíšeme v&nbsp;dalších kapitolách.</li>
+
+<li>Snímky se na výstupu opět spojují do sekvence, ze které se zvoleným kodekem
+generuje výsledný soubor s&nbsp;videem. Pro tuto činnost se opět volá externí
+nástroj <strong>ffmpeg</strong>.</li>
+
+</ol>
+
+<p>Ve skutečnosti však může být situace nepatrně složitější, protože současně
+je možné zpracovávat větší množství videí na vstupu &ndash; tato videa lze
+kombinovat, spojovat, vytvořit snímky ve snímku atd. I s&nbsp;touto zajímavou a
+užitečnou problematikou se setkáme v&nbsp;navazujících kapitolách.</p>
+
+<p>Příkladem může být použití třídy <strong>CompositeVideoClips</strong>
+zajišťující kompozici více vstupních videí:</p>
+
+<ol>
+
+<li>Vstupní soubory jsou postupně zpracovávány externím nástrojem
+<strong>ffmpeg</strong>, podobně jako v&nbsp;případě, kdy je vstupem jediné
+video. Výstupem je tolik sekvencí jednotlivých snímků, kolik souborů se
+zpracovává.</li>
+
+<li>Na snímky nebo na jejich sekvenci lze aplikovat různé filtry, z&nbsp;nichž
+některé si popíšeme v&nbsp;dalších kapitolách.</li>
+
+<li>Snímky z&nbsp;jednotlivých sekvencí jsou zkombinovány dohromady. Při této
+činnosti se typicky používají různé masky (bitové mapy popř.&nbsp;pole
+s&nbsp;hodnotami od 0.0 do 1.0). Výsledkem kombinace je jediná sekvence
+výsledných snímků.</li>
+
+<li>Snímky se na výstupu opět spojují do sekvence, ze které se zvoleným kodekem
+generuje výsledný soubor s&nbsp;videem. Pro tuto činnost se opět volá externí
+nástroj <strong>ffmpeg</strong> (tento krok se nijak neliší od zpracování
+jediného videa).</li>
+
+</ol>
+
+
+
+<p><a name="k03"></a></p>
+<h2 id="k03">3. Načtení videa a jeho následné uložení do odlišného formátu</h2>
+
+<p>První příklad, který si v&nbsp;dnešním článku ukážeme, bude velmi
+jednoduchý. Popíšeme si v&nbsp;něm základní použití třídy
+<strong>VideoFileClip</strong>, která reprezentuje video načítané
+z&nbsp;externího souboru a dekódované do operační paměti paměti ve formě
+jednotlivých snímků. V&nbsp;konstruktoru této třídy je nutné specifikovat jméno
+souboru s&nbsp;videem a popř.&nbsp;i další nepovinné parametry, zejména
+pak:</p>
+
+<table>
+<tr><th>Parametr</th><th>Význam</th></tr>
+<tr><td>has_mask</td><td>určuje, zda se video načte i s&nbsp;maskou (většinou ovšem není maska specifikována, typicky se jedná o specilitu MoviePy)</td></tr>
+<tr><td>audio</td><td>povolení či zákaz importu zvukových stop (samozřejmě pokud existují)</td></tr>
+<tr><td>resize_algorithm</td><td>specifikace algoritmu použitého při převzorkování snímků (volba mezi větší kvalitou nebo rychlostí převodu a výslednou velikostí videa)</td></tr>
+<tr><td>fps_source</td><td>volba, která metadata obsahují informaci o počtu snímků za sekundu</td></tr>
+</table>
+
+<p>Třída <strong>VideoFileClip</strong> obsahuje mj.&nbsp;i metodu pojmenovanou
+<strong>write_videofile()</strong>, která slouží pro export videa do zvoleného
+souboru s&nbsp;využitím kodeku a kontejneru, který je buď přesně specifikovaný,
+nebo si ho knihovna sama dokáže odvodit z&nbsp;koncovky. V&nbsp;našem případě
+bude postačovat odvození z&nbsp;koncovky, protože &bdquo;.ogg&ldquo; je
+jednoznačně mapováno na kontejner/kodek <a
+href="https://en.wikipedia.org/wiki/Theora">Ogg/Theora</a>. <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/01_convert_mp4_to_ogv.py">Příklad</a>
+tedy provede dvě činnosti &ndash; načte video ve formátu MPEG-4 a uloží ho do
+formátu Ogg/Theora (samozřejmě je nutné uvažovat nad ztrátou kvality, která
+dekódovací-kódovací proces provází!):</p>
+
+<pre>
+from moviepy.editor import VideoFileClip
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+clip.write_videofile('01_output_normal.ogv')
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: ve skutečnosti je možné stejné
+funkcionality dosáhnout i přímým zavoláním nástroje <strong>ffmpeg</strong>,
+který je interně knihovnou MoviePy používán.</div></p>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_01_convert_mp4_to_ogv.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_01_convert_mp4_to_ogv.htm</a>
+
+
+
+<p><a name="k04"></a></p>
+<h2 id="k04">4. Specifikace bitové rychlosti výsledného videa</h2>
+
+<p>Při exportu videa do nového souboru se zvoleným kontejnerem a kodekem je
+možné specifikovat i mezní bitovou rychlost (<i>bitrate</i>), která samozřejmě
+ovlivňuje jak kvalitu výsledného videa, tak i jeho celkovou velikost a
+požadavky na rychlost síťového připojení v&nbsp;případě, že video bude umístěno
+například na Youtube. Čím nižší bude specifikovaná hodnota <i>bitrate</i>, tím
+horší bude kvalita výsledného videa a naopak (i když vztah bitová
+rychlost:kvalita není lineární). Podívejme se na příklad, v&nbsp;němž zvýšíme
+bitovou rychlost na cca 700000 bitů za sekundu (<i>bps</i>), což je více, než
+implicitní hodnota (proto bylo předchozí video tak nekvalitní):</p>
+
+<pre>
+from moviepy.editor import VideoFileClip
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+clip.write_videofile('02_output_better_bitrate.ogv', bitrate='700000')
+</pre>
+
+<p>Poznámka: kvalita výsledného videa je samozřejmě omezena kvalitou videa
+vstupního, neboli jak říkají (nejenom) lidé z&nbsp;IT: &bdquo;garbage in,
+garbage out&ldquo;.</p>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_02_convert_change_bitrate.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_02_convert_change_bitrate.htm</a>
+
+
+
+<p><a name="k05"></a></p>
+<h2 id="k05">5. Změna rychlosti vytvářeného videa</h2>
+
+<p>V&nbsp;některých případech je nutné video zpomalit nebo naopak zrychlit. Zde
+se již dostáváme k&nbsp;jednomu z&nbsp;filtrů, které jsou v&nbsp;knihovně
+MoviePy uživatelům-programátorům nabízeny. Tento filtr se jmenuje
+<strong>speedx</strong> a lze ho volat jako metodu objektu třídy
+<strong>VideoFileClip</strong>, které se předá reálné číslo představující
+zrychlení (pokud &gt; 1) nebo naopak zpomalení (v&nbsp;případě, že &lt; 1).
+Výsledkem tohoto filtru bude nové video (obecně třída
+<strong>VideoClip</strong>), se kterým je možné provádět naprosto stejné
+operace, jako s&nbsp;jakýmkoli jiným videem.</p>
+
+<pre>
+from moviepy.editor import VideoFileClip
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># novy objekt reprezentující zrychleny video klip</i>
+faster_clip = clip.speedx(1.5)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+faster_clip.write_videofile('03_output_faster_clip.ogv', bitrate='700000')
+</pre>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_03_convert_speedup.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_03_convert_speedup.htm</a>
+
+
+
+<p><a name="k06"></a></p>
+<h2 id="k06">6. Střih videa (výběr snímků na časové ose)</h2>
+
+<p>Poměrně často se setkáme s&nbsp;požadavkem, aby výsledné video obsahovalo
+pouze některé sekvence z&nbsp;videa původního (například se odstraňují titulky
+atd.). I tento požadavek samozřejmě knihovna MoviePy dokáže splnit, a to
+konkrétně díky existenci filtru nazvaného <strong>subclip</strong>, kterému se
+předá čas prvního a posledního snímku z&nbsp;požadované sekvence. Výsledkem
+této operace je nové video, takže je snadné si postupně vytvořit libovolné
+množství takových sekvencí a ty posléze spojit do výsledného videa
+(popř.&nbsp;mezi ně vložit další efekty nebo jiná videa). Opět se podívejme na
+úplný kód tohoto jednoduchého příkladu:</p>
+
+<pre>
+from moviepy.editor import VideoFileClip
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># novy objekt reprezentujici video klip od 5 do 10 sekundy</i>
+sub_clip = clip.subclip(5.0, 10.0)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+sub_clip.write_videofile('04_output_subclip.ogv', bitrate='700000')
+</pre>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_04_use_subclip.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_04_use_subclip.htm</a>
+
+
+
+<p><a name="k07"></a></p>
+<h2 id="k07">7. Filtry aplikované na jednotlivé snímky</h2>
+
+<p>V&nbsp;následujících pěti kapitolách si ukážeme příklady použití některých
+filtrů, které jsou postupně aplikovány na jednotlivé snímky. Do této skupiny
+patří především klasické filtry určené pro úpravu rastrových obrazů, změnu
+velikosti (zmenšení, zvětšení) snímků, aplikaci masky, přidání okrajů ke
+snímkům (což může být poměrně užitečné, jak uvidíme dále), otočení snímků apod.
+Speciálním případem je pak filtr typu <i>motion blur</i>, který dokáže
+vypočítat průměr z&nbsp;několika snímků zdrojového videa. Tento filtr použijeme
+k&nbsp;vytvoření dvou efektů popsaných v&nbsp;kapitole <a href="#k13">13</a> a
+<a href="#k14">14</a>.</p>
+
+<p>Poznámka: jednotlivé filtry, které budou postupně popsány
+v&nbsp;navazujících kapitolách, jsou většinou velmi jednoduché, takže je na
+místě otázka, k&nbsp;čemu se vlastně hodí. Síla (nejenom) těchto filtrů spočívá
+především v&nbsp;tom, že je lze různými způsoby kombinovat
+v&nbsp;&bdquo;pipeline&ldquo; a dosáhnout tak mnohem složitějších efektů
+(typicky při použití masky).</p>
+
+
+
+<p><a name="k08"></a></p>
+<h2 id="k08">8. Změna rozlišení výsledného videa</h2>
+
+<p>Dalším filtrem, který se ovšem bude volat poněkud odlišným způsobem, je
+filtr určený pro změnu rozlišení jednotlivých snímků a tím pádem i pro změnu
+rozlišení celého videa. Příslušný filtr se jmenuje <strong>resize</strong> a
+předává se mu relativní změna velikosti (1.5 odpovídá 150%, 0.25 pak 1/4).
+Tento filtr se volá přes univerzální metodu <strong>VideoClip.fx()</strong>,
+které se předá jak funkce realizující filtr, tak i její parametry. Výsledkem je
+opět nový video klip, podobně jako ve všech předchozích případech.</p>
+
+<p>Zvětšení videa na 150%:</p>
+
+<pre>
+from moviepy.editor import VideoFileClip
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># novy klip predstavujici video zvetsene na 150% puvodni velikosti</i>
+resized_clip = clip.fx(resize, 1.50)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+resized_clip.write_videofile('05_output_larger.ogv', bitrate='700000')
+</pre>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_05_resize_to_larger.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_05_resize_to_larger.htm</a>
+
+<p>Zmenšení videa na pouhou jednu čtvrtinu původní velikosti:</p>
+
+<pre>
+from moviepy.editor import VideoFileClip
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># novy klip predstavujici video zmensene na 1/4 puvodni velikosti</i>
+resized_clip = clip.fx(resize, 0.25)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+resized_clip.write_videofile('06_output_smaller.ogv', bitrate='700000')
+</pre>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_06_resize_to_smaller.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_06_resize_to_smaller.htm</a>
+
+
+
+<p><a name="k09"></a></p>
+<h2 id="k09">9. Modifikace kontrastu</h2>
+
+<p>Další jednoduchý filtr, který je aplikovaný postupně na všechny pixely ve
+snímcích, se sice jmenuje <strong>colorx</strong>, ovšem ve skutečnosti slouží
+k&nbsp;velmi jednoduše pojaté změně kontrastu (bez barevného vyvážení a dalších
+pokročilejších technik). Filtr pracuje následujícím způsobem &ndash; každou
+barvovou složku pixelu vynásobí předanou konstantou. Pokud je konstanta menší
+než 1, dojde ke snížení kontrastu (a ztmavení snímku), jinak naopak ke zvýšení
+kontrastu a současně i k&nbsp;posunu celého barevného spektra:</p>
+
+<pre>
+def <strong>colorx</strong>(clip, factor):
+    <i>""" multiplies the clip's colors by the given factor, can be used</i>
+    <i>    to decrease or increase the clip's brightness (is that the</i>
+    <i>    reight word ?)</i>
+    <i>"""</i>
+    return clip.fl_image( lambda pic: np.minimum(255,(factor*pic)).
+                                                        astype('uint8'))
+</pre>
+
+<p>V&nbsp;demonstračním příkladu, jehož <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/07_colorize.py">zdrojový
+kód</a> je vypsán pod tímto odstavcem, se budeme snažit do videa přidat barvy,
+což se nám sice takto primitivním filtrem samozřejmě nepodaří, protože původní
+film je monochromatický, ovšem vlivem různých chyb ve videu bude ve výsledcích
+patrný různobarevný šum atd.:</p>
+
+<pre>
+from moviepy.editor import VideoFileClip
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># velmi primitivni "kolorizace"</i>
+recolored_clip = clip.fx(colorx, 2.50)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+recolored_clip.write_videofile('06_output_recolored.ogv', bitrate='700000')
+</pre>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_07_colorize.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_07_colorize.htm</a>
+
+
+
+<p><a name="k10"></a></p>
+<h2 id="k10">10. Nastavení okrajů okolo videa</h2>
+
+<p>Poměrně užitečným filtrem, který má všestranné využití, je filtr určený pro
+vytvoření okraje okolo jednotlivých snímků. Tento filtr se jmenuje
+<strong>margin</strong> a předává se mu požadovaná šířka okraje zadaná
+v&nbsp;pixelech. Výsledkem aplikace filtru je opět nové video, takže lze zápis
+provést na jediném řádku; ihned za volání konstruktoru
+<strong>VideoFileClip</strong> (původní video ovšem již nebudeme mít
+k&nbsp;dispozici):</p>
+
+<pre>
+from moviepy.editor import VideoFileClip
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False).margin(20)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+clip.write_videofile('08_output_with_margin.ogv', bitrate='700000')
+</pre>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_08_margin.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_08_margin.htm</a>
+
+
+
+<p><a name="k11"></a></p>
+<h2 id="k11">11. Aplikace masky na všechny snímky videa</h2>
+
+<p>V&nbsp;mnoha situacích, například při míchání většího množství zdrojových
+videí, přidávání titulků do videa, aplikaci selektivního filtru atd. se setkáme
+s&nbsp;nutností aplikovat masku na zdrojové video, přičemž výsledkem bude
+sekvence snímků, v&nbsp;nichž budou barvové složky jednotlivých pixelů
+vynásobeny hodnotou přečtenou z&nbsp;masky. V&nbsp;knihovně MoviePy je maska
+představována dvourozměrným polem hodnot ležících v&nbsp;rozsahu 0,0 až 1,0,
+přičemž by toto pole mělo mít stejné rozměry, jaké je rozlišení snímků ve
+vstupním videu. Pokud budou použity pouze hodnoty 0,0 a 1,0, bude se aplikovat
+bitová maska, ale ve skutečnosti je možné použít celý rozsah (reálných) hodnot
+mezi nulou a jedničkou. Taková maska může být na vstupu představována rastrovým
+obrázkem reprezentovaným ve stupních šedi (speciální a nejčastěji používaný
+případ monohromatických obrázků). Následuje příklad masky speciálně vytvořené
+pro naše testovací vstupní video:</p>
+
+<img src="https://i.iinfo.cz/images/381/mask-png-1.png" class="image-336316" alt="&#160;" width="640" height="360" />
+<p><i>Obrázek 1: Maska, která bude použita v&nbsp;dalším demonstračním příkladu.</i></p>
+
+<p>Maska představovaná rastrovým obrázkem se načte příkazem, jehož výsledkem
+bude jednosnímkový video klip:</p>
+
+<pre>
+<i># načtení masky</i>
+mask = ImageClip('mask.png', ismask=True)
+</pre>
+
+<p>Existuje větší množství způsobů aplikace takové masky, ovšem nejčastěji se
+setkáme s&nbsp;využitím třídy nazvané <strong>CompositeVideoClips</strong>,
+která vytvoří nový videoklip na základě <i>pole</i> videoklipů, které jsou
+specifikovány v&nbsp;konstruktoru této třídy. V&nbsp;našem případě se bude
+jednat o jediný videoklip, ovšem s&nbsp;nastavenou maskou, která se při
+kompozici automaticky aplikuje:</p>
+
+<pre>
+<i># aplikace masky</i>
+final = CompositeVideoClip([clip.set_mask(mask)])
+</pre>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_09_masking.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_09_masking.htm</a>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/09_masking.py">Úplný
+zdrojový kód</a> tohoto demonstračního příkladu vypadá následovně:</p>
+
+<pre>
+from moviepy.editor import ImageClip, VideoFileClip, CompositeVideoClip
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># načtení masky</i>
+mask = ImageClip('mask.png', ismask=True)
+&nbsp;
+<i># aplikace masky</i>
+final = CompositeVideoClip([clip.set_mask(mask)])
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+final.write_videofile('09_output_masked.ogv', bitrate='600000')
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: při aplikaci masky se vždy pro jistotu
+přesvědčte, jestli rozměry masky skutečně odpovídají rozměrům zdrojového videa.
+Pokud tomu tak není, může se stát, že výsledné video bude mít nastaveno větší
+rozměry (rozlišení) a bude tedy obsahovat černé okraje.</div></p>
+
+
+
+<p><a name="k12"></a></p>
+<h2 id="k12">12. Jednoduchý filtr pro inverzi všech snímků</h2>
+
+<p>Další filtr je skutečně velmi jednoduchý, protože slouží pro inverzi všech
+snímků načtených ze zdrojového videa (přesněji řečeno pro inverzi všech pixelů
+ve snímcích). I samotná implementace tohoto filtru je pouze dvouřádková:</p>
+
+<pre>
+def <strong>invert_colors</strong>(clip):
+    <i>""" Returns the color-inversed clip.</i>
+&nbsp;
+    <i>The values of all pixels are replaced with (255-v) or (1-v) for masks </i>
+    <i>Black becomes white, green becomes purple, etc.</i>
+    <i>"""</i>
+    maxi = (1.0 if clip.ismask else 255)
+    return clip.fl_image(lambda f : maxi - f)
+</pre>
+
+<p>Následuje příklad, který ukazuje způsob použití tohoto jednoduchého
+filtru:</p>
+
+<pre>
+from moviepy.editor import ImageClip, VideoFileClip, CompositeVideoClip
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># inverzní video</i>
+inversed_clip = clip.fx(invert_colors)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+inversed_clip.write_videofile('10_inverse_video.ogv', bitrate='600000')
+</pre>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_10_inverse_video.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_10_inverse_video.htm</a>
+
+
+
+<p><a name="k13"></a></p>
+<h2 id="k13">13. Rozmazání videa v&nbsp;čase (motion blur)</h2>
+
+<p>Další filtr dostupný v&nbsp;knihovně MoviePy, s&nbsp;nímž se v&nbsp;dnešním
+článku seznámíme, je již implementačně komplikovanější, než filtry popsané
+v&nbsp;předchozích kapitolách. Zatímco se totiž předešlé filtry postupně
+aplikovaly na jednotlivé snímky čtené ze zdrojového videa, je filtr nazvaný
+poněkud nepřesně <strong>supersample</strong> aplikován na několik snímků videa
+v&nbsp;nastaveném rozmezí. Odpovídající pixely všech snímků na vstupu jsou
+zprůměrovány a výsledné dvourozměrné pole průměrných hodnot je následně použito
+pro vytvoření snímku výstupního videa. Průměr se počítá pro jednotlivé barvové
+složky zvlášť. Tomuto filtru se předávají dva parametry:</p>
+
+<table>
+<tr><th>Parametr</th><th>Význam</th></tr>
+<tr><td>d</td><td>určuje časový interval ve vstupním videu [t-d, t+d], ze kterého se budou získávat zdrojové snímky</td></tr>
+<tr><td>nframes</td><td>určuje celkový (či maximální) počet snímků ve zvoleném intervalu, z&nbsp;nichž se bude počítat průměr</td></tr>
+</table>
+
+<p><div class="rs-tip-major">Poznámka: povšimněte si, že tento filtr ve
+skutečnosti nemusí zpracovávat <i>sousední</i> snímky ve vstupním videu. Časový
+interval totiž může být libovolný, například 30 sekund a počet snímků pro
+průměrování naopak malý (řekněme 10). Potom se snímky pro výpočet
+&bdquo;průměrného snímku&ldquo; získají takto: snímek nejbližší času t-30,
+snímek nejbližší času t-30+(60/10) atd.</div></p>
+
+<p>V&nbsp;následujícím demonstračním příkladu je časový interval velmi krátký a
+současně je počet snímků pro zprůměrování nastaven na hodnotu 10. Výsledkem
+bude klasický efekt &bdquo;rozmazání pohybem&ldquo; neboli <i>motion blur</i>
+(ve skutečnosti může nastat situace, kdy se bude průměrovat méně než deset
+snímků &ndash; vše zde záleží na hodnotě FPS vstupního videa).</p>
+
+<pre>
+from moviepy.editor import ImageClip, VideoFileClip, CompositeVideoClip
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># aplikace rozmazání pohybem</i>
+blurred_clip = clip.fx(supersample, 0.25, 10)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+blurred_clip.write_videofile('11_motion_blur.ogv', bitrate='600000')
+</pre>
+
+<p>Výsledné video vytvořené tímto příkladem naleznete na adrese:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_11_motion_blur.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_11_motion_blur.htm</a>
+
+
+
+<p><a name="k14"></a></p>
+<h2 id="k14">14. Rozmazání s&nbsp;využitím vzdálenějších snímků</h2>
+
+<p>Filtr <strong>supersample</strong>, s&nbsp;nímž jsme se ve stručnosti
+seznámili <a href="#k13">v&nbsp;předchozí kapitole</a> je však možné použít i
+zcela opačným způsobem &ndash; nastavením časového intervalu na poměrně vysokou
+hodnotu (zde konkrétně na jednu sekundu) a snížením počtu snímků pro
+průměrování (zde na pouhých pět snímků):</p>
+
+<pre>
+<i># aplikace rozmazáni pohybem</i>
+blurred_clip = clip.fx(supersample, 1, 5)
+</pre>
+
+<p>Výsledek aplikace tohoto filtru bude odlišný, protože se ve videu budou
+prolínat tři &bdquo;reality&ldquo; posunuté od sebe o jednu sekundu (minulost,
+současnost, budoucnost), což je ostatně patrné i po otevření následujícího
+videa:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_12_motion_blur_B.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_12_motion_blur_B.htm</a>
+
+<p><div class="rs-tip-major">Poznámka: časový interval t-1 sekunda, t+1 sekunda
+nebyl zvolen náhodně, protože do určité míry odpovídá odpočítávání na videu
+(není to zcela přesné kvůli zaokrouhlovacím aj. chybám).</div></p> 
+
+<p>Následuje výpis upraveného demonstračního příkladu:</p>
+
+<pre>
+from moviepy.editor import ImageClip, VideoFileClip, CompositeVideoClip
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># aplikace rozmazáni pohybem</i>
+blurred_clip = clip.fx(supersample, 1, 5)
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+blurred_clip.write_videofile('12_motion_blur.ogv', bitrate='600000')
+</pre>
+
+
+
+<p><a name="k15"></a></p>
+<h2 id="k15">15. Jednoduchá kompozice typu &bdquo;obraz v&nbsp;obraze&ldquo;</h2>
+
+<p>Velmi zajímavých efektů lze dosáhnout kompozicí většího množství zdrojových
+videí do jediného videa výstupního. Možností, jak vstupní videa zkombinovat,
+existuje hned několik. V&nbsp;této kapitole si ukážeme kompozici typu
+&bdquo;obraz v&nbsp;obraze&ldquo;, kdy se ve výstupním videu vytvoří matice,
+přičemž se do buněk této matice ukládají vstupní videa:</p>
+
+<pre>
+<i># vytvoření pole 2&times;2 s&nbsp;video klipy</i>
+final_clip = clips_array([[clip1, clip2],
+                          [clip3, clip4]])
+</pre>
+
+<p>Samozřejmě nejsme omezeni pouze maticí 2&times;2 video klipy, ale lze použít
+libovolně velkou matici. Některé buňky mohou být zaplněny statickým obrázkem
+typu <strong>ImageClip</strong> atd. V&nbsp;následujícím příkladu se vytvoří
+matice 2&times;2 video klipy obsahující stejná videa. Povšimněte si, že
+výsledné video má rozlišení snímků 1280&times;720 pixelů, a to z&nbsp;toho
+důvodu, že vstupní videa mají rozlišení 640&times;360 pixelů:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_13_clip_array.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_13_clip_array.htm</a>
+
+<p>Zdrojový kód příkladu, který vytvoří matici 2&times;2 videoklipů, vypadá
+následovně:</p>
+
+<pre>
+from moviepy.editor import ImageClip, VideoFileClip, CompositeVideoClip
+from moviepy.editor import clips_array
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># vytvoření pole 2&times;2 s&nbsp;video klipy</i>
+final_clip = clips_array([[clip, clip],
+                          [clip, clip]])
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+final_clip.write_videofile('13_clip_array.ogv', bitrate='600000')
+</pre>
+
+
+
+<p><a name="k16"></a></p>
+<h2 id="k16">16. Vytvoření jednoduché pipeline s&nbsp;uložením výsledku ve formě matice čtyř videoklipů</h2>
+
+<p>Nyní si ukažme, jakým způsobem lze zkonstruovat různé
+&bdquo;pipeline&ldquo;, které na videa aplikují větší množství filtrů, spojují
+videa dohromady, například s&nbsp;využitím třídy
+<strong>CompositeVideoClip</strong> apod. Vzhledem k&nbsp;tomu, že výsledkem
+aplikace filtru na vstupní video je vždy nové video představované instancí
+potomka třídy <strong>VideoClip</strong>, můžeme na video aplikovat více filtrů
+za sebou:</p>
+
+<pre>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+blurred = clip.fx(supersample, 0.25, 10)
+&nbsp;
+faster = blurred.speedx(1.5)
+&nbsp;
+sub_clip = faster.subclip(5.0, 10.0)
+&nbsp;
+colorized = subclip.fx(colorx, 2.50)
+&nbsp;
+with_margin = colorized.margin(20)
+</pre>
+
+<p>Samozřejmě je možné vše zapsat na jediný řádek:</p>
+
+<pre>
+clip = VideoFileClip('input_video.mp4', audio=False).fx(supersample, 0.25, 10).speedx(1.5).subclip(5.0, 10.0).fx(colorx, 2.50).margin(20)
+</pre>
+
+<p>Větší množství pipeline se sloučí do matice m&times;n videí například
+takto:</p>
+
+<pre>
+<i># vytvoření pole 2&times;2 s&nbsp;video klipy</i>
+final_clip = clips_array([[clip, clip2],
+                          [clip3, clip4]])
+</pre>
+
+<p>Popř.&nbsp;je možné videoklipy spojit za sebe:</p>
+
+<pre>
+clips = [clip1, clip2, clip3, clip4]
+&nbsp;
+concat_clip = concatenate_videoclips(clips, method="compose")
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: každý další filtr přidaný do pipeline
+samozřejmě prodlouží celé zpracování, a to mnohdy dosti výrazným způsobem
+(<i>motion blur</i>).</div></p>
+
+<p>V&nbsp;dalším příkladu vytvoříme následující video ukazující jak původní
+(zdrojový) videoklip, tak i jeho tři modifikace:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_14_clip_array.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_14_clip_array.htm</a>
+
+<p>Opět si ukažme, jak vypadá úplný zdrojový kód tohoto demonstračního
+příkladu:</p>
+
+<pre>
+from moviepy.editor import ImageClip, VideoFileClip, CompositeVideoClip
+from moviepy.editor import clips_array
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False)
+&nbsp;
+<i># načtení masky</i>
+mask = ImageClip('mask.png', ismask=True)
+&nbsp;
+<i># aplikace masky</i>
+clip2 = CompositeVideoClip([clip.set_mask(mask)])
+&nbsp;
+<i># aplikace rozmazání pohybem</i>
+clip3 = clip.fx(supersample, 0.25, 10)
+&nbsp;
+<i># aplikace rozmazání pohybem</i>
+clip4 = clip.fx(supersample, 1, 5)
+&nbsp;
+<i># vytvoření pole 2&times;2 s&nbsp;video klipy</i>
+final_clip = clips_array([[clip, clip2],
+                          [clip3, clip4]])
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+final_clip.write_videofile('14_clip_array.ogv', bitrate='800000')
+</pre>
+
+<p>Filtr je samozřejmě možné aplikovat již na vstupní video, což je ukázáno na
+předposledním příkladu, v&nbsp;němž se okolo jednotlivých částí vytvořil
+desetipixelový okraj:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/videoprocessing_15_clip_with_margin.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_15_clip_with_margin.htm</a>
+
+<p>Zdrojový kód tohoto příkladu vypadá následovně:</p>
+
+<pre>
+from moviepy.editor import ImageClip, VideoFileClip, CompositeVideoClip
+from moviepy.editor import clips_array
+from moviepy.video.fx.all import *
+&nbsp;
+<i># načtení video klipu uloženého v kontejneru MPEG-4</i>
+clip = VideoFileClip('input_video.mp4', audio=False).margin(10)
+&nbsp;
+<i># načtení masky</i>
+mask = ImageClip('mask.png', ismask=True)
+&nbsp;
+<i># aplikace masky</i>
+clip2 = CompositeVideoClip([clip.set_mask(mask)])
+&nbsp;
+<i># aplikace rozmazání pohybem</i>
+clip3 = clip.fx(supersample, 0.25, 10)
+&nbsp;
+<i># aplikace rozmazání pohybem</i>
+clip4 = clip.fx(supersample, 1, 5)
+&nbsp;
+<i># vytvoření pole 2&times;2 s&nbsp;video klipy</i>
+final_clip = clips_array([[clip, clip2],
+                          [clip3, clip4]])
+&nbsp;
+<i># uložení video klipu do jiného souboru ve formátu Ogg/Theora</i>
+final_clip.write_videofile('15_clip_array_with_margin.ogv', bitrate='800000')
+</pre>
+
+
+
+<p><a name="k17"></a></p>
+<h2 id="k17">17. Vytvoření videa z&nbsp;jednotlivých snímků získaných z&nbsp;rastrových obrázků</h2>
+
+<p>V&nbsp;závěrečné části dnešního článku si ukážeme skript sloužící
+k&nbsp;vytvoření videa ze snímků, které jsou načteny z&nbsp;rastrových obrázků
+(zde konkrétně z&nbsp;obrázků uložených ve formátu PNG). Tento příklad bude
+sloužit jako základ pro příklady popsané příště, ve kterých se budeme zabývat
+tvorbou vizualizací, programováním vlastních filtrů a částečně i analýzou
+obrazu.</p>
+
+<p>Ve skriptu se nejdříve získá seznam všech souborů s&nbsp;koncovkou
+&bdquo;.png&ldquo;, tento seznam se setřídí, z&nbsp;každého obrázku se vytvoří
+samostatný (jednosnímkový) videoklip představovaný instancí třídy
+<strong>ImageClip</strong> a na závěr se tyto krátké videoklipy spojí dohromady
+funkcí <strong>concatenate_videoclips</strong>, která akceptuje seznam
+videoklipů a nepovinně taktéž určení, jakým způsobem se tyto videoklipy mají
+spojit. V&nbsp;případě potřeby je samozřejmě možné do celého zpracování přidat
+nějaký filtr, například pro prolínání obrázků apod.:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+import os
+import glob
+from moviepy.editor import ImageClip, concatenate_videoclips
+&nbsp;
+fps = 10
+frame_duration = 2
+&nbsp;
+<i># ziskani serazeneho seznamu souboru *.png</i>
+base_dir = os.path.realpath(".")
+file_list = glob.glob('*.png')
+file_list_sorted = sorted(file_list)
+&nbsp;
+<i># vytvoreni sady objektu typu ImageClip</i>
+clips = [ImageClip(filename).set_duration(frame_duration)
+         for filename in file_list_sorted]
+&nbsp;
+<i># kompozice vsech kratkych video klipu</i>
+concat_clip = concatenate_videoclips(clips, method="compose")
+&nbsp;
+<i># ulozeni vysledneho video klipu do souboru ve formatu Ogg/Theora</i>
+concat_clip.write_videofile("test.ogv", fps=fps)
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: tento skript je omezen celkovým počtem
+souborů, které může uživatel současně otevřít (typicky 1024). Pokud se vám
+zobrazí chybové hlášení &bdquo;too many files open&ldquo;, bude zapotřebí
+zvětšit limit příkazem <strong>ulimit -n</strong> (s&nbsp;příslušnými
+právy).</div></p>
+
+
+
+<p><a name="k18"></a></p>
+<h2 id="k18">18. Repositáře s&nbsp;demonstračními příklady a vygenerovanými videi</h2>
+
+<p>Zdrojové kódy všech dnes popsaných demonstračních příkladů určených pro
+Python 3 byly uloženy do Git repositáře dostupného na adrese <a
+href="https://github.com/tisnik/moviepy-examples">https://github.com/tisnik/moviepy-examples</a>
+(stále na GitHubu :-). V&nbsp;případě, že nebudete chtít klonovat celý
+repositář (ten je ovšem stále velmi malý, stále doslova několik kilobajtů),
+můžete namísto toho použít odkazy na jednotlivé příklady, které naleznete
+v&nbsp;následující tabulce:</p>
+
+<table>
+<tr><th> #</th><th>Demonstrační příklad</th><th>Popis</th><th>Cesta</th></tr>
+<tr><td> 1</td><td>01_convert_mp4_to_ogv.py</td><td>konverze mezi MPEG-4 a Ogg/Theora</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/01_convert_mp4_to_ogv.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/01_convert_mp4_to_ogv.py</a></td></tr>
+<tr><td> 2</td><td>02_convert_change_bitrate.py</td><td>konverze se změnou bitové rychlosti</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/02_convert_change_bitrate.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/02_convert_change_bitrate.py</a></td></tr>
+<tr><td> 3</td><td>03_convert_speedup.py</td><td>změna rychlosti přehrávání videa</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/03_convert_speedup.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/03_convert_speedup.py</a></td></tr>
+<tr><td> 4</td><td>04_use_subclip.py</td><td>klasický střih videa</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/04_use_subclip.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/04_use_subclip.py</a></td></tr>
+<tr><td> 5</td><td>05_resize_to_larger.py</td><td>změna velikosti snímků (zde jejich zvětšení)</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/05_resize_to_larger.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/05_resize_to_larger.py</a></td></tr>
+<tr><td> 6</td><td>06_resize_to_smaller.py</td><td>změna velikosti snímků (zde jejich zmenšení)</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/06_resize_to_smaller.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/06_resize_to_smaller.py</a></td></tr>
+<tr><td> 7</td><td>07_colorize.py</td><td>pokus o jednoduchou &bdquo;kolorizaci&ldquo; videa</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/07_colorize.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/07_colorize.py</a></td></tr>
+<tr><td> 8</td><td>08_margin.py</td><td>přidání okraje do videa</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/08_margin.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/08_margin.py</a></td></tr>
+<tr><td> 9</td><td>09_masking.py</td><td>základní použití masky</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/09_masking.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/09_masking.py</a></td></tr>
+<tr><td>10</td><td>10_inverse_video.py</td><td>inverze/negace všech snímků</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/10_inverse_video.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/10_inverse_video.py</a></td></tr>
+<tr><td>11</td><td>11_motion_blur.py</td><td>rozmazání pohybem</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/11_motion_blur.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/11_motion_blur.py</a></td></tr>
+<tr><td>12</td><td>12_motion_blur_B.py</td><td>rozmazání pohybem</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/12_motion_blur_B.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/12_motion_blur_B.py</a></td></tr>
+<tr><td>13</td><td>13_clip_array.py</td><td>matice 2&times;2 videa</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/13_clip_array.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/13_clip_array.py</a></td></tr>
+<tr><td>14</td><td>14_clip_array_various_clips.py</td><td>úprava předchozího příkladu</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/14_clip_array_various_clips.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/14_clip_array_various_clips.py</a></td></tr>
+<tr><td>15</td><td>15_clip_array_various_clips_with_margin.py</td><td>další možnosti pipeline</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/video_processing/15_clip_array_various_clips_with_margin.py">https://github.com/tisnik/moviepy-examples/blob/master/video_processing/15_clip_array_various_clips_with_margin.py</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>16</td><td>01_maps</td><td>tvorba videa z&nbsp;jednotlivých snímků</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/visualization/01_maps.py">https://github.com/tisnik/moviepy-examples/blob/master/visualization/01_maps.py</a></td></tr>
+</table>
+
+<p>Druhý repositář obsahuje všechna videa uložená do formátu Ogg/Vorbis, která
+byla vygenerována demonstračními příklady. Odkazy na jednotlivá videa jsou
+uvedeny v&nbsp;následující tabulce:</p>
+
+<table>
+<tr><th>#</th><th>Video k&nbsp;příkladu</th><th>Cesta</th></tr>
+<tr><td> 1</td><td>01_convert_mp4_to_ogv.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_01_convert_mp4_to_ogv.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_01_convert_mp4_to_ogv.htm</a></td></tr>
+<tr><td> 2</td><td>02_convert_change_bitrate.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_02_convert_change_bitrate.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_02_convert_change_bitrate.htm</a></td></tr>
+<tr><td> 3</td><td>03_convert_speedup.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_03_convert_speedup.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_03_convert_speedup.htm</a></td></tr>
+<tr><td> 4</td><td>04_use_subclip.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_04_use_subclip.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_04_use_subclip.htm</a></td></tr>
+<tr><td> 5</td><td>05_resize_to_larger.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_05_resize_to_larger.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_05_resize_to_larger.htm</a></td></tr>
+<tr><td> 6</td><td>06_resize_to_smaller.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_06_resize_to_smaller.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_06_resize_to_smaller.htm</a></td></tr>
+<tr><td> 7</td><td>07_colorize.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_07_colorize.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_07_colorize.htm</a></td></tr>
+<tr><td> 8</td><td>08_margin.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_08_margin.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_08_margin.htm</a></td></tr>
+<tr><td> 9</td><td>09_masking.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_09_masking.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_09_masking.htm</a></td></tr>
+<tr><td>10</td><td>10_inverse_video.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_10_inverse_video.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_10_inverse_video.htm</a></td></tr>
+<tr><td>11</td><td>11_motion_blur.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_11_motion_blur.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_11_motion_blur.htm</a></td></tr>
+<tr><td>12</td><td>12_motion_blur_B.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_12_motion_blur_B.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_12_motion_blur_B.htm</a></td></tr>
+<tr><td>13</td><td>13_clip_array.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_13_clip_array.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_13_clip_array.htm</a></td></tr>
+<tr><td>14</td><td>14_clip_array_various_clips.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_14_clip_array.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_14_clip_array.htm</a></td></tr>
+<tr><td>15</td><td>15_clip_array_various_clips_with_margin.py</td><td><a href="https://tisnik.github.io/moviepy-videos/videoprocessing_15_clip_with_margin.htm">https://tisnik.github.io/moviepy-videos/videoprocessing_15_clip_with_margin.htm</a></td></tr>
+</table>
+
+
+
+<p><a name="k19"></a></p>
+<h2 id="k19">19. Odkazy na Internetu</h2>
+
+<ol>
+
+<li>MoviePy 0.2.3.3 na PyPi<br />
+<a href="https://pypi.org/project/moviepy/">https://pypi.org/project/moviepy/</a>
+</li>
+
+<li>MoviePy na GitHubu<br />
+<a href="https://github.com/Zulko/moviepy">https://github.com/Zulko/moviepy</a>
+</li>
+
+<li>MoviePy - dokumentace<br />
+<a href="http://zulko.github.io/moviepy/">http://zulko.github.io/moviepy/</a>
+</li>
+
+<li>MoviePy - galerie<br />
+<a href="http://zulko.github.io/moviepy/gallery.html">http://zulko.github.io/moviepy/gallery.html</a>
+</li>
+
+<li>Data Animations With Python and MoviePy<br />
+<a href="https://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/">https://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/</a>
+</li>
+
+<li>Porovnání formátů Ogg Theora a H.264<br />
+<a href="https://www.root.cz/zpravicky/porovnani-formatu-ogg-theora-a-h-264/">https://www.root.cz/zpravicky/porovnani-formatu-ogg-theora-a-h-264/</a>
+</li>
+
+<li>Případ GIF<br />
+<a href="https://www.root.cz/clanky/pripad-gif/">https://www.root.cz/clanky/pripad-gif/</a>
+</li>
+
+<li>Pravda a mýty o GIFu<br />
+<a href="https://www.root.cz/clanky/pravda-a-myty-o-gifu/">https://www.root.cz/clanky/pravda-a-myty-o-gifu/</a>
+</li>
+
+<li>Anatomie grafického formátu GIF<br />
+<a href="https://www.root.cz/clanky/anatomie-grafickeho-formatu-gif/">https://www.root.cz/clanky/anatomie-grafickeho-formatu-gif/</a>
+</li>
+
+<li>GIF: animace a konkurence<br />
+<a href="https://www.root.cz/clanky/gif-animace-a-konkurence/">https://www.root.cz/clanky/gif-animace-a-konkurence/</a>
+</li>
+
+<li>Two python modules : MoviePy and images2gif – part 001<br />
+<a href="http://free-tutorials.org/two-python-modules-moviepy-and-images2gif-part-001/">http://free-tutorials.org/two-python-modules-moviepy-and-images2gif-part-001/</a>
+</li>
+
+<li>images2gif<br />
+<a href="https://pypi.org/project/images2gif/">https://pypi.org/project/images2gif/</a>
+</li>
+
+<li>Making GIFs from video files with Python<br />
+<a href="https://www.devbattles.com/en/sand/post-345-Making+GIFs+From+Video+Files+With+Python">https://www.devbattles.com/en/sand/post-345-Making+GIFs+From+Video+Files+With+Python</a>
+</li>
+
+<li>GIF89a specification<br />
+<a href="https://www.w3.org/Graphics/GIF/spec-gif89a.txt">https://www.w3.org/Graphics/GIF/spec-gif89a.txt</a>
+</li>
+
+<li>MPEG-4 Part 14<br />
+<a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">https://en.wikipedia.org/wiki/MPEG-4_Part_14</a>
+</li>
+
+<li>Theora video compression<br />
+<a href="https://www.theora.org/">https://www.theora.org/</a>
+</li>
+
+<li>Theora<br />
+<a href="https://en.wikipedia.org/wiki/Theora">https://en.wikipedia.org/wiki/Theora</a>
+</li>
+
+<li>NumPy<br />
+<a href="http://www.numpy.org/">http://www.numpy.org/</a>
+</li>
+
+<li>numpy 1.14.2 (on PyPi)<br />
+<a href="https://pypi.org/project/numpy/">https://pypi.org/project/numpy/</a>
+</li>
+
+<li>Integrovaná vývojová prostředí ve Fedoře: praktické použití IPython Notebooku a knihovny Numpy<br />
+<a href="https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy/">https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy/</a>
+</li>
+
+<li>Integrovaná vývojová prostředí ve Fedoře: praktické použití IPython Notebooku a knihovny Numpy (2.část)<br />
+<a href="https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy-2-cast/">https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy-2-cast/</a>
+</li>
+
+<li>Non-linear editing system<br />
+<a href="https://en.wikipedia.org/wiki/Non-linear_editing_system">https://en.wikipedia.org/wiki/Non-linear_editing_system</a>
+</li>
+
+<li>Popis barvových map modulu matplotlib.cm<br />
+<a href="https://gist.github.com/endolith/2719900#id7">https://gist.github.com/endolith/2719900#id7</a>
+</li>
+
+<li>Ukázky (palety) barvových map modulu matplotlib.cm<br />
+<a href="http://matplotlib.org/examples/color/colormaps_reference.html">http://matplotlib.org/examples/color/colormaps_reference.html</a>
+</li>
+
+<li>Customising contour plots in matplotlib<br />
+<a href="https://philbull.wordpress.com/2012/12/27/customising-contour-plots-in-matplotlib/">https://philbull.wordpress.com/2012/12/27/customising-contour-plots-in-matplotlib/</a>
+</li>
+
+<li>NumPy Home Page<br />
+<a href="http://www.numpy.org/">http://www.numpy.org/</a>
+</li>
+
+<li>NumPy v1.10 Manual<br />
+<a href="http://docs.scipy.org/doc/numpy/index.html">http://docs.scipy.org/doc/numpy/index.html</a>
+</li>
+
+<li>NumPy (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/NumPy">https://en.wikipedia.org/wiki/NumPy</a>
+</li>
+
+<li>Monitoring sucha<br />
+<a href="http://portal.chmi.cz/aktualni-situace/sucho">http://portal.chmi.cz/aktualni-situace/sucho</a>
+</li>
+
+</ol>
+
+
+
+<p></p><p></p>
+<p><small>Autor: <a href="http://www.fit.vutbr.cz/~tisnovpa">Pavel Tišnovský</a> &nbsp; 2018</small></p>
+</body>
+</html>
+
