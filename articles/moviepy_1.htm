@@ -1,0 +1,1701 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Programová tvorba a nelineární editace videa s využitím knihovny MoviePy</title>
+<meta name="Author" content="Pavel Tisnovsky" />
+<meta name="Generator" content="vim" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<style type="text/css">
+         body {color:#000000; background:#ffffff;}
+         h1  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#c00000; text-align:center; padding-left:1em}
+         h2  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#0000c0; padding-left:1em; text-align:left}
+         h3  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#c0c0c0; padding-left:1em; text-align:left}
+         h4  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#e0e0e0; padding-left:1em; text-align:left}
+         a   {font-family: arial, helvetica, sans-serif;}
+         li  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ol  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ul  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         p   {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify;}
+         pre {background:#e0e0e0}
+</style>
+</head>
+
+<body>
+
+<h1>Programová tvorba a nelineární editace videa s využitím knihovny MoviePy</h1>
+
+<h3>Pavel Tišnovský</h3>
+
+<p></p>
+
+<h1>Úvodník</h1>
+
+<p>V dnešním článku si popíšeme základní možnosti nabízené knihovnou MoviePy, která umožňuje programovou tvorbu videa popř. i animovaných GIFů. Kromě toho lze tuto knihovnu použít i pro nelineární editaci videa: aplikaci efektů, práci s titulky atd.</p>
+
+
+
+<h2>Obsah</h2>
+
+<p><a href="#k01">1. Programová tvorba a nelineární editace videa s&nbsp;využitím knihovny MoviePy</a></p>
+<p><a href="#k02">2. Instalace knihovny MoviePy</a></p>
+<p><a href="#k03">3. Doinstalování dalších knihoven z&nbsp;interaktivní smyčky Pythonu</a></p>
+<p><a href="#k04">4. První příklad &ndash; vytvoření videa obsahujícího sérii tmavých snímků</a></p>
+<p><a href="#k05">5. Vytvoření animovaného GIFu se stejným obsahem</a></p>
+<p><a href="#k06">6. Editace videa na úrovni jednotlivých snímků a pixelů</a></p>
+<p><a href="#k07">7. Konstruktory datové struktury <strong>ndarray</strong></a></p>
+<p><a href="#k08">8. Přístup k&nbsp;prvkům polí, využití takzvaných řezů polí</a></p>
+<p><a href="#k09">9. Základní operace s&nbsp;datovou strukturou <strong>ndarray</strong></a></p>
+<p><a href="#k10">10. Druhý příklad &ndash; pohybující se úsečka v&nbsp;desetisekundovém videu</a></p>
+<p><a href="#k11">11. Výsledky druhého příkladu</a></p>
+<p><a href="#k12">12. Třetí příklad &ndash; vykreslení všech 16 milionů barev v&nbsp;desetisekundovém videu</a></p>
+<p><a href="#k13">13. Výsledky třetího příkladu</a></p>
+<p><a href="#k14">14. Parametry předávané videokodeku</a></p>
+<p><a href="#k15">15. Čtvrtý příklad &ndash; animace &bdquo;průletu&ldquo; Mandelbrotovou množinou</a></p>
+<p><a href="#k16">16. Přepočet parametrů obrázku v&nbsp;průběhu animace a výpočet snímku Mandelbrotovy množiny</a></p>
+<p><a href="#k17">17. Pomocný modul s&nbsp;barvovou paletou</a></p>
+<p><a href="#k18">18. Výsledek vytvořený čtvrtým příkladem</a></p>
+<p><a href="#k19">19. Repositář s&nbsp;demonstračními příklady</a></p>
+<p><a href="#k20">20. Odkazy na Internetu</a></p>
+
+
+
+<p><a name="k01"></a></p>
+<h2 id="k01">1. Programová tvorba a nelineární editace videa s&nbsp;využitím knihovny MoviePy</h2>
+
+<p>V&nbsp;některých případech se dostaneme do situace, kdy je nutné například
+při prezentaci projektu či při vizualizaci dat vytvořit soubory s&nbsp;videem,
+a to programově. Například se může jednat o animovaný průběh nějaké
+vícerozměrné veličiny, výstup ze simulace apod. Dnes již existuje poměrně velké
+množství nástrojů, které lze pro tuto činnost použít; ovšem vývojáři
+používající programovací jazyk Python pravděpodobně v&nbsp;prvé řadě použijí
+knihovnu nazvanou jednoduše a přímočaře <i>MoviePy</i>. Dnes si ukážeme jen
+základní možnosti této knihovny, ovšem příště se budeme zabývat i
+pokročilejšími tématy, například propojením <i>MovipePy</i> s&nbsp;knihovnou
+<i>Matplotlib</i>, tvorbou video efektů atd.</p>
+
+
+
+<p><a name="k02"></a></p>
+<h2 id="k02">2. Instalace knihovny MoviePy</h2>
+
+<p>Knihovnu <i>MoviePy</i> si nejdříve nainstalujeme, a to klasicky
+s&nbsp;využitím nástroje <strong>pip3</strong> (nebo <strong>pip</strong>),
+protože tato knihovna je <a href="https://pypi.org/project/moviepy/">samozřejmě
+registrována</a> i na <a href="https://pypi.python.org/pypi">PyPI (Python
+Package Index)</a>. Pro jednoduchost provedeme instalaci jen pro právě
+aktivního uživatele:</p>
+
+<pre>
+$ <strong>pip3 install --user moviepy</strong>
+</pre>
+
+<p>Samotná instalace může být provedena za relativně krátkou dobu (samozřejmě
+v&nbsp;závislosti na rychlosti připojení k&nbsp;Internetu):</p>
+
+<pre>
+Collecting moviepy
+  Downloading https://files.pythonhosted.org/packages/ee/88/1b57f7318b3079b41a5b4299ae99caedcd00b5f9897dd765c2e553b694c3/moviepy-0.2.3.3.tar.gz (397kB)
+    100% |████████████████████████████████| 399kB 1.2MB/s 
+Requirement already satisfied: decorator&lt;5.0,&gt;=4.0.2 in /usr/lib/python3.6/site-packages (from moviepy)
+Collecting imageio&lt;3.0,&gt;=2.1.2 (from moviepy)
+  Downloading https://files.pythonhosted.org/packages/a7/1d/33c8686072148b3b0fcc12a2e0857dd8316b8ae20a0fa66c8d6a6d01c05c/imageio-2.3.0-py2.py3-none-any.whl (3.3MB)
+    100% |████████████████████████████████| 3.3MB 455kB/s 
+Collecting tqdm&lt;5.0,&gt;=4.11.2 (from moviepy)
+  Downloading https://files.pythonhosted.org/packages/78/bc/de067ab2d700b91717dc5459d86a1877e2df31abfb90ab01a5a5a5ce30b4/tqdm-4.23.0-py2.py3-none-any.whl (42kB)
+    100% |████████████████████████████████| 51kB 9.9MB/s 
+Collecting numpy (from moviepy)
+  Downloading https://files.pythonhosted.org/packages/6e/dc/92c0f670e7b986829fc92c4c0208edb9d72908149da38ecda50d816ea057/numpy-1.14.2-cp36-cp36m-manylinux1_x86_64.whl (12.2MB)
+    100% |████████████████████████████████| 12.2MB 137kB/s 
+Requirement already satisfied: pillow in /usr/lib64/python3.6/site-packages (from imageio&lt;3.0,&gt;=2.1.2-&gt;moviepy)
+Requirement already satisfied: olefile in /usr/lib/python3.6/site-packages (from pillow-&gt;imageio&lt;3.0,&gt;=2.1.2-&gt;moviepy)
+Installing collected packages: numpy, imageio, tqdm, moviepy
+  Running setup.py install for moviepy ... done
+Successfully installed imageio-2.3.0 moviepy-0.2.3.3 numpy-1.14.2 tqdm-4.23.0
+You are using pip version 9.0.1, however version 10.0.1 is available.
+You should consider upgrading via the 'pip install --upgrade pip' command.
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: takto krátká bude instalace pouze
+v&nbsp;tom případě, kdy již máte ve svém systému nainstalovanou knihovnu
+<i>Numpy</i>. Ta je automaticky nainstalována například společně
+s&nbsp;Matplotlib a dalšími užitečnými nástroji. Pokud ovšem <i>Numpy</i> ještě
+ve svém systému nemáte, bude průběh instalace poněkud delší a také
+komplikovanější, protože <i>Numpy</i> obsahuje i nativní části, které je
+zapotřebí přeložit (pokud se ovšem <i>Numpy</i> neinstaluje přes standardního
+správce balíčků typu apt či dnf, příslušný balíček se většinou jmenuje
+<strong>python-numpy</strong> nebo <strong>python3-numpy</strong>).</div></p>
+
+
+
+<p><a name="k03"></a></p>
+<h2 id="k03">3. Doinstalování dalších knihoven z&nbsp;interaktivní smyčky Pythonu</h2>
+
+<p>Ve druhém kroku provedeme doinstalování dalších požadovaných knihoven.
+Použijeme přitom samotný interpret Pythonu, tj.&nbsp;interaktivní smyčku REPL.
+Nejdříve interpret spustíme:</p>
+
+<pre>
+$ <strong>python3</strong>
+Python 3.6.3 (default, Oct  9 2017, 12:11:29) 
+[GCC 7.2.1 20170915 (Red Hat 7.2.1-2)] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+</pre>
+
+<p>Následně spustíme jediný příkaz, který zajistí import třídy
+<strong>VideoClip</strong>:</p>
+
+<pre>
+&gt;&gt;&gt; from moviepy.editor import VideoClip
+</pre>
+
+<p>Pokud v&nbsp;této chvíli nejsou některé potřebné moduly a kodeky
+nainstalovány, spustí se automatická (lokální) instalace, která může vypadat
+takto:</p>
+
+<pre>
+Imageio: 'ffmpeg-linux64-v3.3.1' was not found on your computer; downloading it now.
+Try 1. Download from https://github.com/imageio/imageio-binaries/raw/master/ffmpeg/ffmpeg-linux64-v3.3.1 (43.8 MB)
+Downloading: 45929032/45929032 bytes (100.0%)
+  Done
+File saved as /home/tester/.imageio/ffmpeg/ffmpeg-linux64-v3.3.1.
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: pokud se po spuštění příkazu
+<strong>import</strong> zdánlivě neprovede žádná operace, znamená to, že
+všechny knihovny jsou již úspěšně doinstalovány a další demonstrační příklady
+by měly být funkční.</div></p>
+
+
+
+<p><a name="k04"></a></p>
+<h2 id="k04">4. První příklad &ndash; vytvoření videa obsahujícího sérii tmavých snímků</h2>
+
+<p>Tvorba videa sice vyžaduje alespoň základní znalost datové struktury
+<strong>ndarray</strong> nabízené knihovnou <i>Numpy</i>, ovšem již nyní si
+můžeme ukázat strukturu jednoduchého skriptu, kterým se nový soubor
+s&nbsp;videem vytvoří. Nejdříve si ukažme, jak vypadá celý zdrojový kód;
+v&nbsp;dalším textu si podrobněji popíšeme význam jednotlivých řádků:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from moviepy.editor import VideoClip
+import numpy
+&nbsp;
+WIDTH = 320
+HEIGHT = 240
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    print("time: {t}".format(t=t))
+    <i># vyplneni trojrozmerneho pole nulami</i>
+    frame = numpy.zeros((HEIGHT, WIDTH, 3))
+    return frame
+&nbsp;
+&nbsp;
+<i># vytvoreni video klipu</i>
+animation = VideoClip(make_frame, duration=10)
+&nbsp;
+<i># export videa do formatu MPEG-4</i>
+animation.write_videofile("dark_scene.mp4", fps=24)
+&nbsp;
+<i># export videa do formatu Ogg Video File</i>
+animation.write_videofile("dark_scene.ogv", fps=24)
+</pre>
+
+<p>Na začátku skriptu pouze provedeme import třídy <strong>VideoClip</strong>
+nabízené knihovnou <i>MoviePy</i> a taktéž import základních funkcí nabízených
+knihovnou <i>Numpy</i>:</p>
+
+<pre>
+from moviepy.editor import VideoClip
+import numpy
+</pre>
+
+<p>Další dva řádky obsahují deklaraci konstant s&nbsp;rozlišením výsledného
+videa:</p>
+
+<pre>
+WIDTH = 320
+HEIGHT = 240
+</pre>
+
+<p>Následuje velmi důležitá část skriptu. Jedná se o <a
+href="https://en.wikipedia.org/wiki/Callback_%28computer_programming%29">callback
+funkci</a> volanou při vytváření jednotlivých video snímků (<i>frame</i>).
+Funkci je předán čas snímku a výsledkem by měla být datová struktura typu
+<i>ndarray</i>; konkrétně trojrozměrné pole o rozměrech
+<i>výška&times;šířka&times;3</i>, kde <i>výška</i> a <i>šířka</i> odpovídá
+rozlišení jednotlivých snímků a poslední dimenze je rovna třem z&nbsp;toho
+důvodu, že každý pixel je reprezentován trojicí barvových složek Red, Green,
+Blue. Náš první video klip bude sestávat pouze ze sady tmavých snímků, takže
+potřebné pole reprezentující snímek vytvoříme konstruktorem
+<strong>numpy.zeros</strong>, kterému předáme n-tici s&nbsp;tvarem pole (pozor
+&ndash; jde o n-tici, takže závorky jsou zdvojeny):</p>
+
+<pre>
+def <strong>make_frame</strong>(t):
+    print("time: {t}".format(t=t))
+    <i># vyplneni trojrozmerneho pole nulami</i>
+    frame = numpy.zeros((HEIGHT, WIDTH, 3))
+    return frame
+</pre>
+
+<p>Dále vytvoříme objekt představující budoucí video klip. Konstruktoru předáme
+jak referenci na callback funkci, tak i délku klipu uvedenou
+v&nbsp;sekundách:</p>
+
+<pre>
+<i># vytvoreni video klipu</i>
+animation = VideoClip(make_frame, duration=10)
+</pre>
+
+<p>Další dva řádky spustí generování videa s&nbsp;jeho postupným ukládáním na
+disk s&nbsp;využitím zvoleného kodeku. Typicky se dnes používá formát
+(kontejner) MPEG-4 s&nbsp;H.264 popř.&nbsp;kontejner Ogg s&nbsp;kodekem Theora.
+Můžeme si samozřejmě vyzkoušet obě možnosti. Povšimněte si, že se předává i
+požadovaný počet snímků za sekundu, který společně s&nbsp;výše specifikovanou
+délkou videa v&nbsp;sekundách určuje <i>přibližný</i> celkový počet snímků
+(přibližný proto, že <i>fps</i> nemusí být všemi kodeky dodrženo zcela přesně a
+taktéž kodeky vyžadují určité řazení mezisnímků):</p>
+
+<pre>
+<i># export videa do formatu MPEG-4</i>
+animation.write_videofile("dark_scene.mp4", fps=24)
+&nbsp;
+<i># export videa do formatu Ogg Video File</i>
+animation.write_videofile("dark_scene.ogv", fps=24)
+</pre>
+
+<p>Co se vlastně stane při zavolání metody
+<strong>write_videofile</strong>?</p>
+
+<ol>
+
+<li>Postupně je volána callback funkce <strong>make_frame</strong>
+s&nbsp;předáním časového razítka</li>
+
+<li>Struktura <strong>ndarray</strong> vrácená touto funkcí je transformována a
+předána do video kodeku</li>
+
+<li>Ten postupně vytváří výsledné video &ndash; v&nbsp;paměti si přitom drží
+jen několik posledních snímků (kvůli predikci pohybu atd., to nás však
+v&nbsp;tuto chvíli nemusí trápit)</li>
+
+</ol>
+
+<p>Výsledná videa jsou dosti nudná, nicméně by měla jít přehrát:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video1.htm">https://tisnik.github.io/moviepy-videos/video1.htm</a>
+
+<p><div class="rs-tip-major">Poznámka: všechna videa je nutné zobrazit
+z&nbsp;jiné stránky, protože Rootovský redakční systém nepodporuje tag
+&lt;video&gt;.</div></p>
+
+
+
+<p><a name="k05"></a></p>
+<h2 id="k05">5. Vytvoření animovaného GIFu se stejným obsahem</h2>
+
+<p>Ve skutečnosti knihovna <i>MoviePy</i> dokáže vytvořit animaci i
+v&nbsp;dalších formátech, nejenom s&nbsp;využitím video kodeků. Jednou
+z&nbsp;možností je série statických snímků a taktéž &ndash; což je asi
+praktičtější &ndash; vytvoření animovaného GIFu. Pro některé účely se může
+jednat o ideální výstupní formát, ovšem musíme znát i některá jeho omezení.</p>
+
+<img src="https://i.iinfo.cz/images/410/moviepy-1-1.gif" class="image-327123" alt="&#160;" width="88" height="31" />
+<p><i>Obrázek 1: GIF s&nbsp;deseti rámci zobrazovanými jako animace (kromě toho
+je v&nbsp;souboru přítomen i rozšiřující textový blok s&nbsp;poznámkou a
+programu, který GIF vytvořil; všimněte si potenciálně citlivých
+informací).</i></p>
+
+<p>Ke stále trvající popularitě grafického formátu GIF nepochybně patří i jeho
+schopnost zaznamenat jednoduché animace. Pokud se podíváme do specifikace GIFu
+89a, zjistíme, že se do rozšiřujícího grafického řídicího bloku (<i>GCE &ndash;
+Graphic Control Extension</i>) mohou zapsat i informace o délce prodlevy před
+zobrazením dalšího rámce. Tato délka je zadávána v&nbsp;setinách sekundy, a
+vzhledem k&nbsp;tomu, že je údaj zapsaný ve dvou bytech, je minimální prodleva
+rovna 1/100&nbsp;s a maximální prodleva 655,36&nbsp;s, což je zhruba 11
+minut.</p>
+
+<p>Ovšem samotná prodleva mezi zobrazením jednotlivých rámců postačuje pouze
+pro tvorbu animace, která proběhne jednou a poté se již neopakuje &ndash; ve
+specifikacích se nic o smyčce v&nbsp;animaci nemluví. Zde však přichází na řadu
+další užitečná vlastnost GIFů, která spočívá v&nbsp;možnosti zápisu přidaných
+informací od &bdquo;třetích stran&ldquo;. Prohlížeče buď těmto přidaným
+informacím rozumí (a zpracují je), nebo je ignorují.</p>
+
+<p>To je ve formátu GIF zajištěno tím způsobem, že každá přidaná informace
+obsahuje hlavičku s&nbsp;její identifikací a délkou. V&nbsp;případě animací se
+jedná o rozšíření zavedené firmou Netscape pro její (kdysi) slavný webový
+prohlížeč Netscape Navigator. V&nbsp;tomto rozšíření je vlastně pouze
+specifikováno, kolikrát se má animace opakovat a popř.&nbsp;zda se má opakovat
+neustále (v&nbsp;prohlížečích bylo většinou možné animaci GIFů zastavit
+klávesou <strong>Esc</strong>).</p>
+
+<p>Pokud budete chtít vytvořit nikoli video klip, ale animaci uloženou do
+formátu GIF, změní se kód skriptu následovně:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from moviepy.editor import VideoClip
+import numpy
+&nbsp;
+WIDTH = 320
+HEIGHT = 240
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    print("time: {t}".format(t=t))
+    <i># vyplneni trojrozmerneho pole nulami</i>
+    frame = numpy.zeros((HEIGHT, WIDTH, 3))
+    return frame
+&nbsp;
+&nbsp;
+<i># vytvoreni video klipu</i>
+animation = VideoClip(make_frame, duration=10)
+&nbsp;
+<i># export videa do formatu GIF</i>
+animation.write_gif("dark_scene.gif", fps=24)
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: povšimněte si, že se nezměnilo pouze
+jméno výstupního souboru (resp.&nbsp;jeho koncovka), ale i jméno metody &ndash;
+<strong>write_gif</strong> namísto <strong>write_videofile</strong>.</div></p>
+
+
+
+<p><a name="k06"></a></p>
+<h2 id="k06">6. Editace videa na úrovni jednotlivých snímků a pixelů</h2>
+
+<p>V&nbsp;prvním příkladu jsme každý snímek vytvořili s&nbsp;využitím
+konstruktoru <strong>numpy.zeros</strong>. Jaký objekt se však tímto
+konstruktorem vytvořil? Jedná se o trojrozměrné pole typu
+<strong>ndarray</strong>, které tvoří základní datovou strukturu známé knihovny
+<i>Numpy</i>. Tato datová struktura je v&nbsp;mnoha ohledech dosti zajímavá,
+takže se s&nbsp;ní seznámíme podrobněji. Je to nutné, protože právě manipulace
+s&nbsp;trojrozměrnými poli nám umožňuje editaci videa na té nejnižší rozumné
+úrovni abstrakce &ndash; jednotlivých pixelech reprezentovaných trojicemi
+hodnot R, G a B.</p>
+
+<p><div class="rs-tip-major">Poznámka: následující text a současně i text
+v&nbsp;kapitolách <a href="#k07">7</a>, <a href="#k08">8</a> a <a
+href="#k09">9</a> ve stručnosti shrnuje základní operace s&nbsp;datovou
+strukturou <strong>ndarray</strong>. Dnes nám budou postačovat jen tři operace
+&ndash; vytvoření trojrozměrného pole s&nbsp;nulovými prvky, zápis nové hodnoty
+do vybraného prvku pole a použití řezu polem. Další operace oceníme až ve
+druhém pokračování článku (takže v&nbsp;případě netrpělivosti klidně přeskočte
+<a href="#k10">až na desátou kapitolu</a>).</div></p>
+
+<p>Funkce a objekty nabízené knihovnou <i>Numpy</i> se sice volají přímo
+z&nbsp;Pythonu, ve skutečnosti se však interní datové struktury dosti
+podstatným způsobem odlišují od datových struktur využívaných samotným
+Pythonem. V&nbsp;knihovně <i>Numpy</i> tvoří základ datová struktura nazvaná
+<strong>ndarray</strong>, která reprezentuje pole o prakticky libovolném počtu
+dimenzí (ostatně &bdquo;nd&ldquo; ve jménu &bdquo;ndarray&ldquo; značí
+N-dimensional). Tato pole se liší od běžných seznamů či n-tic v&nbsp;Pythonu,
+protože <strong>ndarray</strong> jsou homogenní datovou strukturou: všechny
+prvky totiž mají shodný typ a navíc všechny prvky leží za sebou, zatímco
+seznamy v&nbsp;Pythonu jsou měnitelné (prvky lze přidávat a odebírat) a obecně
+nehomogenní (každý prvek může mít odlišný datový typ). Za tuto velkou
+flexibilitu se samozřejmě platí, a to jak většími nároky na operační paměť
+(reference na objekty), tak i pomalejším zpracováním.</p>
+
+<p>Při vytváření polí typu <strong>ndarray</strong>, ať již se jedná o vektory,
+matice či o pole s&nbsp;větším množstvím dimenzí, lze specifikovat datový typ
+všech prvků a dokonce i uspořádání prvků v&nbsp;paměti (buď podle zvyklostí
+jazyka Fortran nebo jazyka C). Podívejme se nyní na tabulku, v&nbsp;níž jsou
+vypsány možné typy prvků polí <strong>ndarray</strong>:</p>
+
+<table>
+<tr><th> #</th><th>Typ</th><th>Formát</th><th>Rozsah</th><th>Jednoznakový kód</th></tr>
+<tr><td> 1</td><td>bool</td><td>uloženo po bajtech</td><td>True/False</td><td>'?'</td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td> 2</td><td>int8</td><td>celočíselný se znaménkem</td><td>-128..127</td><td>'b'</td></tr>
+<tr><td> 3</td><td>int16</td><td>celočíselný se znaménkem</td><td>-32768..32767</td><td>'h'</td></tr>
+<tr><td> 4</td><td>int32</td><td>celočíselný se znaménkem</td><td>-2147483648..2147483647</td><td>'i'</td></tr>
+<tr><td> 5</td><td>int64</td><td>celočíselný se znaménkem</td><td>-9223372036854775808..9223372036854775807</td><td>'l'</td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td> 6</td><td>uint8</td><td>celočíselný bez znaménka</td><td>0..255</td><td>'B'</td></tr>
+<tr><td> 7</td><td>uint16</td><td>celočíselný bez znaménka</td><td>0..65535</td><td>'H'</td></tr>
+<tr><td> 8</td><td>uint32</td><td>celočíselný bez znaménka</td><td>0..4294967295</td><td>'I'</td></tr>
+<tr><td> 9</td><td>uint64</td><td>celočíselný bez znaménka</td><td>0..18446744073709551615</td><td>'L'</td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>10</td><td>float16</td><td>plovoucí řádová čárka</td><td>poloviční přesnost (half)</td><td>'e'</td></tr>
+<tr><td>11</td><td>float32</td><td>plovoucí řádová čárka</td><td>jednoduchá přesnost (single)</td><td>'f'</td></tr>
+<tr><td>12</td><td>float64</td><td>plovoucí řádová čárka</td><td>dvojitá přesnost (double)</td><td>'d'</td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>13</td><td>complex64</td><td>komplexní číslo (dvojice)</td><td>2&times;float32</td><td>'F'</td></tr>
+<tr><td>14</td><td>complex128</td><td>komplexní číslo (dvojice)</td><td>2&times;float64</td><td>'D'</td></tr>
+</table>
+
+<p><div class="rs-tip-major">Poznámka: jednoznakové kódy je možné použít
+namísto jména typu, viz též funkce popsané v&nbsp;navazujících
+kapitolách.</div></p>
+
+
+
+<p><a name="k07"></a></p>
+<h2 id="k07">7. Konstruktory datové struktury <strong>ndarray</strong></h2>
+
+<p>Pole typu <strong>ndarray</strong> je možné vytvořit několika různými
+způsoby. Základní funkcí sloužící k&nbsp;převodu různých typů Pythonovských
+objektů na pole je funkce nazvaná jednoduše <strong>numpy.array</strong>. Této
+funkci se předá objekt (což je typicky seznam, n-tice či objekt typu
+<i>range</i>) a popř.&nbsp;i další nepovinné parametry, které určují typ prvků
+nově vzniklého pole (<strong>dtype</strong>), zda se má provést kopie prvků
+(<strong>copy</strong>, většinou ano) či způsob uspořádání prvků v&nbsp;poli
+(<strong>order</strong>). Hlavička této funkce tedy vypadá následovně:</p>
+
+<pre>
+array(object, dtype=None, copy=True, order=None, subok=False, ndmin=0)
+</pre>
+
+<p>Nepovinný parametr <strong>order</strong> může nabývat hodnot:</p>
+
+<table>
+<tr><th>Order</th><th>Význam</th></tr>
+<tr><td>'C'</td><td>prvky jsou uspořádány stejně jako v&nbsp;jazyku C</td></tr>
+<tr><td>'F'</td><td>prvky jsou uspořádány stejně jako v&nbsp;jazyku Fortran</td></tr>
+<tr><td>'A'</td><td>ponecháme na implementaci, který způsob uspořádání zvolit</td></tr>
+</table>
+
+<p>Jaký je tedy vlastně rozdíl mezi uspořádáním prvků podle 'C' a 'F'?
+Předpokládejme klasickou matici o rozměrech 3&times;3 prvky:</p>
+
+<pre>
+| 1 2 3 |
+| 4 5 6 |
+| 7 8 9 |
+</pre>
+
+<p>Tato matice může být v&nbsp;operační paměti uložena následujícím
+způsobem:</p>
+
+<pre>
+1 2 3 4 5 6 7 8 9 - 'C'
+</pre>
+
+<p>Alternativně je však možné prohodit řádky a sloupce (což více odpovídá
+matematickému zápisu matice):</p>
+
+<pre>
+1 4 7 2 5 8 3 6 9 - 'F'
+</pre>
+
+<p>Podívejme se nyní na několik praktických použití funkce
+<strong>numpy.array</strong>. Všechny příkazy je možné zadat do interaktivní
+konzole Pythonu, použít IPython, Jupyter atd.:</p>
+
+<pre>
+<i># vytvoření pole ze seznamu</i>
+<strong>numpy.array([1,2,3,4])</strong>
+array([1, 2, 3, 4])
+&nbsp;
+<i># vytvoření pole z typu 'range'</i>
+<strong>numpy.array(range(10))</strong>
+array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+&nbsp;
+<i># explicitní specifikace typu všech prvků pole</i>
+<strong>numpy.array(range(10), dtype=numpy.float)</strong>
+array([ 0.,  1.,  2.,  3.,  4.,  5.,  6.,  7.,  8.,  9.])
+&nbsp;
+<i># explicitní specifikace uspořádání prvků pole</i>
+<i># (nemá velký význam pro 1D pole=vektory)</i>
+<strong>numpy.array(range(10), order='C')</strong>
+array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+&nbsp;
+<i># explicitní specifikace uspořádání prvků pole</i>
+<i># (nemá velký význam pro 1D pole=vektory)</i>
+<strong>numpy.array(range(10), order='F')</strong>
+array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+&nbsp;
+<i># vytvoření dvourozměrné matice</i>
+<strong>numpy.array([[1,2,3],[4,5,6]])</strong>
+array([[1, 2, 3],
+       [4, 5, 6]])
+</pre>
+
+<p>Kromě funkce <strong>numpy.array</strong> se poměrně často setkáme
+s&nbsp;nutností vytvořit vektor či matici s&nbsp;nulovými prvky. V&nbsp;tomto
+případě samozřejmě není nutné složitě vytvářet a předávat takové pole do funkce
+<strong>numpy.array</strong>, ale lze namísto toho využít funkci nazvanou
+<strong>numpy.zeros</strong>, což je rychlejší a současně i méně paměťově
+náročnější. Této funkci se předá n-tice (musí se skutečně jednat o n-tici,
+nikoli o seznam parametrů, proto nezapomeňte na závorky) specifikující dimenzi
+vektoru, matice či N-dimenzionálního pole:</p>
+
+<pre>
+zeros(shape, dtype=float, order='C')
+</pre>
+
+<p>Nepovinný parametr <strong>dtype</strong> se nastavuje buď na typ nebo na
+jednoznakový kód uvedený v&nbsp;tabulce <a href="#k06">v&nbsp;předchozí
+kapitole</a>.</p>
+
+<p>Podívejme se nyní na způsob použití této funkce:</p>
+
+<pre>
+<i># jednorozměrný vektor s jediným prvkem</i>
+<strong>numpy.zeros(1)</strong>
+array([ 0.])
+&nbsp;
+<i># jednorozměrný vektor s deseti prvky</i>
+<strong>numpy.zeros(10)</strong>
+array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+&nbsp;
+<i># matice o velikosti 5x5 prvků, každý prvek je typu float</i>
+<strong>numpy.zeros((5,5))</strong>
+&nbsp;
+array([[ 0.,  0.,  0.,  0.,  0.],
+       [ 0.,  0.,  0.,  0.,  0.],
+       [ 0.,  0.,  0.,  0.,  0.],
+       [ 0.,  0.,  0.,  0.,  0.],
+       [ 0.,  0.,  0.,  0.,  0.]])
+&nbsp;
+<i># matice o velikosti 5x5 prvků, každý prvek je typu int</i>
+<strong>numpy.zeros((5,5),dtype=int)</strong>
+&nbsp;
+array([[0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0],
+       [0, 0, 0, 0, 0]])
+&nbsp;
+<i># použití komplexních čísel</i>
+<strong>numpy.zeros((2,2),dtype=numpy.complex)</strong>
+&nbsp;
+array([[ 0.+0.j,  0.+0.j],
+       [ 0.+0.j,  0.+0.j]])
+</pre>
+
+<p>Dalším velmi často používaným typem vektoru či matice je taková struktura,
+jejíž všechny prvky mají hodnotu 1. Takový vektor popř.&nbsp;matice je možné
+vytvořit funkcí <strong>numpy.ones</strong>:</p>
+
+<pre>
+numpy.ones(shape, dtype=None, order='C')
+</pre>
+
+<p>Nepovinný parametr <strong>dtype</strong> se, podobně jako u předchozí
+funkce, nastavuje buď na typ nebo na jednoznakový kód uvedený v&nbsp;tabulce <a
+href="#k06">v&nbsp;předchozí kapitole</a>.</p>
+
+<p>Opět se podívejme na několik příkladů použití této funkce v&nbsp;praxi:</p>
+
+<pre>
+<i># jednorozměrný vektor s deseti prvky</i>
+<strong>numpy.ones(10)</strong>
+array([ 1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.,  1.])
+&nbsp;
+<i># matice se třemi řádky a čtyřmi sloupci</i>
+<strong>numpy.ones((3,4))</strong>
+&nbsp;
+array([[ 1.,  1.,  1.,  1.],
+       [ 1.,  1.,  1.,  1.],
+       [ 1.,  1.,  1.,  1.]])
+&nbsp;
+<i># matice se třemi řádky a čtyřmi sloupci</i>
+<i># s explicitní specifikací typu prvků</i>
+<strong>numpy.ones((3,4), dtype=int)</strong>
+&nbsp;
+array([[1, 1, 1, 1],
+       [1, 1, 1, 1],
+       [1, 1, 1, 1]])
+&nbsp;
+<i># trojrozměrné pole s prvky typu int</i>
+<strong>numpy.ones((3,4,5), dtype=int)</strong>
+&nbsp;
+array([[[1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1]],
+&nbsp;
+       [[1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1]],
+&nbsp;
+       [[1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1],
+        [1, 1, 1, 1, 1]]])
+&nbsp;
+<i># trojrozměrné pole s prvky typu int</i>
+<i># (oproti předchozímu příkladu se velikosti v jednotlivých dimenzích liší)</i>
+<strong>numpy.ones((5,4,3), dtype=int)</strong>
+&nbsp;
+array([[[1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1]],
+&nbsp;
+       [[1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1]],
+&nbsp;
+       [[1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1]],
+&nbsp;
+       [[1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1]],
+&nbsp;
+       [[1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1],
+        [1, 1, 1]]])
+&nbsp;
+<i># zde může být použití typu komplexní číslo možná poněkud překvapující,</i>
+<i># ovšem stále platí, že 1=1+0j</i>
+<strong>numpy.ones((3,2),dtype=numpy.complex)</strong>
+&nbsp;
+array([[ 1.+0.j,  1.+0.j],
+       [ 1.+0.j,  1.+0.j],
+       [ 1.+0.j,  1.+0.j]])
+</pre>
+
+<p>Další funkcí určenou pro konstrukci vektoru je funkce pojmenovaná
+<strong>numpy.arange</strong>, přičemž poněkud zavádějící název
+&bdquo;arange&ldquo; vznikl složením slov &bdquo;array&ldquo; a
+&bdquo;range&ldquo;. Této funkci se předávají parametry s&nbsp;podobným
+významem, jaký mají u funkce <strong>xrange</strong> (Python 2.x) či
+<strong>range</strong> (Python 3.x), samozřejmě s&nbsp;tím rozdílem, že
+návratovou hodnotou funkce <strong>numpy.arange</strong> se skutečný vektor
+typu <strong>ndarray</strong>. Podívejme se na několik možností použití této
+poměrně nenápadné, ale o to užitečnější funkce:</p>
+
+<pre>
+<i># při použití jednoho parametru má tento parametr význam hodnoty "stop"</i>
+<i># vytvoří se vektor s prvky od 0 do "stop" (kromě)</i>
+<strong>numpy.arange(10)</strong>
+array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+&nbsp;
+<i># specifikace hodnot "start" (včetně) a "stop" (kromě)</i>
+<strong>numpy.arange(10, 20)</strong>
+array([10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+&nbsp;
+<i># třetí nepovinný parametr určuje krok použitý při generování prvků vektoru</i>
+<strong>numpy.arange(10, 20, 2)</strong>
+array([10, 12, 14, 16, 18])
+&nbsp;
+<i># krok může být samozřejmě záporný</i>
+<strong>numpy.arange(20, 10, -2)</strong>
+array([20, 18, 16, 14, 12])
+&nbsp;
+<i># nemusíme zůstat pouze u celých čísel, protože pracovat je možné i s hodnotami</i>
+<i># typu float a complex</i>
+<strong>numpy.arange(0,5, 0.1)</strong>
+&nbsp;
+array([ 0. ,  0.1,  0.2,  0.3,  0.4,  0.5,  0.6,  0.7,  0.8,  0.9,  1. ,
+        1.1,  1.2,  1.3,  1.4,  1.5,  1.6,  1.7,  1.8,  1.9,  2. ,  2.1,
+        2.2,  2.3,  2.4,  2.5,  2.6,  2.7,  2.8,  2.9,  3. ,  3.1,  3.2,
+        3.3,  3.4,  3.5,  3.6,  3.7,  3.8,  3.9,  4. ,  4.1,  4.2,  4.3,
+        4.4,  4.5,  4.6,  4.7,  4.8,  4.9])
+&nbsp;
+<i># použití komplexních konstant</i>
+<strong>numpy.arange(0+0j, 10+10j, 2+0j)</strong>
+array([ 0.+0.j,  2.+0.j,  4.+0.j,  6.+0.j,  8.+0.j])
+</pre>
+
+<p>Další velmi důležitou funkcí, s&nbsp;níž se v&nbsp;praxi často setkáme, je
+funkce nazvaná <strong>numpy.reshape</strong>, která dokáže změnit velikost
+matice a vhodným způsobem přeorganizovat prvky v&nbsp;původní matici. Této
+funkci se předávají dva parametry &ndash; prvním parametrem je vstupní pole
+(vektor, matice, ...), druhým parametrem pak specifikace tvaru výsledného pole,
+přičemž tvar je reprezentován n-ticí, ve které jsou uloženy velikosti pole
+v&nbsp;jednotlivých dimenzích. Podívejme se na několik příkladů:</p>
+
+<pre>
+<i># běžná matice se dvěma řádky a třemi sloupci</i>
+<strong>b=numpy.array([[1,2,3],[4,5,6]])</strong>
+&nbsp;
+<i># změna tvaru matice na 3x2 prvky</i>
+<strong>numpy.reshape(b,(3,2))</strong>
+&nbsp;
+array([[1, 2],
+       [3, 4],
+       [5, 6]])
+&nbsp;
+<i># zde vlastně dostaneme původní matici</i>
+<strong>numpy.reshape(b,(2,3))</strong>
+&nbsp;
+array([[1, 2, 3],
+       [4, 5, 6]])
+&nbsp;
+<i># vytvoření matice s jediným řádkem</i>
+<strong>numpy.reshape(b,(1,6))</strong>
+&nbsp;
+array([[1, 2, 3, 4, 5, 6]])
+&nbsp;
+<i># vytvoření matice s jediným sloupcem</i>
+<strong>numpy.reshape(b,(6,1))</strong>
+&nbsp;
+array([[1],
+       [2],
+       [3],
+       [4],
+       [5],
+       [6]])
+</pre>
+
+
+
+<p><a name="k08"></a></p>
+<h2 id="k08">8. Přístup k&nbsp;prvkům polí, využití takzvaných řezů polí</h2>
+
+<p>Jakým způsobem se pole s&nbsp;využitím knihovny <i>Numpy</i> vytváří již
+víme. Ještě si však musíme říct, jak se prvky uložené v&nbsp;polích vybírají
+neboli <i>indexují</i>. V&nbsp;případě jednorozměrných polí je to ve
+skutečnosti velmi jednoduché &ndash; prvky jsou totiž číslovány od nuly a díky
+přetížení operátoru [] (operátor indexování) je možné prvky v&nbsp;případě
+potřeby indexovat i od konce pole. V&nbsp;tomto případě se musí použít záporné
+číslo, takže a[1] značí druhý prvek pole zatímco a[-1] první prvek od
+konce:</p>
+
+<pre>
+<strong>a=numpy.arange(12)</strong>
+&nbsp;
+<strong>a</strong>
+array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11])
+&nbsp;
+<strong>a[0]</strong>
+0
+&nbsp;
+<strong>a[5]</strong>
+5
+&nbsp;
+<strong>a[-1]</strong>
+11
+&nbsp;
+<strong>a[-5]</strong>
+7
+</pre>
+
+<p>U dvourozměrných či vícerozměrných polí je situace poněkud komplikovanější,
+neboť v&nbsp;tomto případě je nutné použít dva či větší počet indexů (jeden
+index pro každou dimenzi). Vzhledem k&nbsp;tomu, že v&nbsp;různých
+programovacích jazycích a rozličných specializovaných nástrojích typu <i>R</i>
+či <i>Matlab</i>, se používají odlišné způsoby zápisu více indexů, podporuje
+knihovna <i>Numpy</i> dva způsoby zápisu:</p>
+
+<ul>
+
+<li>buď se všechny indexy oddělí čárkou a vloží se do jediného bloku omezeného
+hranatými závorkami []</li>
+
+<li>nebo se alternativně pro každou dimenzi použije zvláštní hranatá závorka
+(syntaxe odvozená od Céčka)</li>
+
+</ul>
+
+<p>Podívejme se na příklady:</p>
+
+<pre>
+<strong>import numpy</strong>
+&nbsp;
+<strong>m=numpy.reshape(numpy.arange(12), (3,4))</strong>
+&nbsp;
+<strong>m</strong>
+array([[ 0,  1,  2,  3],
+       [ 4,  5,  6,  7],
+       [ 8,  9, 10, 11]])
+&nbsp;
+<strong>m[0]</strong>
+array([0, 1, 2, 3])
+&nbsp;
+<strong>m[0][2]</strong>
+2
+&nbsp;
+<strong>m[0,2]</strong>
+2
+</pre>
+
+<p>V&nbsp;mnoha případech je nutné z&nbsp;polí získat hodnoty většího množství
+prvků tvořících souvislý blok. Může se například jednat o všechny prvky pole
+kromě prvku prvního a posledního (typické pro některé filtry), prvky
+z&nbsp;první poloviny pole atd. I v&nbsp;tomto případě knihovna <i>Numpy</i>
+nabízí vývojářům velmi elegantní řešení, a to ve formě takzvaných řezů
+(<i>slices</i>). Namísto jediného indexu je totiž možné zadat dva indexy
+oddělené dvojtečkou, které potom reprezentují začátek a konec řezu. Opět se
+podívejme na demonstrační příklad:</p>
+
+<pre>
+<strong>a=numpy.arange(12)</strong>
+&nbsp;
+<strong>a</strong>
+array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11])
+&nbsp;
+<strong>a[3:7]</strong>
+array([3, 4, 5, 6])
+</pre>
+
+<p>Pokud se vynechá první index, automaticky se za něj dosadí 0, pokud se
+vynechá index druhý, dosadí se za něj velikost dimenze pole-1. Vynechat je
+možné i oba indexy; v&nbsp;tomto případě je řezem původní pole (tento zápis je
+sice možný, ale poněkud postrádá smysl):</p>
+
+<pre>
+<strong>a=numpy.arange(12)</strong>
+&nbsp;
+<strong>a[:7]</strong>
+array([0, 1, 2, 3, 4, 5, 6])
+&nbsp;
+<strong>a[5:]</strong>
+array([ 5,  6,  7,  8,  9, 10, 11])
+&nbsp;
+<strong>a[:]</strong>
+array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11])
+</pre>
+
+<p>Někdy může být řez polem prázdný:</p>
+
+<pre>
+<strong>a=numpy.arange(12)</strong>
+&nbsp;
+<strong>a</strong>
+array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11])
+&nbsp;
+<strong>a[-4:-6]</strong>
+array([], dtype=int64)
+</pre>
+
+<p>Použít je možné i záporné indexy popř.&nbsp;první či druhý index zcela
+vynechat:</p>
+
+<pre>
+<strong>a[-6:-4]</strong>
+array([6, 7])
+&nbsp;
+<strong>a[-6:]</strong>
+array([ 6,  7,  8,  9, 10, 11])
+&nbsp;
+<strong>a[:-4]</strong>
+array([0, 1, 2, 3, 4, 5, 6, 7])
+</pre>
+
+<p>Řezy je možné provádět i u dvourozměrných či vícerozměrných polí.
+V&nbsp;tomto případě se zkombinuje již popsaný zápis s&nbsp;dvojtečkou:</p>
+
+<pre>
+<strong>import numpy</strong>
+&nbsp;
+<strong>m=numpy.reshape(numpy.arange(25), (5,5))</strong>
+&nbsp;
+<strong>m</strong>
+array([[ 0,  1,  2,  3,  4],
+       [ 5,  6,  7,  8,  9],
+       [10, 11, 12, 13, 14],
+       [15, 16, 17, 18, 19],
+       [20, 21, 22, 23, 24]])
+&nbsp;
+<strong>m[2:4]</strong>
+array([[10, 11, 12, 13, 14],
+       [15, 16, 17, 18, 19]])
+&nbsp;
+<strong>m[2:4,3]</strong>
+&nbsp;
+array([13, 18])
+&nbsp;
+<strong>m[2:4,3:5]</strong>
+&nbsp;
+array([[13, 14],
+       [18, 19]])
+&nbsp;
+<strong>m[1:4,1:4]</strong>
+&nbsp;
+array([[ 6,  7,  8],
+       [11, 12, 13],
+       [16, 17, 18]])
+&nbsp;
+<strong>m[-4:-2,-4:-2]</strong>
+&nbsp;
+array([[ 6,  7],
+       [11, 12]])
+</pre>
+
+
+
+<p><a name="k09"></a></p>
+<h2 id="k09">9. Základní operace s&nbsp;datovou strukturou <strong>ndarray</strong></h2>
+
+<p>V&nbsp;případě importu knihovny <i>Numpy</i> dojde k&nbsp;přetížení mnoha
+běžných operátorů. Jedná se zejména o relační operátory, tj.&nbsp;o takové
+operátory, které slouží k&nbsp;porovnání dvou hodnot. Ve svém původním významu
+tyto operátory vrací jedinou pravdivostní hodnotu <strong>True</strong> nebo
+<strong>False</strong>. Ovšem pokud se relační operátory použijí ve své
+přetížené variantě pro porovnání polí (vektorů, matic), je výsledkem opět pole,
+ovšem pouze s&nbsp;hodnotami <strong>True</strong> a <strong>False</strong>
+vzniklými porovnáním prvků polí se stejným indexem. Při porovnávání musí mít
+obě pole stejný tvar, což je kontrolováno za běhu aplikace:</p>
+
+<pre>
+<strong>a=numpy.arange(1,11)</strong>
+<strong>b=numpy.array([100,0,100,0,100,0,100,0,100,0])</strong>
+&nbsp;
+<strong>a</strong>
+array([ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10])
+&nbsp;
+<strong>b</strong>
+array([100,   0, 100,   0, 100,   0, 100,   0, 100,   0])
+&nbsp;
+<strong>a==b</strong>
+array([False, False, False, False, False, False, False, False, False, False], dtype=bool)
+&nbsp;
+<strong>a!=b</strong>
+array([ True,  True,  True,  True,  True,  True,  True,  True,  True,  True], dtype=bool)
+&nbsp;
+<strong>a&lt;b</strong>
+array([ True, False,  True, False,  True, False,  True, False,  True, False], dtype=bool)
+</pre>
+
+<p>Relační operátory je možné použít i tak, že jedním z&nbsp;operandů je pole a
+druhým operandem je skalární hodnota. Výsledkem takového porovnání je opět
+pole, tentokrát vytvořené porovnáním každého prvku zdrojového pole
+s&nbsp;jedinou skalární hodnotou:</p>
+
+<pre>
+<strong>a=numpy.arange(12)</strong>
+&nbsp;
+<strong>a</strong>
+array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11])
+&nbsp;
+<strong>a==5</strong>
+array([False, False, False, False,  True, False, False, False, False, False], dtype=bool)
+&nbsp;
+<strong>a&lt;6</strong>
+array([ True,  True,  True,  True,  True,  True, False, False, False,
+       False, False, False], dtype=bool)
+</pre>
+
+<p>Podobným způsobem můžeme vytvořit &bdquo;Booleovská&ldquo; dvourozměrná
+pole:</p>
+
+<pre>
+<strong>m=numpy.arange(24)</strong>
+&nbsp;
+<strong>m</strong>
+&nbsp;
+array([ 0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15, 16,
+       17, 18, 19, 20, 21, 22, 23])
+&nbsp;
+<strong>x=numpy.reshape(m, (6,4), order='F')</strong>
+&nbsp;
+<strong>x&gt;10</strong>
+&nbsp;
+array([[False, False,  True,  True],
+       [False, False,  True,  True],
+       [False, False,  True,  True],
+       [False, False,  True,  True],
+       [False, False,  True,  True],
+       [False,  True,  True,  True]], dtype=bool)
+&nbsp;
+<strong>x%2==1</strong>
+&nbsp;
+array([[False, False, False, False],
+       [ True,  True,  True,  True],
+       [False, False, False, False],
+       [ True,  True,  True,  True],
+       [False, False, False, False],
+       [ True,  True,  True,  True]], dtype=bool)
+</pre>
+
+
+
+<p><a name="k10"></a></p>
+<h2 id="k10">10. Druhý příklad &ndash; pohybující se úsečka v&nbsp;desetisekundovém videu</h2>
+
+<p>Nyní již máme k&nbsp;dispozici všechny informace, které je možné použít pro
+tvorbu skutečného programově generovaného videa. Ve druhém příkladu upravíme
+callback funkci <strong>make_frame</strong> takovým způsobem, aby se do snímků
+vkládala vodorovná bílá úsečka. Na každém dalším snímku bude úsečka posunuta o
+jeden obrazový řádek níže, takže výsledkem bude (prozatím velmi primitivní)
+animace postupně klesající bílé čáry. Počet řádků výsledného videa je roven
+240, což velmi dobře koresponduje s&nbsp;desetisekundovým trváním videa a 24
+snímky za sekundu (úsečka by tedy za oněch deset sekund měla proběhnout přes
+celý snímek). Opět si nejprve ukažme celý zdrojový kód:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from moviepy.editor import VideoClip
+import numpy
+&nbsp;
+WIDTH = 320
+HEIGHT = 240
+&nbsp;
+line = 0
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    global line
+    print("time: {t}, line: {l}".format(t=t, l=line))
+&nbsp;
+    <i># vyplneni trojrozmerneho pole nulami</i>
+    frame = numpy.zeros((HEIGHT, WIDTH, 3))
+&nbsp;
+    <i># vykresleni jedine vodorovne usecky</i>
+    if line &lt; HEIGHT:
+        frame[line].fill(255)
+        line += 1
+    return frame
+&nbsp;
+&nbsp;
+<i># vytvoreni video klipu</i>
+animation = VideoClip(make_frame, duration=10)
+&nbsp;
+<i># export videa do formatu MPEG-4</i>
+animation.write_videofile("line.mp4", fps=24)
+&nbsp;
+<i># znovunastaveni pocitadla</i>
+line = 0
+&nbsp;
+<i># export videa do formatu Ogg Video File</i>
+animation.write_videofile("line.ogv", fps=24)
+&nbsp;
+<i># znovunastaveni pocitadla</i>
+line = 0
+&nbsp;
+<i># export videa do formatu GIF</i>
+animation.write_gif("line.gif", fps=24)
+</pre>
+
+<p>Tento kód je již nepatrně složitější, a to proto, že musíme mít pomocné
+počitadlo s&nbsp;vertikální pozicí úsečky. Počitadlo se s&nbsp;každým snímkem
+zvětšuje o jedničku:</p>
+
+<pre>
+line = 0
+&nbsp;
+def <strong>make_frame</strong>(t):
+    global line
+    print("time: {t}, line: {l}".format(t=t, l=line))
+&nbsp;
+...
+...
+...
+&nbsp;
+    line += 1
+    return frame
+</pre>
+
+<p>Zajímavý je i způsob vykreslení úsečky. Využíváme zde totiž &bdquo;array
+slicing&ldquo; neboli přístup přes řez pole vysvětlený v&nbsp;předchozích
+kapitolách. Následující příkaz:</p>
+
+<pre>
+frame[line].fill(255)
+</pre>
+
+<p>Nejdříve z&nbsp;trojrozměrného pole vybere dvourozměrnou matici
+šířka&times;3 a posléze tuto matici vyplní hodnotami 255. Ostatně si to můžeme
+vyzkoušet i interaktivně na mnohem menší matici:</p>
+
+<pre>
+&gt;&gt;&gt; <strong>import numpy</strong>
+&gt;&gt;&gt; <strong>frame=numpy.zeros((5,4,3))</strong>
+&gt;&gt;&gt; <strong>frame</strong>
+array([[[ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.]],
+&nbsp;
+       [[ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.]],
+&nbsp;
+       [[ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.]],
+&nbsp;
+       [[ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.]],
+&nbsp;
+       [[ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.],
+        [ 0.,  0.,  0.]]])
+&nbsp;
+&gt;&gt;&gt; <strong>frame[3].fill(255)</strong>
+&gt;&gt;&gt; <strong>frame</strong>
+array([[[   0.,    0.,    0.],
+        [   0.,    0.,    0.],
+        [   0.,    0.,    0.],
+        [   0.,    0.,    0.]],
+&nbsp;
+       [[   0.,    0.,    0.],
+        [   0.,    0.,    0.],
+        [   0.,    0.,    0.],
+        [   0.,    0.,    0.]],
+&nbsp;
+       [[   0.,    0.,    0.],
+        [   0.,    0.,    0.],
+        [   0.,    0.,    0.],
+        [   0.,    0.,    0.]],
+&nbsp;
+       [[ 255.,  255.,  255.],
+        [ 255.,  255.,  255.],
+        [ 255.,  255.,  255.],
+        [ 255.,  255.,  255.]],
+&nbsp;
+       [[   0.,    0.,    0.],
+        [   0.,    0.,    0.],
+        [   0.,    0.,    0.],
+        [   0.,    0.,    0.]]])
+</pre>
+
+
+
+<p><a name="k11"></a></p>
+<h2 id="k11">11. Výsledky druhého příkladu</h2>
+
+<p>Opět se podívejme na výsledná videa vytvořená dnešním druhým demonstračním
+příkladem:</p>
+
+<img src="https://i.iinfo.cz/images/410/moviepy-1-3.gif" class="image-327125" alt="&#160;" width="320" height="240" />
+<p><i>Obrázek 2: Animovaný GIF vytvořený druhým příkladem.</i></p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video2.htm">https://tisnik.github.io/moviepy-videos/video2.htm</a>
+
+
+
+<p><a name="k12"></a></p>
+<h2 id="k12">12. Třetí příklad &ndash; vykreslení všech 16 milionů barev v&nbsp;desetisekundovém videu</h2>
+
+<p>Nyní již máme k&nbsp;dispozici všechny informace nutné pro to, abychom byli
+schopni vytvořit video, v&nbsp;němž se postupně (konkrétně na 256 snímcích)
+zobrazí celá barvová paleta. Připomeňme si, že datová struktura typu
+<strong>ndarray</strong>, která je pro každý snímek vytvořena, obsahuje
+<i>šířka&times;výška</i> hodnot, přičemž každá hodnota je vektorem tří čísel
+představujících hodnoty barvových složek <i>red</i>, <i>green</i>, <i>blue</i>.
+Každá barvová složka je reprezentována celým číslem od 0 do 255. Animace bude
+vytvořena následovně: každý snímek bude mít rozlišení 256&times;256 pixelů, což
+znamená, že jedna barvová složka bude ve snímku konstantní a ostatní dvě
+barvové složky budou použity ve všech možných vzájemných kombinacích
+(256&times;256 kombinací). Pokud vytvoříme 256 takových snímků, přičemž na
+každém budeme měnit první barvovou složku, zobrazíme postupně všech zhruba
+šestnáct milionů barev, které dokážou generovat grafické karty (a zobrazit
+dobře nakalibrované monitory).</p>
+
+<p>Funkce <strong>make_frame</strong> bude vypadat následovně (předpokládáme,
+že se bude volat 256&times;, přičemž počitadlo bude uloženo v&nbsp;globální
+proměnné <strong>index</strong>):</p>
+
+<pre>
+def <strong>make_frame</strong>(t):
+    <i>"""Vytvoreni jednoho snimku videa."""</i>
+    global index
+    print("time: {t}, index: {i}".format(t=t, i=index))
+&nbsp;
+    <i># vyplneni trojrozmerneho pole nulami</i>
+    frame = numpy.zeros((HEIGHT, WIDTH, 3))
+&nbsp;
+    <i># vyplneni barvovym prechodem</i>
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
+            frame[y][x][0] = x
+            frame[y][x][2] = y
+            frame[y][x][1] = index
+    index += 1
+    return frame
+</pre>
+
+<p>Zdrojový kód celého demonstračního příkladu:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from moviepy.editor import VideoClip
+import numpy
+&nbsp;
+WIDTH = 256
+HEIGHT = 256
+&nbsp;
+index = 0
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    <i>"""Vytvoreni jednoho snimku videa."""</i>
+    global index
+    print("time: {t}, index: {i}".format(t=t, i=index))
+&nbsp;
+    <i># vyplneni trojrozmerneho pole nulami</i>
+    frame = numpy.zeros((HEIGHT, WIDTH, 3))
+&nbsp;
+    <i># vyplneni barvovym prechodem</i>
+    for y in range(HEIGHT):
+        for x in range(WIDTH):
+            frame[y][x][0] = x
+            frame[y][x][2] = y
+            frame[y][x][1] = index
+    index += 1
+    return frame
+&nbsp;
+&nbsp;
+<i># vytvoreni video klipu</i>
+animation = VideoClip(make_frame, duration=10)
+&nbsp;
+<i># export videa do formatu Ogg Video File</i>
+animation.write_videofile("colors.ogv", fps=25)
+&nbsp;
+<i># znovunastaveni pocitadla</i>
+index = 0
+&nbsp;
+<i># export videa do formatu MPEG-4</i>
+animation.write_videofile("colors.mp4", fps=25)
+&nbsp;
+<i># znovunastaveni pocitadla</i>
+index = 0
+&nbsp;
+<i># export videa do formatu GIF</i>
+animation.write_gif("colors.gif", fps=25)
+</pre>
+
+
+
+<p><a name="k13"></a></p>
+<h2 id="k13">13. Výsledky třetího příkladu</h2>
+
+<p>Znovu si ukážeme výsledná videa vytvořená dnešním třetím demonstračním
+příkladem:</p>
+
+<img src="https://i.iinfo.cz/images/410/moviepy-1-4.gif" class="image-327126" alt="&#160;" width="128" height="128" />
+<p><i>Obrázek 3: Animovaný GIF vytvořený třetím příkladem.</i></p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video3.htm">https://tisnik.github.io/moviepy-videos/video3.htm</a>
+
+
+
+<p><a name="k14"></a></p>
+<h2 id="k14">14. Parametry předávané videokodeku</h2>
+
+<p>Při ukládání videa je možné zvolit několik parametrů předávaných video
+kodeku. Především se jedná o parametr <strong>progress_bar</strong>, který
+určuje, jestli budou výpisy z&nbsp;funkce <strong>make_frame</strong>
+přerušovány zobrazovaným progress barem (což působí rušivě). Důležitější je
+však parametr <strong>bitrate</strong>, kterým se určuje přibližný mezní bitový
+tok (bity za sekundu). Čím nižší bude zapsaná hodnota, tím horší bude kvalita
+výsledného videa a naopak (i když vztah není lineární). Podívejme se na
+příklad:</p>
+
+<pre>
+animation.write_videofile("mandelbrot_zoom.ogv", fps=20, progress_bar=False, bitrate="900000")
+</pre>
+
+<p>Rozdíly mezi videi vytvořenými s&nbsp;rozdílným bitovým tokem si můžete
+otestovat na této stránkce:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video4.htm">https://tisnik.github.io/moviepy-videos/video4.htm</a>
+
+
+
+<p><a name="k15"></a></p>
+<h2 id="k15">15. Čtvrtý příklad &ndash; animace &bdquo;průletu&ldquo; Mandelbrotovou množinou</h2>
+
+<p>V&nbsp;dnešním posledním příkladu si ukážeme, jak je možné vytvořit
+působivou animaci &bdquo;průletu&ldquo; Mandelbrotovou množinou. Tématem
+vykreslování Mandelbrotovy množiny jsme se podrobně zabývali v&nbsp;seriálu o
+fraktálech v&nbsp;počítačové grafice:</p>
+
+<ol>
+
+<li>Výpočet bodů ležících v&nbsp;Mandelbrotově množině<br />
+<a href="https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xii#k05">https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xii#k05</a>
+</li>
+
+<li>Fraktály v&nbsp;počítačové grafice XIII &ndash; zobrazení Mandelbrotovy množiny<br />
+<a href="https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xiii">https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xiii</a>
+</li>
+
+<li>Fraktály v&nbsp;počítačové grafice XVI &ndash; Animace průletu Mandelbrotovou množinou<br />
+<a href="https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xvi">https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xvi</a>
+</li>
+
+</ol>
+
+<p>Výsledná animace se vytvoří tak, že se postupně spočítá větší množství
+obrázků Mandelbrotovy množiny, přičemž každý obrazec bude mít nastavené odlišné
+parametry výpočtu. Je přitom jasné, že čím menší budou rozdíly mezi
+jednotlivými parametry, tím plynulejší bude výsledná animace. Vytvořené
+rastrové obrázky se následně seřadí do sekvence a vytvoří se z&nbsp;nich
+animace, tj.&nbsp;postupný přechod mezi obrázky. Animaci lze samozřejmě uložit
+v&nbsp;různých formátech, přičemž my prozatím zůstaneme u kombinace MPEG4+H.264
+a Ogg+Theora. Parametry pro tvorbu jednotlivých obrázků jsou nastaveny takovým
+způsobem, že mapování prvního obrazu do komplexní roviny vytvoří osově
+orientovaný obdélník o délce stran 4,0 a 3,0 se středem v&nbsp;bodě
+specifikovaném uživatelem ve skriptu. Ve druhém a každém dalším obrázku animace
+je obdélník proporcionálně zmenšen a zmenšování probíhá tak dlouho, aby se u
+posledního obrázku dosáhlo zadaného místa v&nbsp;Mandelbrotově množině. Příklad
+BEZ funkce pro výpočet Mandelbrotovy množiny bude vypadat takto:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+from moviepy.editor import VideoClip
+import numpy
+import palette_mandmap
+&nbsp;
+&nbsp;
+WIDTH = 320
+HEIGHT = 240
+&nbsp;
+MAXITER = 255
+&nbsp;
+# pocatecni podminky
+&nbsp;
+x0 = -0.7913539
+y0 = 0.161779
+scale = 1.0000
+scale_factor = 0.97
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    <i>"""Vytvoreni jednoho snimku videa."""</i>
+    global scale
+    print("time: {t}, scale: {s}".format(t=t, s=scale))
+&nbsp;
+    <i># vyplneni trojrozmerneho pole nulami</i>
+    frame = numpy.zeros((HEIGHT, WIDTH, 3))
+&nbsp;
+    calc_mandelbrot(WIDTH, HEIGHT, MAXITER, palette_mandmap.palette, x0, y0, scale, frame)
+    scale *= scale_factor
+&nbsp;
+    return frame
+&nbsp;
+&nbsp;
+<i># vytvoreni video klipu</i>
+animation = VideoClip(make_frame, duration=15)
+&nbsp;
+<i># export videa do formatu Ogg Video File</i>
+animation.write_videofile("mandelbrot_zoom.ogv", fps=20, progress_bar=False, bitrate="900000")
+&nbsp;
+<i># export videa do formatu MPEG-4</i>
+<i># animation.write_videofile("colors.mp4", fps=25)</i>
+&nbsp;
+<i># export videa do formatu GIF</i>
+<i># animation.write_gif("colors.gif", fps=25)</i>
+</pre>
+
+
+
+<p><a name="k16"></a></p>
+<h2 id="k16">16. Přepočet parametrů obrázku v&nbsp;průběhu animace a výpočet snímku Mandelbrotovy množiny</h2>
+
+<p>Samotný výpočet Mandelbrotovy množiny je rozdělen na dvě části:</p>
+
+<ol>
+
+<li>Výpočet mezních hodnot v&nbsp;komplexní rovině, což zajišťuje funkce
+<strong>calc_corner</strong></li>
+
+<li>Výpočet barev pixelů v&nbsp;Mandelbrotově množine, což zajišťuje funkce
+<strong>calc_mandelbrot</strong></li>
+
+</ol>
+
+<p>První zmíněná funkce na základě středu snímku (v&nbsp;komplexní rovině),
+velikosti obdélníkového výřezu a měřítka spočítá všechny čtyři mezní
+hodnoty:</p>
+
+<pre>
+def <strong>calc_corner</strong>(c_width, c_height, xpos, ypos, scale):
+    return xpos - c_width * scale, \
+           ypos - c_height * scale, \
+           xpos + c_width * scale, \
+           ypos + c_height * scale
+</pre>
+
+<p>Druhá funkce vypočte barvy všech pixelů s&nbsp;využitím barvové palety
+popsané v&nbsp;navazující kapitole:</p>
+
+<pre>
+def <strong>calc_mandelbrot</strong>(width, height, maxiter, palette, xpos, ypos, scale, array):
+    xmin, ymin, xmax, ymax = calc_corner(2.0, 1.5, xpos, ypos, scale)
+    c = complex(xmin, ymin)
+    for y in range(0, height):
+        c = complex(xmin, c.imag)
+        for x in range(0, width):
+            z = 0.0 + 0.0J
+            i = 0
+&nbsp;
+            <i># iteracni smycka</i>
+            while i &lt; maxiter:
+                if abs(z) &gt; 4.0:
+                    break
+                z = z**2 + c
+                i += 1
+&nbsp;
+            <i># vypocet barvy</i>
+            r = palette[i][0]
+            g = palette[i][1]
+            b = palette[i][2]
+            array[y][x][0] = r
+            array[y][x][1] = g
+            array[y][x][2] = b
+&nbsp;
+            <i># posun na dalsi bod na radku</i>
+            c += (xmax - xmin) / width
+&nbsp;
+        <i># posun na dalsi radek</i>
+        c += 1J*(ymax - ymin) / height
+</pre>
+
+<p>V&times;Mandelbrotově množině se nachází velké množství zajímavých oblastí,
+přičemž zobrazované tvary jsou soběpodobné, tj.&nbsp;při různém zvětšení se
+opakují. Některé typické tvary byly podle svého vzhledu dokonce pojmenovány.
+Popis zajímavých oblastí začneme částí Mandelbrotovy množiny, která se nachází
+v&nbsp;okolí takzvaného Feigenbaumova bodu. S&nbsp;prací Feigenbauma jsme se <a
+href="https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-v/#k06">setkali</a>
+již při popisování dynamických systémů a <a
+href="https://www.root.cz/clanky/fraktaly-ve-skatulkach/#k011">bifurkačních
+diagramů</a>. Feigenbaumův bod je místo v&nbsp;Mandelbrotově množině,
+v&nbsp;jehož okolí nastává stejný jev jako v&nbsp;bifurkačním diagramu &ndash;
+prudké zdvojování period vedoucích až k&nbsp;chaosu. Tento bod má
+v&nbsp;komplexní rovině souřadnice -1,401155+0,0i, leží tedy v&nbsp;záporné
+části reálné osy.</p>
+
+<p>Další zajímavé oblasti, které můžete vybrat a vytvořit tak zajímavé video,
+jsou popsány v&nbsp;následujících kapitolách článku ze seriálu o Fraktálech
+v&nbsp;počítačové grafice:</p>
+
+<ol>
+<li><a href="https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xvi/?ic=serial-box&icc=text-title#k04">Oblast nazývaná &bdquo;Elephant valley&ldquo;</a></li>
+<li><a href="https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xvi/?ic=serial-box&icc=text-title#k05">Oblast nazývaná &bdquo;Seahorse valley&ldquo;</a></li>
+<li><a href="https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xvi/?ic=serial-box&icc=text-title#k06">Oblast nazývaná &bdquo;West seahorse valley&ldquo;</a></li>
+<li><a href="https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xvi/?ic=serial-box&icc=text-title#k07">Oblast nazývaná &bdquo;Triple spiral valley&ldquo;</a></li>
+<li><a href="https://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-xvi/?ic=serial-box&icc=text-title#k08">Oblast nazývaná &bdquo;Quad spiral valley&ldquo;</a></li>
+</ol>
+
+
+
+<p><a name="k17"></a></p>
+<h2 id="k17">17. Pomocný modul s&nbsp;barvovou paletou</h2>
+
+<p>Fraktály či obecně procedurální textury vykreslené ve stupních šedi sice
+mohou být pro některé projekty zajímavé, ovšem většinou požadujeme textury
+barevné. Ve skutečnosti je řešení jednoduché &ndash; postačuje ke každému
+vypočtenému indexu vybrat vhodnou barvu z&nbsp;barvové palety. Tradičně mají
+barvové palety 256 barev, ovšem samozřejmě je v&nbsp;případě potřeby možné
+vytvořit rozsáhlejší či naopak menší palety. Pro účely demonstračního příkladu
+použijeme barvovou paletu získanou z&nbsp;datových souborů programu
+<i>Fractint</i> a převedenou na Pythonovský seznam:</p>
+
+<pre>
+<i># taken from Fractint</i>
+palette = (
+        (255, 255, 255), (224, 224, 224), (216, 216, 216), (208, 208, 208),
+        (200, 200, 200), (192, 192, 192), (184, 184, 184), (176, 176, 176),
+        (168, 168, 168), (160, 160, 160), (152, 152, 152), (144, 144, 144),
+        (136, 136, 136), (128, 128, 128), (120, 120, 120), (112, 112, 112),
+        (104, 104, 104),  (96,  96,  96),  (88,  88,  88),  (80,  80,  80),
+        (72,   72,  72),  (64,  64,  64),  (56,  56,  56),  (48,  48,  56),
+        (40,   40,  56),  (32,  32,  56),  (24,  24,  56),  (16,  16,  56),
+        (8,     8,  56), (000, 000,  60), (000, 000,  64), (000, 000,  72),
+        (000, 000,  80), (000, 000,  88), (000, 000,  96), (000, 000, 104),
+        (000, 000, 108), (000, 000, 116), (000, 000, 124), (000, 000, 132),
+        (000, 000, 140), (000, 000, 148), (000, 000, 156), (000, 000, 160),
+        (000, 000, 168), (000, 000, 176), (000, 000, 184), (000, 000, 192),
+        (000, 000, 200), (000, 000, 204), (000, 000, 212), (000, 000, 220),
+        (000, 000, 228), (000, 000, 236), (000, 000, 244), (000, 000, 252),
+        (000,   4, 252),   (4,  12, 252),   (8,  20, 252),  (12,  28, 252),
+        (16,   36, 252),  (20,  44, 252),  (20,  52, 252),  (24,  60, 252),
+        (28,   68, 252),  (32,  76, 252),  (36,  84, 252),  (40,  92, 252),
+        (40,  100, 252),  (44, 108, 252),  (48, 116, 252),  (52, 120, 252),
+        (56,  128, 252),  (60, 136, 252),  (60, 144, 252),  (64, 152, 252),
+        (68,  160, 252),  (72, 168, 252),  (76, 176, 252),  (80, 184, 252),
+        (80,  192, 252),  (84, 200, 252),  (88, 208, 252),  (92, 216, 252),
+        (96,  224, 252), (100, 232, 252), (100, 228, 248),  (96, 224, 244),
+        (92,  216, 240),  (88, 212, 236),  (88, 204, 232),  (84, 200, 228),
+        (80,  192, 220),  (76, 188, 216),  (76, 180, 212),  (72, 176, 208),
+        (68,  168, 204),  (64, 164, 200),  (64, 156, 196),  (60, 152, 188),
+        (56,  144, 184),  (52, 140, 180),  (52, 132, 176),  (48, 128, 172),
+        (44,  120, 168),  (40, 116, 160),  (40, 108, 156),  (36, 104, 152),
+        (32,   96, 148),  (28,  92, 144),  (28,  84, 140),  (24,  80, 136),
+        (20,   72, 128),  (16,  68, 124),  (16,  60, 120),  (12,  56, 116),
+        (8,    48, 112),   (4,  44, 108), (000,  36, 100),   (4,  36, 104),
+        (12,   40, 108),  (16,  44, 116),  (24,  48, 120),  (28,  52, 128),
+        (36,   56, 132),  (40,  60, 140),  (48,  64, 144),  (52,  64, 148),
+        (60,   68, 156),  (64,  72, 160),  (72,  76, 168),  (76,  80, 172),
+        (84,   84, 180),  (88,  88, 184),  (96,  92, 192), (104, 100, 192),
+        (112, 112, 196), (124, 120, 200), (132, 132, 204), (144, 140, 208),
+        (152, 152, 212), (164, 160, 216), (172, 172, 220), (180, 180, 224),
+        (192, 192, 228), (200, 200, 232), (212, 212, 236), (220, 220, 240),
+        (232, 232, 244), (240, 240, 248), (252, 252, 252), (252, 240, 244),
+        (252, 224, 232), (252, 208, 224), (252, 192, 212), (252, 176, 204),
+        (252, 160, 192), (252, 144, 184), (252, 128, 172), (252, 112, 164),
+        (252,  96, 152), (252,  80, 144), (252,  64, 132), (252,  48, 124),
+        (252,  32, 112), (252,  16, 104), (252, 000,  92), (236, 000,  88),
+        (228, 000,  88), (216,   4,  84), (204,   4,  80), (192,   8,  76),
+        (180,   8,  76), (168,  12,  72), (156,  16,  68), (144,  16,  64),
+        (132,  20,  60), (124,  20,  60), (112,  24,  56), (100,  24,  52),
+        (88,   28,  48),  (76,  32,  44),  (64,  32,  44),  (52,  36,  40),
+        (40,   36,  36),  (28,  40,  32),  (16,  44,  28),  (20,  52,  32),
+        (24,   60,  36),  (28,  68,  44),  (32,  76,  48),  (36,  88,  56),
+        (40,   96,  60),  (44, 104,  64),  (48, 112,  72),  (52, 120,  76),
+        (56,  132,  84),  (48, 136,  84),  (40, 144,  80),  (52, 148,  88),
+        (68,  156, 100),  (80, 164, 112),  (96, 168, 124), (108, 176, 136),
+        (124, 184, 144), (136, 192, 156), (152, 196, 168), (164, 204, 180),
+        (180, 212, 192), (192, 220, 200), (208, 224, 212), (220, 232, 224),
+        (236, 240, 236), (252, 248, 248), (252, 252, 252), (252, 252, 240),
+        (252, 252, 228), (252, 252, 216), (248, 248, 204), (248, 248, 192),
+        (248, 248, 180), (248, 248, 164), (244, 244, 152), (244, 244, 140),
+        (244, 244, 128), (244, 244, 116), (240, 240, 104), (240, 240,  92),
+        (240, 240,  76), (240, 240,  64), (236, 236,  52), (236, 236,  40),
+        (236, 236,  28), (236, 236,  16), (232, 232,   0), (232, 232,  12),
+        (232, 232,  28), (232, 232,  40), (236, 236,  56), (236, 236,  68),
+        (236, 236,  84), (236, 236,  96), (240, 240, 112), (240, 240, 124),
+        (240, 240, 140), (244, 244, 152), (244, 244, 168), (244, 244, 180),
+        (244, 244, 196), (248, 248, 208), (248, 248, 224), (248, 248, 236),
+        (252, 252, 252), (248, 248, 248), (240, 240, 240), (232, 232, 232))
+</pre>
+
+
+
+<p><a name="k18"></a></p>
+<h2 id="k18">18. Výsledek vytvořený čtvrtým příkladem</h2>
+
+<p>Dnes již naposledy si ukážeme výsledná videa vytvořená čtvrtým demonstračním
+příkladem:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video4.htm">https://tisnik.github.io/moviepy-videos/video4.htm</a>
+
+
+
+<p><a name="k19"></a></p>
+<h2 id="k19">19. Repositář s&nbsp;demonstračními příklady</h2>
+
+<p>Zdrojové kódy všech čtyř dnes popsaných demonstračních příkladů určených pro
+interpret Pythonu 3 byly uloženy do Git repositáře dostupného na adrese <a
+href="https://github.com/tisnik/moviepy-examples">https://github.com/tisnik/moviepy-examples</a>.
+V&nbsp;případě, že nebudete chtít klonovat celý repositář (ten je ovšem
+prozatím velmi malý, doslova několik kilobajtů), můžete namísto toho použít
+odkazy na jednotlivé demonstrační příklady, které naleznete v&nbsp;následující
+tabulce:</p>
+
+<table>
+<tr><th>Projekt</th><th>Cesta</th></tr>
+<tr><td>dark_scene</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/1_dark_scene/moviepy_1_dark_scene.py">https://github.com/tisnik/moviepy-examples/blob/master/1_dark_scene/moviepy_1_dark_scene.py</a></td></tr>
+<tr><td>moving_line</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/2_moving_line/moviepy_2_moving_line.py">https://github.com/tisnik/moviepy-examples/blob/master/2_moving_line/moviepy_2_moving_line.py</a></td></tr>
+<tr><td>color_palette</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/3_color_palette/moviepy_3_colors.py">https://github.com/tisnik/moviepy-examples/blob/master/3_color_palette/moviepy_3_colors.py</a></td></tr>
+<tr><td>mandelbrot_zoom</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/4_mandelbrot_zoom">https://github.com/tisnik/moviepy-examples/blob/master/</a></td></tr>
+</table>
+
+
+
+<p><a name="k20"></a></p>
+<h2 id="k20">20. Odkazy na Internetu</h2>
+
+<ol>
+
+<li>MoviePy 0.2.3.3 na PyPi<br />
+<a href="https://pypi.org/project/moviepy/">https://pypi.org/project/moviepy/</a>
+</li>
+
+<li>MoviePy na GitHubu<br />
+<a href="https://github.com/Zulko/moviepy">https://github.com/Zulko/moviepy</a>
+</li>
+
+<li>MoviePy - dokumentace<br />
+<a href="http://zulko.github.io/moviepy/">http://zulko.github.io/moviepy/</a>
+</li>
+
+<li>MoviePy - galerie<br />
+<a href="http://zulko.github.io/moviepy/gallery.html">http://zulko.github.io/moviepy/gallery.html</a>
+</li>
+
+<li>Data Animations With Python and MoviePy<br />
+<a href="https://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/">https://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/</a>
+</li>
+
+<li>Porovnání formátů Ogg Theora a H.264<br />
+<a href="https://www.root.cz/zpravicky/porovnani-formatu-ogg-theora-a-h-264/">https://www.root.cz/zpravicky/porovnani-formatu-ogg-theora-a-h-264/</a>
+</li>
+
+<li>Případ GIF<br />
+<a href="https://www.root.cz/clanky/pripad-gif/">https://www.root.cz/clanky/pripad-gif/</a>
+</li>
+
+<li>Pravda a mýty o GIFu<br />
+<a href="https://www.root.cz/clanky/pravda-a-myty-o-gifu/">https://www.root.cz/clanky/pravda-a-myty-o-gifu/</a>
+</li>
+
+<li>Anatomie grafického formátu GIF<br />
+<a href="https://www.root.cz/clanky/anatomie-grafickeho-formatu-gif/">https://www.root.cz/clanky/anatomie-grafickeho-formatu-gif/</a>
+</li>
+
+<li>GIF: animace a konkurence<br />
+<a href="https://www.root.cz/clanky/gif-animace-a-konkurence/">https://www.root.cz/clanky/gif-animace-a-konkurence/</a>
+</li>
+
+<li>Two python modules : MoviePy and images2gif – part 001<br />
+<a href="http://free-tutorials.org/two-python-modules-moviepy-and-images2gif-part-001/">http://free-tutorials.org/two-python-modules-moviepy-and-images2gif-part-001/</a>
+</li>
+
+<li>images2gif<br />
+<a href="https://pypi.org/project/images2gif/">https://pypi.org/project/images2gif/</a>
+</li>
+
+<li>Making GIFs from video files with Python<br />
+<a href="https://www.devbattles.com/en/sand/post-345-Making+GIFs+From+Video+Files+With+Python">https://www.devbattles.com/en/sand/post-345-Making+GIFs+From+Video+Files+With+Python</a>
+</li>
+
+<li>GIF89a specification<br />
+<a href="https://www.w3.org/Graphics/GIF/spec-gif89a.txt">https://www.w3.org/Graphics/GIF/spec-gif89a.txt</a>
+</li>
+
+<li>MPEG-4 Part 14<br />
+<a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">https://en.wikipedia.org/wiki/MPEG-4_Part_14</a>
+</li>
+
+<li>Theora video compression<br />
+<a href="https://www.theora.org/">https://www.theora.org/</a>
+</li>
+
+<li>Theora<br />
+<a href="https://en.wikipedia.org/wiki/Theora">https://en.wikipedia.org/wiki/Theora</a>
+</li>
+
+<li>NumPy<br />
+<a href="http://www.numpy.org/">http://www.numpy.org/</a>
+</li>
+
+<li>numpy 1.14.2 (on PyPi)<br />
+<a href="https://pypi.org/project/numpy/">https://pypi.org/project/numpy/</a>
+</li>
+
+<li>Integrovaná vývojová prostředí ve Fedoře: praktické použití IPython Notebooku a knihovny Numpy<br />
+<a href="https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy/">https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy/</a>
+</li>
+
+<li>Integrovaná vývojová prostředí ve Fedoře: praktické použití IPython Notebooku a knihovny Numpy (2.část)<br />
+<a href="https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy-2-cast/">https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy-2-cast/</a>
+</li>
+
+<li>Non-linear editing system<br />
+<a href="https://en.wikipedia.org/wiki/Non-linear_editing_system">https://en.wikipedia.org/wiki/Non-linear_editing_system</a>
+</li>
+
+</ol>
+
+
+
+<p></p><p></p>
+<p><small>Autor: <a href="http://www.fit.vutbr.cz/~tisnovpa">Pavel Tišnovský</a> &nbsp; 2018</small></p>
+</body>
+</html>
+
