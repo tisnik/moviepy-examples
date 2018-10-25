@@ -1,0 +1,1773 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Použití MoviePy společně Matplotlibem pro tvorbu animovaných grafů</title>
+<meta name="Author" content="Pavel Tisnovsky" />
+<meta name="Generator" content="vim" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<style type="text/css">
+         body {color:#000000; background:#ffffff;}
+         h1  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#c00000; text-align:center; padding-left:1em}
+         h2  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#0000c0; padding-left:1em; text-align:left}
+         h3  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#c0c0c0; padding-left:1em; text-align:left}
+         h4  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#e0e0e0; padding-left:1em; text-align:left}
+         a   {font-family: arial, helvetica, sans-serif;}
+         li  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ol  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ul  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         p   {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify;}
+         pre {background:#e0e0e0}
+</style>
+</head>
+
+<body>
+
+<h1>Použití MoviePy společně Matplotlibem pro tvorbu animovaných grafů</h1>
+
+<h3>Pavel Tišnovský</h3>
+
+<p></p>
+
+<h1>Úvodník</h1>
+
+<p>Ve druhé části článku o knihovně MoviePy si ukážeme, jak je možné s využitím kombinace knihoven MoviePy + Matplotlib vytvořit animované grafy. Nejedná se jen o pouhé efekty, protože animované grafy lze využít například pro zobrazení složitějších funkcí.</p>
+
+
+
+<h2>Obsah</h2>
+
+<p><a href="#k01">1. Použití MoviePy společně Matplotlibem pro tvorbu animovaných grafů</a></p>
+<p><a href="#k02">2. Vykreslení průběhu funkce sinus s&nbsp;využitím knihovny Matplotlib</a></p>
+<p><a href="#k03">3. Volba výstupního souboru</a></p>
+<p><a href="#k04">4. Animovaná změna parametrů zobrazované funkce</a></p>
+<p><a href="#k05">5. Specifikace rozlišení výsledného videa nebo animovaného GIFu</a></p>
+<p><a href="#k06">6. Alternativní způsob vykreslení animace</a></p>
+<p><a href="#k07">7. Vykreslení průběhů dvou funkcí do jediného grafu</a></p>
+<p><a href="#k08">8. Animace předchozího příkladu</a></p>
+<p><a href="#k09">9. Základní polární graf</a></p>
+<p><a href="#k10">10. Postupná změna parametrů funkce vykreslené v&nbsp;polárním grafu</a></p>
+<p><a href="#k11">11. Použití funkce <strong>numpy.meshgrid()</strong></a></p>
+<p><a href="#k12">12. Graf s&nbsp;konturami funkce z=f(x,y)</a></p>
+<p><a href="#k13">13. Animace funkce s&nbsp;proměnnými parametry vykreslená formou kontur</a></p>
+<p><a href="#k14">14. Jednoduchý trojrozměrný graf funkce z=f(x,y) &ndash; drátový model</a></p>
+<p><a href="#k15">15. Od drátového modelu k&nbsp;vyplněné ploše</a></p>
+<p><a href="#k16">16. Promítnutí grafu na plochy kolmé na osy</a></p>
+<p><a href="#k17">17. Animace &bdquo;vlnek&ldquo; ve funkci sinc</a></p>
+<p><a href="#k18">18. Přidání dalšího rozměru &ndash; času</a></p>
+<p><a href="#k19">19. Repositář s&nbsp;demonstračními příklady</a></p>
+<p><a href="#k20">20. Odkazy na Internetu</a></p>
+
+
+
+<p><a name="k01"></a></p>
+<h2 id="k01">1. Použití MoviePy společně Matplotlibem pro tvorbu animovaných grafů</h2>
+
+<p><a
+href="https://www.root.cz/clanky/programova-tvorba-a-nelinearni-editace-videa-s-vyuzitim-knihovny-moviepy/">V&nbsp;předchozím
+článku</a> jsme si ukázali, jakým způsobem je možné použít knihovnu
+<i>MoviePy</i> pro programové vytváření videa v&nbsp;různých formátech. Dnes se
+zaměříme na další užitečné vlastnosti této knihovny, zejména na možnost
+zkombinovat ji s&nbsp;knihovnou <i>Matplotlib</i>. Díky kombinaci
+<i>MoviePy</i> + <i>Matplotlib</i> lze vytvářet animované grafy, ukazovat různé
+možnosti aproximace a interpolace funkcí, přidat do grafů funkcí čas jako další
+(třetí, čtvrtý) rozměr atd. Nejprve si ukážeme tvorbu klasických grafů funkcí
+jedné proměnné a následně do grafu přidáme průběh další funkce, popisky os,
+legendu apod. Dále si ukážeme další typy grafů, zejména polární grafy.  Ve
+druhé části článku si pak ukážeme tvorbu grafů s&nbsp;konturami, 3D grafů
+funkcí se dvěma nezávislými proměnnými, 3D grafů funkcí typu <i>x,y=f(t)</i>,
+<i>x,y,z=f(t)</i> apod. Všechny ukázky budou provedeny jak ve statické podobně,
+tak i v&nbsp;podobě animované.</p>
+
+<a href="https://www.root.cz/obrazek/328072/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-1-prev.png" class="image-328072" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 1: Ukázka možností knihovny Matplotlib.</i></p>
+
+
+
+<p><a name="k02"></a></p>
+<h2 id="k02">2. Vykreslení průběhu funkce sinus s&nbsp;využitím knihovny Matplotlib</h2>
+
+<p>Na úvod si popíšeme velmi jednoduchý demonstrační příklad naprogramovaný
+v&nbsp;Pythonu 3, který po svém spuštění vykreslí graf s&nbsp;průběhem funkce
+sinus. V&nbsp;příkladu nalezneme pouze osm programových řádků. Nejprve je nutné
+naimportovat hlavní modul knihovny <i>Numpy</i> nazvaný přímočaře
+<strong>numpy</strong> a následně i submodul <strong>pyplot</strong>
+z&nbsp;knihovny <i>matplotlib</i>. Většina aplikací, ale i demonstračních
+příkladů, s&nbsp;nimiž se setkáte, používá pro importované moduly zkratky
+<strong>np</strong> a <strong>plt</strong>, čehož se z&nbsp;důvodu zachování
+konzistence budeme držet i my:</p>
+
+<pre>
+import numpy as np
+import matplotlib.pyplot as plt
+</pre>
+
+<p>Následně je pomocí funkce <strong>numpy.linspace()</strong> (tu již dobře
+známe <a
+href="https://www.root.cz/clanky/programova-tvorba-a-nelinearni-editace-videa-s-vyuzitim-knihovny-moviepy/">z&nbsp;předchozího
+článku</a>) vytvořeno pole se sto prvky s&nbsp;hodnotami od 0 do 2&pi;. Na toto
+pole je aplikována funkce pojmenovaná <strong>numpy.sin()</strong>, jejímž
+výsledkem je nové stoprvkové pole (hodnoty prvků leží v&nbsp;rozsahu od -1 do
+1):</p>
+
+<pre>
+<i># hodnoty na x-ové ose</i>
+x = np.linspace(0, 2*np.pi, 100)
+&nbsp;
+<i># hodnoty na y-ové ose</i>
+y = np.sin(x)
+</pre>
+
+<p>Funkcí <strong>matplotlib.pyplot.plot()</strong> je vykreslen průběh funkce,
+ovšem graf ještě není zobrazen, takže do něj můžeme přidat popis obou os a graf
+následně zobrazit příkazem <strong>matplotlib.pyplot.show()</strong>. Způsob
+zobrazení závisí na nastavení Pythonu; implicitně se použije speciální
+prohlížeč naprogramovaný s&nbsp;použitím knihovny Tk (resp.&nbsp;Tkinter):</p>
+
+<pre>
+<i># vykreslit průběh funkce</i>
+plt.plot(x, y)
+&nbsp;
+<i># popis os</i>
+plt.xlabel("x")
+plt.ylabel("sin(x)")
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example01_sinus.py">Úplný
+zdrojový kód</a> tohoto příkladu vypadá následovně:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># První demonstrační příklad:</i>
+<i># - vykreslení průběhu funkce sin</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+&nbsp;
+<i># hodnoty na x-ové ose</i>
+x = np.linspace(0, 2*np.pi, 100)
+&nbsp;
+<i># hodnoty na y-ové ose</i>
+y = np.sin(x)
+&nbsp;
+<i># vykreslit průběh funkce</i>
+plt.plot(x, y)
+&nbsp;
+<i># popis os</i>
+plt.xlabel("x")
+plt.ylabel("sin(x)")
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<a href="https://www.root.cz/obrazek/328073/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-2-prev.png" class="image-328073" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 2: Průběh funkce sin(x) vykreslený prvním demonstračním
+příkladem.</i></p>
+
+
+
+<p><a name="k03"></a></p>
+<h2 id="k03">3. Volba výstupního souboru</h2>
+
+<p>Implicitní prohlížeč, o němž jsme se zmínili <a href="#k02">v&nbsp;předchozí
+kapitole</a>, sice dokáže uložit nakreslený graf do výstupního souboru, ovšem
+mnohdy je vyžadováno, aby knihovna <i>Matplotlib</i> graf vyexportovala
+automaticky (programově). Můžeme si například představit generátor výsledků
+spouštěný ze skriptu, pomocnou službu pro tvorbu grafů umisťovaných na webové
+stránky apod. Při takovýchto požadavcích, které jsou poměrně časté, je možné
+využít funkce <strong>matplotlib.pyplot.savefig()</strong>, které se
+v&nbsp;nejjednodušším případě předá pouze jméno výstupního souboru. Tato funkce
+se pak na základě analýzy přípony souboru dokáže rozhodnout o tom, který formát
+použije.  K&nbsp;dispozici jsou mj.&nbsp;tyto formáty:</p>
+
+<table>
+<tr><th>#</th><th>Koncovka</th><th>Formát</th></tr>
+<tr><td>1</td><td>png</td><td>rastrový formát <a href="http://www.root.cz/clanky/png-is-not-gif/">PNG</a></td></tr>
+<tr><td>2</td><td>pdf</td><td>dokument ve formátu PDF s&nbsp;vektorovým grafem</td></tr>
+<tr><td>3</td><td>eps</td><td>vektorový formát Encapsulated PostScript (varianta PostScriptu určená pro vložení do dalších dokumentů, včetně (La)TeXu)</td></tr>
+<tr><td>4</td><td>ps</td><td>vektorový formát <a href="http://www.root.cz/clanky/graficky-metaformat-postscript/">PostScript</a></td></tr>
+<tr><td>5</td><td>svg</td><td>vektorový formát <a href="http://www.root.cz/clanky/vektorovy-graficky-format-svg/">SVG</a></td></tr>
+</table>
+
+<p>Použití funkce <strong>matplotlib.pyplot.savefig()</strong> je v&nbsp;praxi
+velmi snadné, o čemž se ostatně můžete sami přesvědčit po porovnání zdrojového
+kódu <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example01_sinus.py">prvního
+demonstračního příkladu</a> popsaného <a href="#k02">v&nbsp;předchozí
+kapitole</a> a <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example02_export_formats.py">příkladu
+druhého</a>, do něhož jsme pouze vložili vytvoření pěti souborů
+s&nbsp;exportovaným grafem:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># Druhý demonstrační příklad:</i>
+<i># - vykreslení průběhu funkce sin</i>
+<i># - uložení grafu do různých typů souboru</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+&nbsp;
+<i># hodnoty na x-ové ose</i>
+x = np.linspace(0, 2*np.pi, 100)
+&nbsp;
+<i># hodnoty na y-ové ose</i>
+y = np.sin(x)
+&nbsp;
+<i># vykreslit průběh funkce</i>
+plt.plot(x, y)
+&nbsp;
+<i># popis os</i>
+plt.xlabel("x")
+plt.ylabel("sin(x)")
+&nbsp;
+<i># vykreslení a uložení grafu do různých typů souborů</i>
+plt.savefig("example02.png")
+plt.savefig("example02.pdf")
+plt.savefig("example02.eps")
+plt.savefig("example02.ps")
+plt.savefig("example02.svg")
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<a href="https://www.root.cz/obrazek/328074/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-3-prev.png" class="image-328074" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 3: Průběh funkce sin(x) vykreslený druhým demonstračním
+příkladem (měl by být shodný s&nbsp;předchozím obrázkem).</i></p>
+
+
+
+<p><a name="k04"></a></p>
+<h2 id="k04">4. Animovaná změna parametrů zobrazované funkce</h2>
+
+<p>Nyní si již můžeme ukázat, jak se vytvoří animovaný průběh funkce sinus.
+Animace bude spočívat v&nbsp;postupném přidávání offsetu k&nbsp;parametru této
+funkce. Pokud bude offset postupně nabývat hodnot od 0 do 2&pi;, vznikne
+zdánlivě nekonečná smyčka. Nejprve je nutné naimportovat nám již známou třídu
+<i>VideoClip</i> a taktéž funkci <strong>mplfig_to_npimage</strong>, která
+provádí rasterizaci grafu do datové struktury <strong>ndarray</strong>:</p>
+
+<pre>
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+</pre>
+
+<p>Dále nastavíme základní parametry animace, tj.&nbsp;její délku a počet
+snímků za sekundu:</p>
+
+<pre>
+DURATION = 10
+FPS = 15
+</pre>
+
+<p>Vytvoření stoprvkového pole s&nbsp;hodnotami od 0 do 2&pi; již známe:</p>
+
+<pre>
+<i># hodnoty na x-ové ose</i>
+x = np.linspace(0, 2 * np.pi, 100)
+</pre>
+
+<p>Následuje změna &ndash; vytvoření objektu reprezentujícího vlastní graf
+(<strong>Figure</strong>) a jednotlivé elementy grafu
+(<strong>Axes</strong>):</p>
+
+<pre>
+<i># vytvoření objektu reprezentujícího průběh funkce</i>
+fig, axis = plt.subplots()
+</pre>
+
+<p>Další část kódu je již vložena do funkce <strong>make_frame</strong>,
+protože právě tato funkce bude postupně volána pro vytvoření všech snímků. Ve
+funkci nejprve vymažeme z&nbsp;grafu všechny starší elementy, vypočítáme
+offset, vypočítáme pole hodnot funkce sinus, graf vykreslíme metodou
+<strong>plot</strong> a následně výsledný objekt <strong>Figure</strong>
+rasterizujeme do datové struktury typu <strong>ndarray</strong>:</p>
+
+<pre>
+def make_frame(t):
+    axis.clear()
+&nbsp;
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset = 2 * np.pi * t / DURATION
+&nbsp;
+    <i># hodnoty na y-ové ose</i>
+    y = np.sin(x + offset)
+&nbsp;
+    <i># vykreslení průběhu funkce</i>
+    axis.plot(x, y)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+</pre>
+
+<p>Následuje část, kterou jsme si popsali minule &ndash; vytvoření video klipu,
+nastavení jeho parametrů, postupná tvorba snímků (volání callback funkce
+<strong>make_frame</strong>) a následné uložení video klipu do animovaného
+GIFu:</p>
+
+<pre>
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_gif('sinus_A.gif', fps=FPS)
+</pre>
+
+<a href="https://www.root.cz/obrazek/328075/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-4.gif" class="image-328075" alt="&#160;" width="200" height="150" /></a>
+<p><i>Obrázek 4: Výsledná animace (zmenšená na poloviční rozlišení).</i></p>
+
+<p>Původní animaci v&nbsp;plném rozlišení lze získat <a href="https://www.root.cz/obrazek/328091/">na této
+adrese</a>.</p>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example01_sinus_A.py">Úplný
+zdrojový kód</a> tohoto příkladu vypadá následovně:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># První demonstrační příklad:</i>
+<i># - vykreslení animovaného průběhu funkce sin</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 15
+&nbsp;
+<i># hodnoty na x-ové ose</i>
+x = np.linspace(0, 2 * np.pi, 100)
+&nbsp;
+<i># vytvoření objektu reprezentujícího průběh funkce</i>
+fig, axis = plt.subplots()
+&nbsp;
+&nbsp;
+def make_frame(t):
+    axis.clear()
+&nbsp;
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset = 2 * np.pi * t / DURATION
+&nbsp;
+    <i># hodnoty na y-ové ose</i>
+    y = np.sin(x + offset)
+&nbsp;
+    <i># vykreslení průběhu funkce</i>
+    axis.plot(x, y)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_gif('sinus_A.gif', fps=FPS)
+</pre>
+
+
+
+<p><a name="k05"></a></p>
+<h2 id="k05">5. Specifikace rozlišení výsledného videa nebo animovaného GIFu</h2>
+
+<p>Při tvorbě animací je většinou nutné explicitně nastavit rozlišení
+výsledných snímků (rámců). Ovšem při použití knihovny Matplotlib je situace
+poněkud složitější, protože se rozlišení nenastavuje přímo v&nbsp;pixelech, ale
+je nutné specifikovat rozměry obrázku ve fyzických jednotkách (například
+v&nbsp;palcích). Malým trikem, konkrétně určením DPI (<i>dot per inch</i>) je
+však možné docílit toho, že rozlišení animace bude přepočteno z&nbsp;pixelů na
+délkové míry. Rozlišení snímků i DPI si nastavíme dopředu:</p>
+
+<pre>
+WIDTH = 400
+HEIGHT = 300
+DPI = 100
+</pre>
+
+<p>Dále nastavíme rozměr grafu, ovšem s&nbsp;přepočtem přes DPI. To znamená, že
+se šířka 400 pixelů přepočte na 4 palce při 100 DPI atd.:</p>
+
+<pre>
+fig, axis = plt.subplots(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+</pre>
+
+<a href="https://www.root.cz/obrazek/328076/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-5.gif" class="image-328076" alt="&#160;" width="200" height="150" /></a>
+<p><i>Obrázek 5: Výsledná animace (zmenšená na poloviční rozlišení).</i></p>
+
+<p>Původní animaci v&nbsp;plném rozlišení lze získat <a href="https://www.root.cz/obrazek/328091/">na této
+adrese</a>.</p>
+
+<p>Opět se podívejme na <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example01_sinus_B.py">úplný
+zdrojový kód</a> tohoto demonstračního příkladu:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - vykreslení animovaného průběhu funkce sin</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+<i># parametry obrázků / rámců</i>
+WIDTH = 400
+HEIGHT = 300
+DPI = 100
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 15
+&nbsp;
+<i># hodnoty na x-ové ose</i>
+x = np.linspace(0, 2 * np.pi, 100)
+&nbsp;
+<i># vytvoření objektu reprezentujícího průběh funkce</i>
+<i># + nastavení rozlišení obrázku (resp. jednotlivých rámců)</i>
+fig, axis = plt.subplots(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+&nbsp;
+&nbsp;
+def make_frame(t):
+    axis.clear()
+&nbsp;
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset = 2 * np.pi * t / DURATION
+&nbsp;
+    <i># hodnoty na y-ové ose</i>
+    y = np.sin(x + offset)
+&nbsp;
+    <i># vykreslení průběhu funkce</i>
+    axis.plot(x, y)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_gif('sinus_B.gif', fps=FPS)
+</pre>
+
+
+
+<p><a name="k06"></a></p>
+<h2 id="k06">6. Alternativní způsob vykreslení animace</h2>
+
+<p>Knihovna Matplotlib nabízí hned několik způsobů vykreslení grafů. Proto si
+ukažme ještě jednu variantu vytvoření animovaného průběhu funkce sinus.
+Tentokrát se bude každý snímek vytvářet takto (bez použití
+<strong>subplots</strong>):</p>
+
+<pre>
+    fig = plt.figure(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+&nbsp;
+    plot = fig.add_subplot(111)
+&nbsp;
+    <i># vykreslení průběhu funkce</i>
+    plot.plot(x, y)
+</pre>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example01_sinus_C.py">Celý
+zdrojový kód</a> této varianty vypadá následovně:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># První demonstrační příklad:</i>
+<i># - vykreslení animovaného průběhu funkce sin</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+<i># parametry obrázků / rámců</i>
+WIDTH = 400
+HEIGHT = 300
+DPI = 100
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 15
+&nbsp;
+<i># hodnoty na x-ové ose</i>
+x = np.linspace(0, 2 * np.pi, 100)
+&nbsp;
+&nbsp;
+&nbsp;
+def make_frame(t):
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset = 2 * np.pi * t / DURATION
+&nbsp;
+    <i># hodnoty na y-ové ose</i>
+    y = np.sin(x + offset)
+&nbsp;
+    fig = plt.figure(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+&nbsp;
+    plot = fig.add_subplot(111)
+&nbsp;
+    <i># vykreslení průběhu funkce</i>
+    plot.plot(x, y)
+    
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_gif('sinus_C.gif', fps=FPS)
+</pre>
+
+
+
+<p><a name="k07"></a></p>
+<h2 id="k07">7. Vykreslení průběhů dvou funkcí do jediného grafu</h2>
+
+<p>Velmi často se můžeme setkat s&nbsp;požadavkem vložení průběhů několika
+funkcí do jediného grafu. Zde knihovna <i>matplotlib</i> svým uživatelům nabízí
+větší množství řešení. Je například možné do jednoho obrázku či dokumentu
+vložit více grafů s&nbsp;totožnou x-ovou osou (a většinou odlišným měřítkem na
+y-ových osách), popř.&nbsp;lze skutečně sloučit větší množství průběhů
+v&nbsp;jediném grafu. Ukažme si nejdříve druhou zmiňovanou možnost,
+tj.&nbsp;vytvoření grafu s&nbsp;dvěma funkcemi, ovšem s&nbsp;totožnými x-ovými
+a y-ovými osami. I u takto vytvořeného grafu můžeme použít již zmíněnou funkci
+<strong>matplotlib.pyplot.plot()</strong>, které se ovšem předají čtyři pole:
+hodnoty na ose x, hodnoty první funkce, opět hodnoty na ose x (pro nás stejné
+pole) a hodnoty druhé funkce. Žádné další operace nejsou zapotřebí, což je
+ostatně patrné i při pohledu na zdrojový kód dnešního třetího demonstračního
+příkladu:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - vykreslení průběhů funkcí sin a cos</i>
+<i>#   do jediného grafu</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+&nbsp;
+<i># hodnoty na x-ové ose</i>
+x = np.linspace(0, 2*np.pi, 100)
+&nbsp;
+<i># hodnoty na y-ové ose: první funkce</i>
+y1 = np.sin(x)
+&nbsp;
+<i># hodnoty na y-ové ose: druhá funkce</i>
+y2 = np.cos(x)
+&nbsp;
+<i># vykreslit průběh obou funkcí</i>
+plt.plot(x, y1, x, y2)
+&nbsp;
+<i># popis os</i>
+plt.xlabel("x")
+plt.ylabel("sin(x) a cos(x)")
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: toto řešení není příliš vhodné
+v&nbsp;situaci, kdy jsou hodnoty obou funkcí značně rozdílné, neboť se používá
+stejné měřítko.</div></p>
+
+<a href="https://www.root.cz/obrazek/328077/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-6-prev.png" class="image-328077" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 6: Graf, na němž jsou nakresleny průběhy dvou funkcí.</i></p>
+
+
+
+<p><a name="k08"></a></p>
+<h2 id="k08">8. Animace předchozího příkladu</h2>
+
+<p>Předchozí příklady můžeme zkombinovat a vytvořit tak animovaný průběh
+většího množství funkcí. Aby byla situace ještě zajímavější, je u funkce sinus
+počítán kladný offset, u funkce kosinus offset záporný a navíc ještě zobrazíme
+součet obou funkcí. Aby se neměnilo měřítko na y-ové ose, nastavíme ho na fixní
+hodnotu:</p>
+
+<pre>
+def make_frame(t):
+    axis.clear()
+&nbsp;
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset = 2 * np.pi * t / DURATION
+&nbsp;
+    <i># hodnoty na y-ové ose: první funkce</i>
+    y1 = np.sin(x + offset)
+&nbsp;
+    <i># hodnoty na y-ové ose: druhá funkce</i>
+    y2 = np.cos(x - offset)
+&nbsp;
+    <i># hodnoty na y-ové ose: součet funkcí</i>
+    y3 = y1 + y2
+&nbsp;
+    <i># vykreslení průběhu funkce</i>
+    axis.plot(x, y1)
+    axis.plot(x, y2)
+    axis.plot(x, y3)
+    axis.set_ylim(-2, 2)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+</pre>
+
+<a href="https://www.root.cz/obrazek/328078/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-7.gif" class="image-328078" alt="&#160;" width="200" height="150" /></a>
+<p><i>Obrázek 7: Výsledná animace (zmenšená na poloviční rozlišení).</i></p>
+
+<p>Původní animaci v&nbsp;plném rozlišení lze získat <a href="https://www.root.cz/obrazek/328093/">na této
+adrese</a>.</p>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example03_sin_cos.py">Úplný
+zdrojový kód</a> příkladu:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># Třetí demonstrační příklad:</i>
+<i># - vykreslení animovaného průběhů funkcí sin a cos</i>
+<i>#   do jediného grafu</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+<i># parametry obrázků / rámců</i>
+WIDTH = 400
+HEIGHT = 300
+DPI = 100
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 15
+&nbsp;
+<i># hodnoty na x-ové ose</i>
+x = np.linspace(0, 2 * np.pi, 100)
+&nbsp;
+<i># vytvoření objektu reprezentujícího průběh funkce</i>
+<i># + nastavení rozlišení obrázku (resp. jednotlivých rámců)</i>
+fig, axis = plt.subplots(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+&nbsp;
+&nbsp;
+def make_frame(t):
+    axis.clear()
+&nbsp;
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset = 2 * np.pi * t / DURATION
+&nbsp;
+    <i># hodnoty na y-ové ose: první funkce</i>
+    y1 = np.sin(x + offset)
+&nbsp;
+    <i># hodnoty na y-ové ose: druhá funkce</i>
+    y2 = np.cos(x - offset)
+&nbsp;
+    <i># hodnoty na y-ové ose: součet funkcí</i>
+    y3 = y1 + y2
+&nbsp;
+    <i># vykreslení průběhu funkce</i>
+    axis.plot(x, y1)
+    axis.plot(x, y2)
+    axis.plot(x, y3)
+    axis.set_ylim(-2, 2)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_gif('sin_cos.gif', fps=FPS)
+</pre>
+
+
+
+<p><a name="k09"></a></p>
+<h2 id="k09">9. Základní polární graf</h2>
+
+<p>Pokud je zapotřebí vykreslit polární graf, je možné postupovat následujícím
+způsobem. Nejprve se plocha obrázku či dokumentu určená pro vykreslení grafu
+rozdělí do pomyslné mřížky o velikosti 1&times;1 buňka. Do této mřížky se
+funkcí <strong>matplotlib.pyplot.subplot()</strong> vloží
+&bdquo;podgraf&ldquo;, u něhož se pojmenovaným parametrem
+<strong>projection</strong> specifikuje použitá projekce. Magická konstanta 111
+při volání této funkce značí, že se skutečně má vytvořit mřížka 1&times;1 buňka
+a podgraf se má vložit do této buňky (ta má index 1). Další vykreslování již
+vlastně známe, ovšem s&nbsp;tím nepatrným rozdílem, že se nevolá funkce
+<strong>matplotlib.pyplot.plot()</strong>, ale metoda objektu získaného výše
+zmíněnou funkcí <strong>matplotlib.pyplot.subplot()</strong>. Dále si
+povšimněte toho, že namísto polí pojmenovaných <strong>x</strong> a
+<strong>y</strong> používáme pole hodnot se jmény <strong>theta</strong> a
+<strong>radius</strong>, což se pro tento typ grafu hodí mnohem více:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - základní polární graf</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+&nbsp;
+<i># úhel v polárním grafu</i>
+theta = np.linspace(0.01, 2*np.pi, 150)
+&nbsp;
+<i># vzdálenost od středu</i>
+radius = np.log(theta)
+&nbsp;
+ax=plt.subplot(111, projection="polar")
+&nbsp;
+<i># vykreslit průběh funkce</i>
+<i># v polárním grafu</i>
+ax.plot(theta, radius)
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<a href="https://www.root.cz/obrazek/328079/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-8-prev.png" class="image-328079" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 8: Polární graf se slavnou logaritmickou spirálou.</i></p>
+
+
+
+<p><a name="k10"></a></p>
+<h2 id="k10">10. Postupná změna parametrů funkce vykreslené v&nbsp;polárním grafu</h2>
+
+<p>Postupné odvíjení logaritmické spirály lze vytvořit nepatrnou úpravou
+předchozího příkladu:</p>
+
+<pre>
+def make_frame(t):
+    axis.clear()
+&nbsp;
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset = 2 * np.pi * t / DURATION
+&nbsp;
+    <i># úhel v polárním grafu</i>
+    theta = np.linspace(0.01 + offset, 2*np.pi + offset, 150)
+&nbsp;
+    <i># vzdálenost od středu</i>
+    radius = np.log(theta)
+&nbsp;
+    <i># vykreslení průběhu funkce</i>
+    <i># v polárním grafu</i>
+    axis.plot(theta, radius)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+</pre>
+
+<p>Na zmenšené animaci si povšimněte, jak se automaticky mění měřítko:</p>
+
+<a href="https://www.root.cz/obrazek/328080/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-9.gif" class="image-328080" alt="&#160;" width="200" height="200" /></a>
+<p><i>Obrázek 9: Postupné odvíjení logaritmické spirály.</i></p>
+
+<p>Původní animaci v&nbsp;plném rozlišení lze získat <a href="https://www.root.cz/obrazek/328094/">na této
+adrese</a>.</p>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example04_polar_graph.py">Úplný
+zdrojový kód</a> příkladu:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - základní polární animovaný graf</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+<i># parametry obrázků / rámců</i>
+WIDTH = 400
+HEIGHT = 400
+DPI = 100
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 15
+&nbsp;
+fig = plt.figure(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+axis = fig.add_subplot(111, projection="polar")
+&nbsp;
+&nbsp;
+def make_frame(t):
+    axis.clear()
+&nbsp;
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset = 2 * np.pi * t / DURATION
+&nbsp;
+    <i># úhel v polárním grafu</i>
+    theta = np.linspace(0.01 + offset, 2*np.pi + offset, 150)
+&nbsp;
+    <i># vzdálenost od středu</i>
+    radius = np.log(theta)
+&nbsp;
+    <i># vykreslení průběhu funkce</i>
+    <i># v polárním grafu</i>
+    axis.plot(theta, radius)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_gif('polar.gif', fps=FPS)
+</pre>
+
+
+
+<p><a name="k11"></a></p>
+<h2 id="k11">11. Použití funkce <strong>numpy.meshgrid()</strong></h2>
+
+<p>Před popisem grafů zobrazujících drátové modely či kontury funkcí typu
+z=f(x,y) se musíme seznámit s&nbsp;užitečnou funkcí nazvanou
+<strong>numpy.meshgrid()</strong>. Tato funkce má sice poměrně univerzální
+možnosti použití, my se však v&nbsp;dnešním článku spokojíme s&nbsp;tím, že
+pokud se funkci <strong>numpy.meshgrid()</strong> předá dvojice jednorozměrných
+polí (vektorů) představujících hodnoty nezávislých x-ových a y-ových souřadnic,
+vytvoří se jako výsledek dvě dvourozměrné matice, které dohromady tvoří mřížku
+souřadnic [x<sub>i</sub>, y<sub>i</sub>]. Počet řádků těchto 2D matic odpovídá
+délce druhého pole, počet sloupců pak délce pole prvního. Podívejme se na
+jednoduchý příklad:</p>
+
+<pre>
+<i># vytvoření vektoru [1..10]</i>
+<strong>x=np.arange(1, 11, 1)</strong>
+&nbsp;
+<i># vytvoření vektoru [101..105]</i>
+<strong>y=np.arange(101, 106, 1)</strong>
+&nbsp;
+<i># zobrazení prvního vektoru</i>
+<strong>x</strong>
+array([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+&nbsp;
+<i># zobrazení druhého vektoru</i>
+<strong>y</strong>
+array([101, 102, 103, 104, 105])
+&nbsp;
+<i># zavolání funkce numpy.meshgrid</i>
+<strong>np.meshgrid(x,y)</strong>
+[array([[ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10],
+       [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10],
+       [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10],
+       [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10],
+       [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10]]),
+ array([[101, 101, 101, 101, 101, 101, 101, 101, 101, 101],
+       [102, 102, 102, 102, 102, 102, 102, 102, 102, 102],
+       [103, 103, 103, 103, 103, 103, 103, 103, 103, 103],
+       [104, 104, 104, 104, 104, 104, 104, 104, 104, 104],
+       [105, 105, 105, 105, 105, 105, 105, 105, 105, 105]])]
+</pre>
+
+<p>Většinou se první i druhá matice uloží do samostatné proměnné, a to
+následovně (povšimněte si, že výsledné matice jsou uloženy do proměnných
+označených verzálkami):</p>
+
+<pre>
+<i># uložení první matice do proměnné X</i>
+<i># uložení druhé matice do proměnné Y</i>
+<strong>X,Y=np.meshgrid(x,y)</strong>
+&nbsp;
+<i># zobrazení první matice</i>
+<strong>X</strong>
+array([[ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10],
+       [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10],
+       [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10],
+       [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10],
+       [ 1,  2,  3,  4,  5,  6,  7,  8,  9, 10]])
+&nbsp;
+<i># zobrazení druhé matice</i>
+<strong>Y</strong>
+array([[101, 101, 101, 101, 101, 101, 101, 101, 101, 101],
+       [102, 102, 102, 102, 102, 102, 102, 102, 102, 102],
+       [103, 103, 103, 103, 103, 103, 103, 103, 103, 103],
+       [104, 104, 104, 104, 104, 104, 104, 104, 104, 104],
+       [105, 105, 105, 105, 105, 105, 105, 105, 105, 105]])
+</pre>
+
+<p>Z&nbsp;předchozího článku již víme, že s&nbsp;maticemi je možné
+mj.&nbsp;provádět i základní operace typu součet matic, rozdíl matic, maticový
+součin atd. Taktéž je možné na prvky matice aplikovat logaritmické či
+goniometrické funkce, takže například následující zápis je zcela korektní:</p>
+
+<pre>
+<i># součet matic a následně aplikace goniometrické funkce sin</i>
+<i># na každý prvek výsledné matice</i>
+<strong>Z=np.sin(X+Y)</strong>
+&nbsp;
+<i># podívejme se na výslednou matici</i>
+<strong>Z</strong>
+array([[ 0.99482679,  0.62298863, -0.3216224 , -0.97053528, -0.7271425 ,
+         0.18478174,  0.92681851,  0.81674261, -0.04424268, -0.86455145],
+       [ 0.62298863, -0.3216224 , -0.97053528, -0.7271425 ,  0.18478174,
+         0.92681851,  0.81674261, -0.04424268, -0.86455145, -0.8899956 ],
+       [-0.3216224 , -0.97053528, -0.7271425 ,  0.18478174,  0.92681851,
+         0.81674261, -0.04424268, -0.86455145, -0.8899956 , -0.09718191],
+       [-0.97053528, -0.7271425 ,  0.18478174,  0.92681851,  0.81674261,
+        -0.04424268, -0.86455145, -0.8899956 , -0.09718191,  0.78498039],
+       [-0.7271425 ,  0.18478174,  0.92681851,  0.81674261, -0.04424268,
+        -0.86455145, -0.8899956 , -0.09718191,  0.78498039,  0.94543533]])
+</pre>
+
+
+
+<p><a name="k12"></a></p>
+<h2 id="k12">12. Graf s&nbsp;konturami funkce z=f(x,y)</h2>
+
+<p>První způsob zobrazení funkce typu <i>z=f(x,y)</i> spočívá ve vykreslení
+takzvaných kontur, které si pro zjednodušení můžeme představit jako vrstevnice
+na mapě &ndash; body spojené konturou/vrstevnicí mají stejnou hodnotu funkce
+(tj.&nbsp;stejnou hodnotu z-ové souřadnice). Při vyhodnocování a následném
+vykreslení funkce budeme postupovat následovně:</p>
+
+<ol>
+<li>Vytvoříme vektor s&nbsp;hodnotami nezávislé proměnné x.</li>
+<li>Vytvoříme vektor s&nbsp;hodnotami nezávislé proměnné y.</li>
+<li>S&nbsp;využitím <strong>numpy.meshgrid</strong> necháme vygenerovat dvojici matic souřadnic.</li>
+<li>Necháme vypočítat body ležící na ploše funkce (z-ové souřadnice se uloží do matice Z).</li>
+<li>Vlastní vykreslení kontur zajistí funkce <strong>matplotlib.pyplot.contour(X, Y, Z)</strong>.</li>
+</ol>
+
+<p>Podívejme se na úplný příklad:</p>
+
+<pre>
+<i>#!/usr/bin/env python</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - zobrazení kontur funkce typu z=f(x,y)</i>
+&nbsp;
+import matplotlib
+import numpy as np
+import matplotlib.pyplot as plt
+&nbsp;
+&nbsp;
+delta = 0.1
+&nbsp;
+<i># průběh nezávislé proměnné x</i>
+x = np.arange(-10.0, 10.0, delta)
+&nbsp;
+<i># průběh nezávislé proměnné y</i>
+y = np.arange(-10.0, 10.0, delta)
+&nbsp;
+<i># vytvoření dvou polí se souřadnicemi [x,y] </i>
+X, Y = np.meshgrid(x, y)
+&nbsp;
+<i># vzdálenost od bodu [0,0]</i>
+R1 = np.sqrt(X*X+Y*Y)
+&nbsp;
+<i># vzdálenost od bodu [3,3]</i>
+R2 = np.sqrt((X-3)*(X-3)+(Y-3)*(Y-3))
+&nbsp;
+<i># výpočet funkce, kterou použijeme při vykreslování grafu</i>
+Z = np.sin(R1)-np.cos(R2)
+&nbsp;
+<i># povolení zobrazení mřížky</i>
+plt.grid(True)
+&nbsp;
+<i># vytvoření grafu s konturami funkce z=f(x,y)</i>
+plt.contour(X, Y, Z)
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<a href="https://www.root.cz/obrazek/328081/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-10-prev.png" class="image-328081" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 10: Zobrazení kontur funkce typu z=f(x,y).</i></p>
+
+<a href="https://www.root.cz/obrazek/328082/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-11-prev.png" class="image-328082" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 11: Pokud je hodnota &bdquo;delta&ldquo; příliš vysoká, vypočte
+se menší počet bodů tvořících plochu funkce, takže i kontury budou vykresleny
+velmi nepřesně (knihovna bude mít k&nbsp;dispozici jen málo bodů, které bude
+moci spojit).</i></p>
+
+<p>Další vylepšení, které může být výhodné zejména ve chvíli, kdy jsou plochy
+s&nbsp;konturami vybarveny (pro vybarvení použijte funkci
+<strong>matplotlib.pyplot.contourf</strong> namísto pouhého
+<strong>matplotlib.pyplot.countour</strong>) spočívá v&nbsp;přidání legendy, na
+níž se zobrazují výšky jednotlivých kontur/vrstevnic. Přidání je jednoduché,
+stačí pouze použít funkci nazvanou
+<strong>matplotlib.pyplot.colorbar()</strong>, které se opět předá datová
+struktura reprezentující graf funkce a několik nepovinných pojmenovaných
+parametrů. Z&nbsp;těchto parametrů dnes použijeme pouze parametr nazvaný
+<strong>shrink</strong> (relativní velikost popisku) a <strong>extend</strong>
+(způsob vykreslení popisků vedle grafu). Podívejme se na úplný zdrojový kód
+příkladu:</p>
+
+<pre>
+<i>#!/usr/bin/env python</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - zobrazení kontur funkce typu z=f(x,y)</i>
+<i># - zobrazení hodnot u jednotlivých "vrstevnic"</i>
+<i># - přidání legendy</i>
+&nbsp;
+import matplotlib
+import numpy as np
+import matplotlib.mlab as mlab
+import matplotlib.pyplot as plt
+&nbsp;
+&nbsp;
+delta = 0.1
+&nbsp;
+<i># průběh nezávislé proměnné x</i>
+x = np.arange(-10.0, 10.0, delta)
+&nbsp;
+<i># průběh nezávislé proměnné y</i>
+y = np.arange(-10.0, 10.0, delta)
+&nbsp;
+<i># vytvoření dvou polí se souřadnicemi [x,y] </i>
+X, Y = np.meshgrid(x, y)
+&nbsp;
+<i># vzdálenost od bodu [0,0]</i>
+R1 = np.sqrt(X*X+Y*Y)
+&nbsp;
+<i># vzdálenost od bodu [3,3]</i>
+R2 = np.sqrt((X-3)*(X-3)+(Y-3)*(Y-3))
+&nbsp;
+<i># výpočet funkce, kterou použijeme při vykreslování grafu</i>
+Z = np.sin(R1)-np.cos(R2)
+&nbsp;
+<i># povolení zobrazení mřížky</i>
+plt.grid(True)
+&nbsp;
+<i># vytvoření grafu s konturami funkce z=f(x,y)</i>
+CS = plt.contour(X, Y, Z)
+&nbsp;
+<i># přidání legendy (colorbar)</i>
+CB = plt.colorbar(CS, shrink=0.7, extend='both')
+&nbsp;
+<i># popisky "vrstevnic"</i>
+plt.clabel(CS, inline=1, fontsize=10)
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<a href="https://www.root.cz/obrazek/328083/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-12-prev.png" class="image-328083" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 12: Kromě vrstevnic a jejich hodnot se napravo od grafu zobrazila
+i &bdquo;mapa výšek&ldquo;. Relativní velikost mapy vůči celému grafu se řídí
+hodnotou <strong>shrink</strong>. Zde konkrétně má celá legenda výšku jen 70%
+výšky celého grafu.</i></p>
+
+
+
+<p><a name="k13"></a></p>
+<h2 id="k13">13. Animace funkce s&nbsp;proměnnými parametry vykreslená formou kontur</h2>
+
+<p>V&nbsp;následujícím demonstračním příkladu vykreslíme animovaný průběh
+funkce, která se vykreslí formou kontur (vrstevnic). Ve funkci počítáme
+vzdálenosti od dvou bodů [0, 0] a [3, 3]. Tyto vzdálenosti slouží jako vstup do
+funkcí sinus a kosinus, kde ovšem vypočtené hodnoty navíc posuneme o vypočtený
+offset, který je pro každý snímek odlišný:</p>
+
+<pre>
+def make_frame(t):
+    axis.clear()
+&nbsp;
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset1 = 3 * 2 * np.pi * t / DURATION
+    offset2 = 2 * 2 * np.pi * t / DURATION
+&nbsp;
+    delta = 0.1
+&nbsp;
+    <i># průběh nezávislé proměnné x</i>
+    x = np.arange(-10.0, 10.0, delta)
+&nbsp;
+    <i># průběh nezávislé proměnné y</i>
+    y = np.arange(-10.0, 10.0, delta)
+&nbsp;
+    <i># vytvoření dvou polí se souřadnicemi [x,y]</i>
+    X, Y = np.meshgrid(x, y)
+&nbsp;
+    <i># vzdálenost od bodu [0,0]</i>
+    R1 = np.sqrt(X*X+Y*Y)
+&nbsp;
+    <i># vzdálenost od bodu [3,3]</i>
+    R2 = np.sqrt((X-3)*(X-3)+(Y-3)*(Y-3))
+&nbsp;
+    <i># výpočet funkce, kterou použijeme při vykreslování grafu</i>
+    Z = np.sin(R1 + offset1) - np.cos(R2 + offset2)
+&nbsp;
+    <i># povolení zobrazení mřížky</i>
+    axis.grid(True)
+&nbsp;
+    <i># vytvoření grafu s konturami funkce z=f(x,y)</i>
+    axis.contour(X, Y, Z)
+&nbsp;
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+</pre>
+
+<a href="https://www.root.cz/obrazek/328084/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-13.gif" class="image-328084" alt="&#160;" width="200" height="200" /></a>
+<p><i>Obrázek 13: Animace funkce s&nbsp;proměnnými parametry vykreslená formou kontur.</i></p>
+
+<p>Původní animaci v&nbsp;plném rozlišení lze získat <a href="https://www.root.cz/obrazek/328095/">na této
+adrese</a>.</p>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example05_contours.py">Úplný
+zdrojový kód</a> příkladu:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - zobrazení kontur funkce typu z=f(x,y)</i>
+&nbsp;
+import matplotlib
+import numpy as np
+import matplotlib.pyplot as plt
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+<i># parametry obrázků / rámců</i>
+WIDTH = 400
+HEIGHT = 400
+DPI = 100
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 15
+&nbsp;
+<i># vytvoření objektu reprezentujícího průběh funkce</i>
+<i># + nastavení rozlišení obrázku (resp. jednotlivých rámců)</i>
+fig, axis = plt.subplots(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+&nbsp;
+&nbsp;
+def make_frame(t):
+    axis.clear()
+&nbsp;
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset1 = 3 * 2 * np.pi * t / DURATION
+    offset2 = 2 * 2 * np.pi * t / DURATION
+&nbsp;
+    delta = 0.1
+&nbsp;
+    <i># průběh nezávislé proměnné x</i>
+    x = np.arange(-10.0, 10.0, delta)
+&nbsp;
+    <i># průběh nezávislé proměnné y</i>
+    y = np.arange(-10.0, 10.0, delta)
+&nbsp;
+    <i># vytvoření dvou polí se souřadnicemi [x,y]</i>
+    X, Y = np.meshgrid(x, y)
+&nbsp;
+    <i># vzdálenost od bodu [0,0]</i>
+    R1 = np.sqrt(X*X+Y*Y)
+&nbsp;
+    <i># vzdálenost od bodu [3,3]</i>
+    R2 = np.sqrt((X-3)*(X-3)+(Y-3)*(Y-3))
+&nbsp;
+    <i># výpočet funkce, kterou použijeme při vykreslování grafu</i>
+    Z = np.sin(R1 + offset1) - np.cos(R2 + offset2)
+&nbsp;
+    <i># povolení zobrazení mřížky</i>
+    axis.grid(True)
+&nbsp;
+    <i># vytvoření grafu s konturami funkce z=f(x,y)</i>
+    axis.contour(X, Y, Z)
+&nbsp;
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_gif('contour.gif', fps=FPS)
+</pre>
+
+
+
+<p><a name="k14"></a></p>
+<h2 id="k14">14. Jednoduchý trojrozměrný graf funkce z=f(x,y) &ndash; drátový model</h2>
+
+<p>Použití grafu s&nbsp;konturami sice může být v&nbsp;mnoha ohledech velmi
+užitečné (například při zjišťování lokálních minim a maxim), v&nbsp;praxi se
+však spíše setkáme s&nbsp;odlišným typem grafů zobrazujících funkce typu
+z=f(x,y). Jedná se o trojrozměrné grafy, v&nbsp;nichž se zobrazuje plocha
+funkce. Nejjednodušším typem tohoto grafu je takzvaný <i>drátový model</i>,
+který je spíše známý pod svým anglickým názvem <i>wireframe</i>. V&nbsp;tomto
+typu grafu je zobrazena série křivek či spíše lomených čar. Jedna série je
+vypočtena takovým způsobem, že x-ová souřadnice se postupně mění
+v&nbsp;nastaveném intervalu zatímco y-ová souřadnice je konstantní. Druhá série
+lomených čar se vykresluje kolmo na sérii první, tj.&nbsp;x-ová souřadnice je
+konstantní a postupně se mění hodnota y-ových souřadnic. Výsledkem je tedy
+plocha, která má při pohledu z&nbsp;osy z tvar pravidelné mřížky. Pro
+vykreslení tohoto typu grafu se používá funkce
+<strong>plot_wireframe()</strong>, které se předá trojice polí odpovídajících
+x-ovým, y-ovým a z-ovým souřadnicím bodů ležících na ploše představujících
+obraz funkce:</p>
+
+<pre>
+<i>#!/usr/bin/env python</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - zobrazení 3D grafu funkce typu z=f(x,y)</i>
+&nbsp;
+from mpl_toolkits.mplot3d import axes3d
+import matplotlib.pyplot as plt
+import numpy as np
+&nbsp;
+fig = plt.figure()
+ax = fig.add_subplot(111, projection='3d')
+&nbsp;
+delta = 0.1
+&nbsp;
+<i># průběh nezávislé proměnné x</i>
+x = np.arange(-10.0, 10.0, delta)
+&nbsp;
+<i># průběh nezávislé proměnné y</i>
+y = np.arange(-10.0, 10.0, delta)
+&nbsp;
+<i># vytvoření dvou polí se souřadnicemi [x,y] </i>
+X, Y = np.meshgrid(x, y)
+&nbsp;
+<i># vzdálenost od bodu [0,0]</i>
+R = np.sqrt(X*X+Y*Y)
+&nbsp;
+<i># výpočet funkce, kterou použijeme při vykreslování grafu</i>
+Z = np.sin(R)/R
+&nbsp;
+<i># zobrazení 3D grafu</i>
+ax.plot_wireframe(X, Y, Z, rstride=7, cstride=7)
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<a href="https://www.root.cz/obrazek/328085/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-14-prev.png" class="image-328085" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 14: Drátový model vykreslený s&nbsp;využitím funkce
+<strong>plot_wireframe(X, Y, Z, rstride=7, cstride=7)</strong>.</i></p>
+
+<p>Pojmenované parametry <strong>rstride</strong> a <strong>cstride</strong>
+lze použít pro řízení hustoty vykreslované mřížky. Tyto parametry představují
+krok použitý při změně x-ových a y-ových souřadnic, což znamená, že čím menší
+hodnota se požije, tím bode vykreslená mřížka jemnější:</p>
+
+<pre>
+ax.plot_wireframe(X, Y, Z, rstride=3, cstride=3)
+</pre>
+
+<a href="https://www.root.cz/obrazek/328086/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-15-prev.png" class="image-328086" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 15: Drátový model vykreslený s&nbsp;využitím funkce
+<strong>plot_wireframe(X, Y, Z, rstride=3, cstride=3)</strong>.</i></p>
+
+
+
+<p><a name="k15"></a></p>
+<h2 id="k15">15. Od drátového modelu k&nbsp;vyplněné ploše</h2>
+
+<p>Drátový model je možné v&nbsp;případě potřeby nahradit vykreslením vyplněné
+plochy namísto pouhé mřížky. V&nbsp;tomto případě je nutné namísto funkce
+<strong>plot_wireframe()</strong> použít funkci pojmenovanou
+<strong>plot_surface()</strong>. První tři povinné parametry obou zmíněných
+funkcí jsou shodné, dokonce lze použít i stejně pojmenované parametry
+<strong>cstride</strong> a <strong>rstride</strong>, o jejichž významu jsme se
+taktéž zmiňovali. Kromě toho se však navíc většinou používá i další pojmenovaný
+parametr <strong>cmap</strong>, kterému se předá barvová paleta (či barvová
+mapa), která typicky definuje jeden gradientní přechod i větší množství
+gradientních přechodů mezi různými odstíny. Pro účely vytváření gradientních
+přechodů či pro použití již předem připravených barvových map se používá modul
+<strong>matplotlib.cm</strong>. Seznam všech předdefinovaných barvových map
+naleznete na adrese <a
+href="https://gist.github.com/endolith/2719900#id7">https://gist.github.com/endolith/2719900#id7</a>,
+ukázky (palety) pak na adrese <a
+href="http://matplotlib.org/examples/color/colormaps_reference.html">http://matplotlib.org/examples/color/colormaps_reference.html</a>.
+My využijeme barvovou mapu pojmenovanou &bdquo;coolwarm&ldquo;:</p>
+
+<pre>
+<i>#!/usr/bin/env python</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - zobrazení 3D grafu funkce typu z=f(x,y)</i>
+&nbsp;
+from mpl_toolkits.mplot3d import axes3d
+from matplotlib import cm
+import matplotlib.pyplot as plt
+import numpy as np
+&nbsp;
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+&nbsp;
+delta = 0.1
+&nbsp;
+<i># průběh nezávislé proměnné x</i>
+x = np.arange(-10.0, 10.0, delta)
+&nbsp;
+<i># průběh nezávislé proměnné y</i>
+y = np.arange(-10.0, 10.0, delta)
+&nbsp;
+<i># vytvoření dvou polí se souřadnicemi [x,y] </i>
+X, Y = np.meshgrid(x, y)
+&nbsp;
+<i># vzdálenost od bodu [0,0]</i>
+R = np.sqrt(X*X+Y*Y)
+&nbsp;
+<i># výpočet funkce, kterou použijeme při vykreslování grafu</i>
+Z = np.sin(R)/R
+&nbsp;
+<i># zobrazení 3D grafu formou plochy</i>
+ax.plot_surface(X, Y, Z, rstride=2, cstride=2, cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<a href="https://www.root.cz/obrazek/328087/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-16-prev.png" class="image-328087" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 16: Plocha funkce z=f(x,y) používající barvovou mapu pojmenovanou
+&bdquo;coolwarm&ldquo;.</i></p>
+
+
+
+<p><a name="k16"></a></p>
+<h2 id="k16">16. Promítnutí grafu na plochy kolmé na osy</h2>
+
+<p>Vzhledem k&nbsp;tomu, že se pro zobrazení trojrozměrného grafu na 2D
+obrazovce musí používat axonometrické promítání popř.&nbsp;promítání
+s&nbsp;perspektivou, nemusí být z&nbsp;obrázku na první pohled zřejmé, jak
+přesně vlastně průběh funkce vypadá. Knihovna <i>Matplotlib</i> nám však nabízí
+řešení &ndash; na plochy (které jsou kolmé na osy souřadného systému) se
+promítnou kontury průběhu funkce. Podívejme se, jak vypadá výsledek:</p>
+
+<a href="https://www.root.cz/obrazek/328088/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-17-prev.png" class="image-328088" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 17: Promítnutí kontur průběhu funkce na plochy.</i></p>
+
+<p>Samotná plocha představující funkci se vykreslí příkazem
+<strong>matplotlib.pyplot.plot_surface()</strong>, podobně jako
+v&nbsp;předchozím příkladu. Dále se metodou <strong>ax.contour()</strong> mohou
+vykreslit kontury grafu na jednotlivé plochy, ve skutečnosti je však ještě
+nutné korektně nastavit přesné umístění těchto kontur do grafu. K&nbsp;tomu
+slouží explicitní nastavení rozsahů na jednotlivých osách
+(<strong>set_xlim()</strong>, <strong>set_ylim()</strong>,
+<strong>set_zlim()</strong>) a vlastní posun reprezentovaný pojmenovaným
+parametrem <strong>offset</strong> předaným do metody
+<strong>ax.contour()</strong>. Podívejme se na odladěný příklad:</p>
+
+<pre>
+<i>#!/usr/bin/env python</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - zobrazení 3D grafu funkce typu z=f(x,y)</i>
+<i># - pomocná legenda - colorbar</i>
+<i># - promítnutí grafu na ploch kolmých na osy</i>
+&nbsp;
+from mpl_toolkits.mplot3d import axes3d
+from matplotlib import cm
+import matplotlib.pyplot as plt
+import numpy as np
+&nbsp;
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+&nbsp;
+delta = 0.1
+&nbsp;
+<i># průběh nezávislé proměnné x</i>
+x = np.arange(-10.0, 10.0, delta)
+&nbsp;
+<i># průběh nezávislé proměnné y</i>
+y = np.arange(-10.0, 10.0, delta)
+&nbsp;
+<i># vytvoření dvou polí se souřadnicemi [x,y] </i>
+X, Y = np.meshgrid(x, y)
+&nbsp;
+<i># vzdálenost od bodu [0,0]</i>
+R = np.sqrt(X*X+Y*Y)
+&nbsp;
+<i># výpočet funkce, kterou použijeme při vykreslování grafu</i>
+Z = np.sin(R)/R
+&nbsp;
+<i># zobrazení 3D grafu formou plochy</i>
+surface = ax.plot_surface(X, Y, Z, rstride=2, cstride=2, cmap=cm.coolwarm,
+                       linewidth=0, antialiased=False)
+&nbsp;
+<i># kontutra: průmět na rovinu x-y</i>
+cset = ax.contour(X, Y, Z, zdir='z', offset=-5, cmap=cm.coolwarm)
+&nbsp;
+<i># kontutra: průmět na rovinu y-z</i>
+cset = ax.contour(X, Y, Z, zdir='x', offset=-15, cmap=cm.coolwarm)
+&nbsp;
+<i># kontutra: průmět na rovinu x-z</i>
+cset = ax.contour(X, Y, Z, zdir='y', offset= 15, cmap=cm.coolwarm)
+&nbsp;
+<i># rozměry grafu ve směru osy x</i>
+ax.set_xlabel('X')
+ax.set_xlim(-15, 15)
+&nbsp;
+<i># rozměry grafu ve směru osy y</i>
+ax.set_ylabel('Y')
+ax.set_ylim(-15, 15)
+&nbsp;
+<i># rozměry grafu ve směru osy z</i>
+ax.set_zlabel('Z')
+ax.set_zlim(-5, 5)
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+
+
+<p><a name="k17"></a></p>
+<h2 id="k17">17. Animace &bdquo;vlnek&ldquo; ve funkci sinc</h2>
+
+<p>V&nbsp;dnešním předposledním příkladu je ukázána tvorba animovaných
+&bdquo;vlnek&ldquo; s&nbsp;využitím funkce <i>sinc</i>. Postupovat budeme
+stejně jako v&nbsp;předchozím příkladu, ovšem do výpočtu navíc vložíme postupně
+měněný offset:</p>
+
+<pre>
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset = 2.0 * np.pi * t / DURATION
+&nbsp;
+    <i># průběh nezávislé proměnné x</i>
+    x = np.arange(-10.0, 10.0, delta)
+&nbsp;
+    <i># průběh nezávislé proměnné y</i>
+    y = np.arange(-10.0, 10.0, delta)
+&nbsp;
+    <i># vytvoření dvou polí se souřadnicemi [x,y]</i>
+    X, Y = np.meshgrid(x, y)
+&nbsp;
+    <i># vzdálenost od bodu [0,0]</i>
+    R = np.sqrt(X*X+Y*Y) + offset
+&nbsp;
+    <i># výpočet funkce, kterou použijeme při vykreslování grafu</i>
+    Z = np.sin(R)/R
+</pre>
+
+<p>Vykreslení grafu:</p>
+
+<pre>
+axis.plot_wireframe(X, Y, Z, rstride=7, cstride=7)
+</pre>
+
+<p>Následně musíme zakázat zobrazení všech další elementů v&nbsp;grafu,
+tj.&nbsp;souřadných os atd.:</p>
+
+<pre>
+axis.set_axis_off()
+axis.margins(0, 0, 0)
+axis.get_xaxis().set_visible(False)
+</pre>
+
+<a href="https://www.root.cz/obrazek/328089/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-18.gif" class="image-328089" alt="&#160;" width="200" height="150" /></a>
+<p><i>Obrázek 18: Výsledná animace (zmenšená na poloviční rozlišení).</i></p>
+
+<p>Původní animaci v&nbsp;plném rozlišení lze získat <a href="https://www.root.cz/obrazek/328096/">na této
+adrese</a>.</p>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example06_surface.py">Zdrojový
+kód</a> příkladu:</p>
+
+<pre>
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - zobrazení 3D grafu funkce typu z=f(x,y)</i>
+&nbsp;
+from mpl_toolkits.mplot3d import axes3d
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib import cm
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+<i># parametry obrázků / rámců</i>
+WIDTH = 400
+HEIGHT = 300
+DPI = 100
+&nbsp;
+<i># parametry animace</i>
+DURATION = 4
+FPS = 10
+&nbsp;
+fig = plt.figure(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+axis = fig.add_subplot(111, projection="3d")
+&nbsp;
+delta = 0.1
+&nbsp;
+&nbsp;
+def make_frame(t):
+    axis.clear()
+&nbsp;
+    <i># offset v rozmezí 0 .. 2*Pi</i>
+    offset = 2.0 * np.pi * t / DURATION
+&nbsp;
+    <i># průběh nezávislé proměnné x</i>
+    x = np.arange(-10.0, 10.0, delta)
+&nbsp;
+    <i># průběh nezávislé proměnné y</i>
+    y = np.arange(-10.0, 10.0, delta)
+&nbsp;
+    <i># vytvoření dvou polí se souřadnicemi [x,y]</i>
+    X, Y = np.meshgrid(x, y)
+&nbsp;
+    <i># vzdálenost od bodu [0,0]</i>
+    R = np.sqrt(X*X+Y*Y) + offset
+&nbsp;
+    <i># výpočet funkce, kterou použijeme při vykreslování grafu</i>
+    Z = np.sin(R)/R
+&nbsp;
+    <i># zobrazení 3D grafu</i>
+    axis.set_axis_off()
+    axis.margins(0, 0, 0)
+    axis.plot_wireframe(X, Y, Z, rstride=7, cstride=7)
+    axis.get_xaxis().set_visible(False)
+&nbsp;
+    axis.plot_surface(X, Y, Z, rstride=2, cstride=2, cmap=cm.coolwarm,
+                      linewidth=0, antialiased=False)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_gif('wireframe.gif', fps=FPS)
+</pre>
+
+
+
+<p><a name="k18"></a></p>
+<h2 id="k18">18. Zobrazení 3D grafu funkce typu [x,y,z]=f(t)</h2>
+
+<p>Poslední typ grafu, s&nbsp;nímž se dnes seznámíme, je trojrozměrný graf,
+v&nbsp;němž se zobrazuje funkce typu <i>[x,y,z]=f(t)</i> popř.&nbsp;složitější
+funkce <i>[x<sub>n</sub>, y<sub>n</sub>, z<sub>n</sub>]=f(x<sub>n-1</sub>,
+y<sub>n-1</sub>, z<sub>n-1</sub>)</i>. Tento příkaz automaticky zjistí potřebné
+rozsahy na všech třech osách, což je dobře patrné z&nbsp;dalšího screenshotu.
+Podívejme se tedy, jakým způsobem je možné zobrazit trojrozměrnou spirálu
+(pokud budete potřebovat, aby se spirála nezužovala, postačuje proměnnou
+<strong>r</strong> nastavit na konstantní hodnotu):</p>
+
+<pre>
+<i>#!/usr/bin/env python</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - zobrazení 3D grafu funkce typu [x,y,z]=f(t)</i>
+&nbsp;
+from mpl_toolkits.mplot3d import axes3d
+import matplotlib.pyplot as plt
+import numpy as np
+&nbsp;
+<i># nezávislá proměnná</i>
+t = np.arange(0, 8*np.pi, 0.1)
+&nbsp;
+<i># vzdálenost od osy spirály</i>
+r = 10.0/(t+4)
+&nbsp;
+<i># výpočet souřadnic [x,y,z]) pro každé t</i>
+x = r*np.cos(t)
+y = r*np.sin(t)
+z = t
+&nbsp;
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+&nbsp;
+<i># vykreslení grafu</i>
+ax.plot(x, y, z)
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<a href="https://www.root.cz/obrazek/328090/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-19-prev.png" class="image-328090" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 19: Spirála vykreslená předchozím demonstračním příkladem.</i></p>
+
+
+
+<p><a name="k19"></a></p>
+<h2 id="k19">19. Repositář s&nbsp;demonstračními příklady</h2>
+
+<p>Zdrojové kódy všech dnes popsaných demonstračních příkladů určených pro
+Python 3 byly uloženy do Git repositáře dostupného na adrese <a
+href="https://github.com/tisnik/moviepy-examples">https://github.com/tisnik/moviepy-examples</a>.
+V&nbsp;případě, že nebudete chtít klonovat celý repositář (ten je ovšem
+prozatím velmi malý, doslova několik kilobajtů), můžete namísto toho použít
+odkazy na jednotlivé příklady, které naleznete v&nbsp;následující tabulce:</p>
+
+<table>
+<tr><th>Projekt</th><th>Cesta</th></tr>
+<tr><td>static_plots/example01_sinus.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example01_sinus.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example01_sinus.py</a></td></tr>
+<tr><td>static_plots/example02_export_formats.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example02_export_formats.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example02_export_formats.py</a></td></tr>
+<tr><td>static_plots/example03_sin_cos.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example03_sin_cos.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example03_sin_cos.py</a></td></tr>
+<tr><td>static_plots/example04_polar_graph.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example04_polar_graph.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example04_polar_graph.py</a></td></tr>
+<tr><td>static_plots/example05_contours.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example05_contours.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example05_contours.py</a></td></tr>
+<tr><td>static_plots/example06_contours_legend.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example06_contours_legend.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example06_contours_legend.py</a></td></tr>
+<tr><td>static_plots/example07_wireframe.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example07_wireframe.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example07_wireframe.py</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>animated_plots/example01_sinus_A.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example01_sinus_A.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example01_sinus_A.py</a></td></tr>
+<tr><td>animated_plots/example01_sinus_B.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example01_sinus_B.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example01_sinus_B.py</a></td></tr>
+<tr><td>animated_plots/example01_sinus_C.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example01_sinus_C.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example01_sinus_C.py</a></td></tr>
+<tr><td>animated_plots/example03_sin_cos.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example03_sin_cos.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example03_sin_cos.py</a></td></tr>
+<tr><td>animated_plots/example04_polar_graph.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example04_polar_graph.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example04_polar_graph.py</a></td></tr>
+<tr><td>animated_plots/example05_contours.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example05_contours.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example05_contours.py</a></td></tr>
+<tr><td>animated_plots/example06_surface.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example06_surface.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example06_surface.py</a></td></tr>
+</table>
+
+
+
+<p><a name="k20"></a></p>
+<h2 id="k20">20. Odkazy na Internetu</h2>
+
+<ol>
+
+<li>MoviePy 0.2.3.3 na PyPi<br />
+<a href="https://pypi.org/project/moviepy/">https://pypi.org/project/moviepy/</a>
+</li>
+
+<li>MoviePy na GitHubu<br />
+<a href="https://github.com/Zulko/moviepy">https://github.com/Zulko/moviepy</a>
+</li>
+
+<li>MoviePy - dokumentace<br />
+<a href="http://zulko.github.io/moviepy/">http://zulko.github.io/moviepy/</a>
+</li>
+
+<li>MoviePy - galerie<br />
+<a href="http://zulko.github.io/moviepy/gallery.html">http://zulko.github.io/moviepy/gallery.html</a>
+</li>
+
+<li>Data Animations With Python and MoviePy<br />
+<a href="https://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/">https://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/</a>
+</li>
+
+<li>Porovnání formátů Ogg Theora a H.264<br />
+<a href="https://www.root.cz/zpravicky/porovnani-formatu-ogg-theora-a-h-264/">https://www.root.cz/zpravicky/porovnani-formatu-ogg-theora-a-h-264/</a>
+</li>
+
+<li>Případ GIF<br />
+<a href="https://www.root.cz/clanky/pripad-gif/">https://www.root.cz/clanky/pripad-gif/</a>
+</li>
+
+<li>Pravda a mýty o GIFu<br />
+<a href="https://www.root.cz/clanky/pravda-a-myty-o-gifu/">https://www.root.cz/clanky/pravda-a-myty-o-gifu/</a>
+</li>
+
+<li>Anatomie grafického formátu GIF<br />
+<a href="https://www.root.cz/clanky/anatomie-grafickeho-formatu-gif/">https://www.root.cz/clanky/anatomie-grafickeho-formatu-gif/</a>
+</li>
+
+<li>GIF: animace a konkurence<br />
+<a href="https://www.root.cz/clanky/gif-animace-a-konkurence/">https://www.root.cz/clanky/gif-animace-a-konkurence/</a>
+</li>
+
+<li>Two python modules : MoviePy and images2gif – part 001<br />
+<a href="http://free-tutorials.org/two-python-modules-moviepy-and-images2gif-part-001/">http://free-tutorials.org/two-python-modules-moviepy-and-images2gif-part-001/</a>
+</li>
+
+<li>images2gif<br />
+<a href="https://pypi.org/project/images2gif/">https://pypi.org/project/images2gif/</a>
+</li>
+
+<li>Making GIFs from video files with Python<br />
+<a href="https://www.devbattles.com/en/sand/post-345-Making+GIFs+From+Video+Files+With+Python">https://www.devbattles.com/en/sand/post-345-Making+GIFs+From+Video+Files+With+Python</a>
+</li>
+
+<li>GIF89a specification<br />
+<a href="https://www.w3.org/Graphics/GIF/spec-gif89a.txt">https://www.w3.org/Graphics/GIF/spec-gif89a.txt</a>
+</li>
+
+<li>MPEG-4 Part 14<br />
+<a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">https://en.wikipedia.org/wiki/MPEG-4_Part_14</a>
+</li>
+
+<li>Theora video compression<br />
+<a href="https://www.theora.org/">https://www.theora.org/</a>
+</li>
+
+<li>Theora<br />
+<a href="https://en.wikipedia.org/wiki/Theora">https://en.wikipedia.org/wiki/Theora</a>
+</li>
+
+<li>NumPy<br />
+<a href="http://www.numpy.org/">http://www.numpy.org/</a>
+</li>
+
+<li>numpy 1.14.2 (on PyPi)<br />
+<a href="https://pypi.org/project/numpy/">https://pypi.org/project/numpy/</a>
+</li>
+
+<li>Integrovaná vývojová prostředí ve Fedoře: praktické použití IPython Notebooku a knihovny Numpy<br />
+<a href="https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy/">https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy/</a>
+</li>
+
+<li>Integrovaná vývojová prostředí ve Fedoře: praktické použití IPython Notebooku a knihovny Numpy (2.část)<br />
+<a href="https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy-2-cast/">https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy-2-cast/</a>
+</li>
+
+<li>Non-linear editing system<br />
+<a href="https://en.wikipedia.org/wiki/Non-linear_editing_system">https://en.wikipedia.org/wiki/Non-linear_editing_system</a>
+</li>
+
+<li>Lorenzův atraktor<br />
+<a href="http://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-iii/#k03">http://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-iii/#k03</a>
+</li>
+
+<li>Popis barvových map modulu matplotlib.cm<br />
+<a href="https://gist.github.com/endolith/2719900#id7">https://gist.github.com/endolith/2719900#id7</a>
+</li>
+
+<li>Ukázky (palety) barvových map modulu matplotlib.cm<br />
+<a href="http://matplotlib.org/examples/color/colormaps_reference.html">http://matplotlib.org/examples/color/colormaps_reference.html</a>
+</li>
+
+<li>Lorenz system<br />
+<a href="https://en.wikipedia.org/wiki/Lorenz_system">https://en.wikipedia.org/wiki/Lorenz_system</a>
+</li>
+
+<li>Customising contour plots in matplotlib<br />
+<a href="https://philbull.wordpress.com/2012/12/27/customising-contour-plots-in-matplotlib/">https://philbull.wordpress.com/2012/12/27/customising-contour-plots-in-matplotlib/</a>
+</li>
+
+<li>Graphics with Matplotlib<br />
+<a href="http://kestrel.nmt.edu/~raymond/software/python_notes/paper004.html">http://kestrel.nmt.edu/~raymond/software/python_notes/paper004.html</a>
+</li>
+
+<li>Systémy lineárních rovnic<br />
+<a href="http://www.matematika.cz/systemy-linearnich-rovnic">http://www.matematika.cz/systemy-linearnich-rovnic</a>
+</li>
+
+<li>NumPy Home Page<br />
+<a href="http://www.numpy.org/">http://www.numpy.org/</a>
+</li>
+
+<li>NumPy v1.10 Manual<br />
+<a href="http://docs.scipy.org/doc/numpy/index.html">http://docs.scipy.org/doc/numpy/index.html</a>
+</li>
+
+<li>NumPy (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/NumPy">https://en.wikipedia.org/wiki/NumPy</a>
+</li>
+
+<li>Matplotlib Home Page<br />
+<a href="http://matplotlib.org/">http://matplotlib.org/</a>
+</li>
+
+<li>matplotlib (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/Matplotlib">https://en.wikipedia.org/wiki/Matplotlib</a>
+</li>
+
+<li>The cell magics in IPython<br />
+<a href="http://nbviewer.jupyter.org/github/ipython/ipython/blob/1.x/examples/notebooks/Cell%20Magics.ipynb">http://nbviewer.jupyter.org/github/ipython/ipython/blob/1.x/examples/notebooks/Cell%20Magics.ipynb</a>
+</li>
+
+</ol>
+
+
+
+<p></p><p></p>
+<p><small>Autor: <a href="http://www.fit.vutbr.cz/~tisnovpa">Pavel Tišnovský</a> &nbsp; 2018</small></p>
+</body>
+</html>
+
