@@ -1,0 +1,1950 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Použití MoviePy společně Matplotlibem pro tvorbu animovaných grafů (dokončení)</title>
+<meta name="Author" content="Pavel Tisnovsky" />
+<meta name="Generator" content="vim" />
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<style type="text/css">
+         body {color:#000000; background:#ffffff;}
+         h1  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#c00000; text-align:center; padding-left:1em}
+         h2  {font-family: arial, helvetica, sans-serif; color:#ffffff; background-color:#0000c0; padding-left:1em; text-align:left}
+         h3  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#c0c0c0; padding-left:1em; text-align:left}
+         h4  {font-family: arial, helvetica, sans-serif; color:#000000; background-color:#e0e0e0; padding-left:1em; text-align:left}
+         a   {font-family: arial, helvetica, sans-serif;}
+         li  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ol  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         ul  {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify; width:450px;}
+         p   {font-family: arial, helvetica, sans-serif; color:#000000; text-align:justify;}
+         pre {background:#e0e0e0}
+</style>
+</head>
+
+<body>
+
+<h1>Použití MoviePy společně Matplotlibem pro tvorbu animovaných grafů (dokončení)</h1>
+
+<h3>Pavel Tišnovský</h3>
+
+<p></p>
+
+<h1>Úvodník</h1>
+
+<p>Ve třetí části článku o knihovně MoviePy dokončíme téma, kterému jsme se věnovali minule. Ukážeme si, jak lze s využitím knihoven MoviePy + Matplotlib vytvořit animované průběhy funkcí využitelné mj. i při výuce. Také se seznámíme s modulem Animation.</p>
+
+
+
+<h2>Obsah</h2>
+
+<p><a href="#k01">1. Použití MoviePy společně Matplotlibem pro tvorbu animovaných grafů (dokončení)</a></p>
+<p><a href="#k02">2. Lorenzův atraktor</a></p>
+<p><a href="#k03">3. Zobrazení Lorenzova atraktoru (statický graf)</a></p>
+<p><a href="#k04">4. Animace Lorenzova atraktoru</a></p>
+<p><a href="#k05">5. Zobrazení dvou atraktorů s&nbsp;různými počátečními podmínkami</a></p>
+<p><a href="#k06">6. Aproximace funkcí Taylorovým polynomem</a></p>
+<p><a href="#k07">7. Skript pro vykreslení sinusovky aproximované Taylorovým polynomem</a></p>
+<p><a href="#k08">8. Animace vlivu postupného přidávání členů do Taylorova polynomu na tvar aproximované funkce (sinusovky)</a></p>
+<p><a href="#k09">9. Reprezentace periodického průběhu pomocí funkcí sin a cos (Fourierova řada)</a></p>
+<p><a href="#k10">10. Statický graf &ndash; rekonstrukce obdélníkového signálu</a></p>
+<p><a href="#k11">11. Animace postupného zvyšování členů ve Fourierově řadě</a></p>
+<p><a href="#k12">12. Problematika vykreslení komplexních funkcí</a></p>
+<p><a href="#k13">13. Obarvení komplexních hodnot</a></p>
+<p><a href="#k14">14. Zobrazení 2D grafu s&nbsp;komplexní funkcí</a></p>
+<p><a href="#k15">15. Ukázky vytvořených grafů s&nbsp;komplexními funkcemi</a></p>
+<p><a href="#k16">16. Animace v&nbsp;grafech zobrazujících komplexní funkce</a></p>
+<p><a href="#k17">17. Vylepšení předchozího příkladu</a></p>
+<p><a href="#k18">18. Modul <strong>Animation</strong> dostupný v&nbsp;knihovně Matplotlib</a></p>
+<p><a href="#k19">19. Repositář s&nbsp;demonstračními příklady</a></p>
+<p><a href="#k20">20. Odkazy na Internetu</a></p>
+
+
+
+<p><a name="k01"></a></p>
+<h2 id="k01">1. Použití MoviePy společně Matplotlibem pro tvorbu animovaných grafů (dokončení)</h2>
+
+<p>Ve třetím článku o knihovně <i>MoviePy</i> se opět budeme zabývat způsobem
+kombinace <i>MoviePy</i> s&nbsp;<i>Matplotlibem</i> při tvorbě animovaných
+grafů, které je možné využít například při výuce. Z&nbsp;tohoto důvodu si
+ukážeme i některé poměrně typické příklady používané (nejenom) při výuce
+&ndash; aproximace průběhu funkce Taylorovým polynomem, reprezentace periodické
+funkce Fourierovou řadou, vykreslení komplexních funkcí atd. Taktéž si ukážeme,
+jak je možné animovat postupné vytváření stopy Lorenzova atraktoru pro různé
+počáteční podmínky. Z&nbsp;animace bude patrný takzvaný &bdquo;motýlí
+efekt&ldquo; ve chvíli, kdy se budou souběžně vykreslovat dva atraktory
+s&nbsp;nepatrně odlišnými počátečními podmínkami. V&nbsp;závěru dnešního článku
+se alespoň ve stručnosti seznámíme s&nbsp;modulem nazvaným
+<strong>Animation</strong>, který je dostupný přímo v&nbsp;Matplotlibu. Tento
+modul umožňuje vytváření animací bez použití knihovny MoviePy.</p>
+
+<a href="https://www.root.cz/obrazek/328090/"><img src="https://i.iinfo.cz/images/464/matplotlib-previews-19-prev.png" class="image-328090" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 1: Spirála vykreslená posledním demonstračním příkladem popsaným
+minule. Podobný typ grafu použijeme i při zobrazení Lorenzova
+atraktoru.</i></p>
+
+
+
+<p><a name="k02"></a></p>
+<h2 id="k02">2. Lorenzův atraktor</h2>
+
+<p>Poměrně vděčným příkladem funkce typu <i>[x,y,z]=f(t)</i> zobrazené
+v&nbsp;3D prostoru je dynamický systém s&nbsp;takzvaným <i>podivným
+atraktorem</i>, který je nazvaný <i>Lorenzův atraktor</i> podle svého
+objevitele. Tento systém sestávající ze tří dynamických rovnic použil <a
+href="https://en.wikipedia.org/wiki/Edward_Norton_Lorenz">Edward Lorenz</a>
+v&nbsp;roce 1963 při simulaci vývoje počasí (resp.&nbsp;ve velmi zjednodušeném
+modelu počasí). Na tomto systému byla také numericky a analyticky ověřena velká
+citlivost na počáteční podmínky (někdy také nazývaná &bdquo;motýlí efekt&ldquo;
+neboli &bdquo;butterfly effect&ldquo;). Pro upřesnění je však nutné říci, že
+při simulaci na počítači vlastně získáme atraktor, jenž je periodický. Je to
+z&nbsp;toho důvodu, že pro zobrazení číselných hodnot je použito konečného
+počtu bitů, z&nbsp;toho nutně vyplývá, že se po určitém počtu kroků (který je
+však obrovský, takže tento jev mnohdy nezaregistrujeme) začne dráha Lorenzova
+atraktoru překrývat. V&nbsp;matematicky přesném modelu však tato situace
+nenastane, každá smyčka funkce bude mít unikátní tvar a dráhy se nebudou
+překrývat, pouze protínat.</p>
+
+<img src="http://i.iinfo.cz/urs/fractals03_5-preview-113137605415848.png" class="i" alt="&#160" />
+<p><i>Obrázek 2: Lorenzův atraktor vykreslený dnes již
+&bdquo;starožitným&ldquo; programem Fractint.</i></p>
+
+<p>Diferenciální rovnice Lorenzova atraktoru mají po převodu na diferenční tvar
+následující formát:</p>
+
+<pre>
+dx/dt = &sigma; (y-x)
+dy/dt = x(&rho; - z) - y
+dz/dt = xy - &Beta;z
+</pre>
+
+<p>Takže pro iterativní (samozřejmě že nepřesný) výpočet můžeme pracovat
+s&nbsp;následujícími vztahy, které pro dostatečně malé <i>dt</i> vedou
+k&nbsp;výpočtu bodů ležících na Lorenzově atraktoru:</p>
+
+<p>
+x<sub>n+1</sub>=x<sub>n</sub>+(&sigma; (y-x)) dt<br />
+y<sub>n+1</sub>=y<sub>n</sub>+(x(&rho; - z) - y) dt<br />
+z<sub>n+1</sub>=z<sub>n</sub>+(xy - &Beta;z) dt
+</p>
+
+<p>Podívejme se nyní na jeden ze způsobů implementace této funkce:</p>
+
+<pre>
+def <strong>lorenz</strong>(x, y, z, s=10, r=28, b=2.667):
+    x_dot = s*(y - x)
+    y_dot = r*x - y - x*z
+    z_dot = x*y - b*z
+    return x_dot, y_dot, z_dot
+</pre>
+
+<p>A výpočtu sekvence bodů ležících na atraktoru (zde použijeme možnosti
+knihovny Numpy):</p>
+
+<pre>
+<i># prozatím prázdné pole připravené pro výpočet</i>
+x = np.zeros((n,))
+y = np.zeros((n,))
+z = np.zeros((n,))
+&nbsp;
+<i># počáteční hodnoty</i>
+x[0], y[0], z[0] = (0., 1., 1.05)
+&nbsp;
+<i># vlastní výpočet atraktoru (resp. bodů na něm ležících)</i>
+for i in range(n-1):
+    x_dot, y_dot, z_dot = lorenz(x[i], y[i], z[i])
+    x[i+1] = x[i] + x_dot * dt
+    y[i+1] = y[i] + y_dot * dt
+    z[i+1] = z[i] + z_dot * dt
+</pre>
+
+<img src="http://i.iinfo.cz/urs/fractals03_4-preview-113137580688922.png" class="i" alt="&#160" />
+<p><i>Obrázek 3: Dynamických systémů s&nbsp;&bdquo;podivným atraktorem&ldquo;
+existuje celá řada.</i></p>
+
+
+
+<p><a name="k03"></a></p>
+<h2 id="k03">3. Zobrazení Lorenzova atraktoru (statický graf)</h2>
+
+<p>Vlastní zobrazení pak probíhá naprosto stejným způsobem, jako tomu bylo <a
+href="https://www.root.cz/clanky/pouziti-moviepy-spolecne-s-matplotlibem-pro-tvorbu-animovanych-grafu/#k18">v&nbsp;předchozím
+demonstračním příkladu</a> se spirálou. Nejprve vypočteme body tvořící
+atraktor. Jejich souřadnice jsou uloženy ve vektorech <strong>x</strong>,
+<strong>y</strong> a <strong>z</strong>. Následně z&nbsp;těchto bodů vytvoříme
+graf, a to následujícím postupem:</p>
+
+<pre>
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+&nbsp;
+<i># vykreslení grafu</i>
+ax.plot(x, y, z)
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<a href="https://www.root.cz/obrazek/329211/"><img src="https://i.iinfo.cz/images/455/moviepy-3-1-prev.png" class="image-329211" alt="&#160;" width="358" height="270" /></a>
+<p><i>Obrázek 4: Lorenzův atraktor (resp.&nbsp;přesněji řečeno jeho hrubá
+aproximace) zobrazený knihovnou Matplotlib.</i></p>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example11_Lorenz_attractor.py">Úplný
+zdrojový kód</a> demonstračního příkladu pro vykreslení interaktivního grafu
+s&nbsp;Lorenzovým atraktorem vypadá následovně:</p>
+
+<pre>
+<i>#!/usr/bin/env python</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - Lorenzův atraktor</i>
+&nbsp;
+from mpl_toolkits.mplot3d import axes3d
+import matplotlib.pyplot as plt
+import numpy as np
+&nbsp;
+<i># funkce pro výpočet dalšího bodu Lorenzova atraktoru</i>
+def <strong>lorenz</strong>(x, y, z, s=10, r=28, b=2.667):
+    x_dot = s*(y - x)
+    y_dot = r*x - y - x*z
+    z_dot = x*y - b*z
+    return x_dot, y_dot, z_dot
+&nbsp;
+<i># krok (změna času)</i>
+dt = 0.01
+&nbsp;
+<i># celkový počet vypočtených bodů na Lorenzově atraktoru</i>
+n = 10000
+&nbsp;
+<i># prozatím prázdné pole připravené pro výpočet</i>
+x = np.zeros((n,))
+y = np.zeros((n,))
+z = np.zeros((n,))
+&nbsp;
+<i># počáteční hodnoty</i>
+x[0], y[0], z[0] = (0., 1., 1.05)
+&nbsp;
+<i># vlastní výpočet atraktoru</i>
+for i in range(n-1):
+    x_dot, y_dot, z_dot = lorenz(x[i], y[i], z[i])
+    x[i+1] = x[i] + x_dot * dt
+    y[i+1] = y[i] + y_dot * dt
+    z[i+1] = z[i] + z_dot * dt
+&nbsp;
+fig = plt.figure()
+ax = fig.gca(projection='3d')
+&nbsp;
+<i># vykreslení grafu</i>
+ax.plot(x, y, z)
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+
+
+<p><a name="k04"></a></p>
+<h2 id="k04">4. Animace Lorenzova atraktoru</h2>
+
+<p>Podívejme se nyní na způsob vytvoření animace postupného vzniku Lorenzova
+atraktoru. Právě z&nbsp;animace je (na rozdíl od statického obrázku) velmi
+dobře patrné, jak body tvořící atraktor přechází mezi několika &bdquo;oblastmi
+přitažlivosti&ldquo;, až se nakonec vytvoří ona charakteristická smyčka
+s&nbsp;atraktorem. Výsledek bude prozatím poměrně primitivní, protože například
+nenastavujeme limity grafu v&nbsp;osách x, y, z:</p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-2.gif" class="image-329212" alt="&#160;" width="400" height="300" />
+<p><i>Obrázek 5: Velmi hrubá animace postupného vykreslování Lorenzova
+atraktoru (spíše se však podívejte na přiložené video).</i></p>
+
+<p>Výsledné video:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video5.htm">https://tisnik.github.io/moviepy-videos/video5.htm</a>
+
+<p>Výpočet bodů Lorenzova atraktoru se provádí stále stejně, ovšem pro každý
+snímek animace zvýšíme počet iterací, který je uložen v&nbsp;globální proměnné
+<strong>max</strong>. Ve skutečnosti by bylo možné výpočet optimalizovat,
+protože není nutné pro každý snímek začínat s&nbsp;prázdnými vektory
+<strong>x</strong>, <strong>y</strong> a <strong>z</strong>. Tuto jednoduchou
+úpravu ponechám na laskavém čtenáři:</p>
+
+<pre>
+max = 0
+&nbsp;
+def <strong>make_frame</strong>(t):
+    axis.clear()
+&nbsp;
+    global max
+&nbsp;
+    <i># celkový počet vypočtených bodů na Lorenzově atraktoru</i>
+    n = 10 + max * 10
+&nbsp;
+    max += 1
+&nbsp;
+    <i># prozatím prázdné pole připravené pro výpočet</i>
+    x = np.zeros((n,))
+    y = np.zeros((n,))
+    z = np.zeros((n,))
+&nbsp;
+    <i># počáteční hodnoty</i>
+    x[0], y[0], z[0] = (0., 1., 1.05)
+&nbsp;
+    <i># vlastní výpočet atraktoru</i>
+    for i in range(n-1):
+        x_dot, y_dot, z_dot = lorenz(x[i], y[i], z[i])
+        x[i+1] = x[i] + x_dot * dt
+        y[i+1] = y[i] + y_dot * dt
+        z[i+1] = z[i] + z_dot * dt
+&nbsp;
+    ax = fig.gca(projection='3d')
+&nbsp;
+    ax.set_axis_off()
+&nbsp;
+    ax.plot(x, y, z)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+</pre>
+
+<p>Samotné vytvoření animace již známe. Nejprve vytvoříme instanci třídy
+<strong>VideoClip</strong>, v&nbsp;níž zaregistrujeme callback funkci
+<strong>make_frame</strong> a následně vytvoříme jak <a
+href="https://www.root.cz/clanky/gif-animace-a-konkurence/#k02">animovaný
+GIF</a>, tak i video ve formátu Ogg/Theora:</p>
+
+<pre>
+animation = VideoClip(make_frame, duration=DURATION)
+&nbsp;
+animation.write_gif('lorenz1.gif', fps=FPS)
+animation.write_videofile('lorenz1.ogv', fps=FPS, progress_bar=True)
+</pre>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example11_Lorenz_attractor_1.py">Úplný
+zdrojový kód</a> demonstračního příkladu pro vytvoření animace vzniku Lorenzova
+atraktoru vypadá takto:</p>
+
+<pre>
+<i>#!/usr/bin/env python</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - Lorenzův atraktor</i>
+&nbsp;
+from mpl_toolkits.mplot3d import axes3d
+import matplotlib.pyplot as plt
+import numpy as np
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+&nbsp;
+<i># parametry obrázků / rámců</i>
+WIDTH = 400
+HEIGHT = 300
+DPI = 100
+&nbsp;
+<i># parametry animace</i>
+DURATION = 16
+FPS = 8
+&nbsp;
+&nbsp;
+<i># funkce pro výpočet dalšího bodu Lorenzova atraktoru</i>
+def <strong>lorenz</strong>(x, y, z, s=10, r=28, b=2.667):
+    x_dot = s*(y - x)
+    y_dot = r*x - y - x*z
+    z_dot = x*y - b*z
+    return x_dot, y_dot, z_dot
+&nbsp;
+<i># krok (změna času)</i>
+dt = 0.01
+&nbsp;
+&nbsp;
+fig = plt.figure(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+axis = fig.add_subplot(111, projection="3d")
+&nbsp;
+max = 0
+&nbsp;
+def <strong>make_frame</strong>(t):
+    axis.clear()
+&nbsp;
+    global max
+&nbsp;
+    <i># celkový počet vypočtených bodů na Lorenzově atraktoru</i>
+    n = 10 + max * 10
+&nbsp;
+    max += 1
+&nbsp;
+    <i># prozatím prázdné pole připravené pro výpočet</i>
+    x = np.zeros((n,))
+    y = np.zeros((n,))
+    z = np.zeros((n,))
+&nbsp;
+    <i># počáteční hodnoty</i>
+    x[0], y[0], z[0] = (0., 1., 1.05)
+&nbsp;
+    <i># vlastní výpočet atraktoru</i>
+    for i in range(n-1):
+        x_dot, y_dot, z_dot = lorenz(x[i], y[i], z[i])
+        x[i+1] = x[i] + x_dot * dt
+        y[i+1] = y[i] + y_dot * dt
+        z[i+1] = z[i] + z_dot * dt
+&nbsp;
+    ax = fig.gca(projection='3d')
+&nbsp;
+    ax.set_axis_off()
+&nbsp;
+    ax.plot(x, y, z)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+<i># animation.write_gif('lorenz1.gif', fps=FPS)</i>
+animation.write_videofile('lorenz1.ogv', fps=FPS, progress_bar=True)
+</pre>
+
+<p>Předchozí příklad je možné vylepšit, a to hned v&nbsp;několika ohledech.
+První vylepšení spočívá v&nbsp;tom, že explicitně nastavíme limitní hodnoty ve
+všech třech osách, takže se zamezí nepříjemným změnám měřítka v&nbsp;počáteční
+fázi animace:</p>
+
+<pre>
+    <i># rozměry grafu ve směru osy x</i>
+    ax.set_xlim(-35, 35)
+&nbsp;
+    <i># rozměry grafu ve směru osy y</i>
+    ax.set_ylim(-35, 35)
+&nbsp;
+    <i># rozměry grafu ve směru osy z</i>
+    ax.set_zlim(0, 50)
+</pre>
+
+<p>Dále ponecháme zobrazení souřadných os a stěn v&nbsp;zadní části grafu. To
+zajistíme jednoduše <i>smazáním nebo zakomentováním</i> následujícího řádku
+kódu:</p>
+
+<pre>
+    ax.set_axis_off()
+</pre>
+
+<p>Navíc zvětšíme hodnotu <i>bitrate</i> při vytváření videa ve formátu
+Ogg/Theora. Tím se zvýší dosti postatným způsobem zvýší kvalita animace,
+protože výchozí velikost bitového toku je nastavena pouze na 200000 kbps
+(kilobitů za sekundu):</p>
+
+<pre>
+animation.write_videofile('lorenz2.ogv', fps=FPS, progress_bar=True, <strong>bitrate="800000"</strong>)
+</pre>
+
+<p>Výsledek již vypadá mnohem lépe:</p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-3.gif" class="image-329213" alt="&#160;" width="400" height="300" />
+<p><i>Obrázek 6: Vylepšená animace postupného vykreslování Lorenzova atraktoru
+(spíše se však podívejte na přiložené video).</i></p>
+
+<p>Výsledné video:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video6.htm">https://tisnik.github.io/moviepy-videos/video6.htm</a>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example11_Lorenz_attractor_2.py">Úplný
+zdrojový kód</a> demonstračního příkladu pro vytvoření vylepšené animace vzniku
+Lorenzova atraktoru vypadá následovně:</p>
+
+<pre>
+<i>#!/usr/bin/env python</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - Lorenzův atraktor</i>
+&nbsp;
+from mpl_toolkits.mplot3d import axes3d
+import matplotlib.pyplot as plt
+import numpy as np
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+&nbsp;
+<i># parametry obrázků / rámců</i>
+WIDTH = 600
+HEIGHT = 450
+DPI = 100
+&nbsp;
+<i># parametry animace</i>
+DURATION = 16
+FPS = 16
+&nbsp;
+&nbsp;
+<i># funkce pro výpočet dalšího bodu Lorenzova atraktoru</i>
+def <strong>lorenz</strong>(x, y, z, s=10, r=28, b=2.667):
+    x_dot = s*(y - x)
+    y_dot = r*x - y - x*z
+    z_dot = x*y - b*z
+    return x_dot, y_dot, z_dot
+&nbsp;
+<i># krok (změna času)</i>
+dt = 0.01
+&nbsp;
+&nbsp;
+fig = plt.figure(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+axis = fig.add_subplot(111, projection="3d")
+&nbsp;
+max = 0
+&nbsp;
+def <strong>make_frame</strong>(t):
+    axis.clear()
+&nbsp;
+    global max
+&nbsp;
+    <i># celkový počet vypočtených bodů na Lorenzově atraktoru</i>
+    n = 10 + max * 10
+&nbsp;
+    max += 1
+&nbsp;
+    <i># prozatím prázdné pole připravené pro výpočet</i>
+    x = np.zeros((n,))
+    y = np.zeros((n,))
+    z = np.zeros((n,))
+&nbsp;
+    <i># počáteční hodnoty</i>
+    x[0], y[0], z[0] = (0., 1., 1.05)
+&nbsp;
+    <i># vlastní výpočet atraktoru</i>
+    for i in range(n-1):
+        x_dot, y_dot, z_dot = lorenz(x[i], y[i], z[i])
+        x[i+1] = x[i] + x_dot * dt
+        y[i+1] = y[i] + y_dot * dt
+        z[i+1] = z[i] + z_dot * dt
+&nbsp;
+    ax = fig.gca(projection='3d')
+&nbsp;
+    <i># rozměry grafu ve směru osy x</i>
+    ax.set_xlim(-35, 35)
+&nbsp;
+    <i># rozměry grafu ve směru osy y</i>
+    ax.set_ylim(-35, 35)
+&nbsp;
+    <i># rozměry grafu ve směru osy z</i>
+    ax.set_zlim(0, 50)
+&nbsp;
+    ax.plot(x, y, z)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+<i># animation.write_gif('lorenz2.gif', fps=FPS)</i>
+animation.write_videofile('lorenz2.ogv', fps=FPS, progress_bar=True, bitrate="800000")
+</pre>
+
+
+
+<p><a name="k05"></a></p>
+<h2 id="k05">5. Zobrazení dvou atraktorů s&nbsp;různými počátečními podmínkami</h2>
+
+<p>Velmi zajímavé bude zjistit, co se stane ve chvíli, kdy budeme sledovat
+vývoj dvou atraktorů, jejichž počáteční podmínky se nepatrně odlišují. Zpočátku
+se budou obě křivky zdánlivě překrývat (to kvůli omezenému rozlišení výsledných
+snímků), ovšem dříve či později (ale vždy) nastane situace, kdy dojde
+k&nbsp;úplnému oddělení křivek &ndash; každá se vydá po zcela odlišné
+trajektorii. Ostatně se podívejme na animaci a video:</p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-4.gif" class="image-329214" alt="&#160;" width="400" height="300" />
+<p><i>Obrázek 7: Zobrazení dvou divergujících atraktorů pro různé počáteční
+podmínky.</i></p>
+
+<p>Výsledné video je kvalitnější, než výše uvedený animovaný GIF:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video7.htm">https://tisnik.github.io/moviepy-videos/video7.htm</a>
+
+<p>Aby bylo možné vykreslit dva atraktory s&nbsp;různými počátečními podmínkami
+a různým počtem bodů, nepatrně pozměníme zdrojový kód &ndash; vytvoříme novou
+funkci nazvanou <strong>draw_attractor</strong>, které se předá maximální počet
+vykreslovaných bodů, počáteční podmínky a taktéž objekt typu <a
+href="https://matplotlib.org/api/axes_api.html#matplotlib.axes.Axes">Axes</a>,
+který zajistí vlastní vykreslování (má metodu <strong>plot</strong>):</p>
+
+<pre>
+def <strong>draw_attractor</strong>(ax, n, x0, y0, z0):
+    <i># prozatím prázdné pole připravené pro výpočet</i>
+    x = np.zeros((n,))
+    y = np.zeros((n,))
+    z = np.zeros((n,))
+&nbsp;
+    <i># počáteční hodnoty</i>
+    x[0], y[0], z[0] = x0, y0, z0
+&nbsp;
+    <i># vlastní výpočet atraktoru</i>
+    for i in range(n-1):
+        x_dot, y_dot, z_dot = lorenz(x[i], y[i], z[i])
+        x[i+1] = x[i] + x_dot * dt
+        y[i+1] = y[i] + y_dot * dt
+        z[i+1] = z[i] + z_dot * dt
+&nbsp;
+    ax.plot(x, y, z)
+</pre>
+
+<p>Následuje <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example11_Lorenz_attractor_3.py">úplný
+zdrojový kód</a> tohoto demonstračního příkladu</p>
+
+<pre>
+<i>#!/usr/bin/env python</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># - Lorenzův atraktor</i>
+&nbsp;
+from mpl_toolkits.mplot3d import axes3d
+import matplotlib.pyplot as plt
+import numpy as np
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+&nbsp;
+<i># parametry obrázků / rámců</i>
+WIDTH = 600
+HEIGHT = 450
+DPI = 100
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 20
+&nbsp;
+&nbsp;
+<i># funkce pro výpočet dalšího bodu Lorenzova atraktoru</i>
+def <strong>lorenz</strong>(x, y, z, s=10, r=28, b=2.667):
+    x_dot = s*(y - x)
+    y_dot = r*x - y - x*z
+    z_dot = x*y - b*z
+    return x_dot, y_dot, z_dot
+&nbsp;
+<i># krok (změna času)</i>
+dt = 0.01
+&nbsp;
+&nbsp;
+fig = plt.figure(figsize=(1.0 * WIDTH / DPI, 1.0 * HEIGHT / DPI), dpi=DPI)
+axis = fig.add_subplot(111, projection="3d")
+&nbsp;
+max = 0
+&nbsp;
+&nbsp;
+def <strong>draw_attractor</strong>(ax, n, x0, y0, z0):
+    <i># prozatím prázdné pole připravené pro výpočet</i>
+    x = np.zeros((n,))
+    y = np.zeros((n,))
+    z = np.zeros((n,))
+&nbsp;
+    <i># počáteční hodnoty</i>
+    x[0], y[0], z[0] = x0, y0, z0
+&nbsp;
+    <i># vlastní výpočet atraktoru</i>
+    for i in range(n-1):
+        x_dot, y_dot, z_dot = lorenz(x[i], y[i], z[i])
+        x[i+1] = x[i] + x_dot * dt
+        y[i+1] = y[i] + y_dot * dt
+        z[i+1] = z[i] + z_dot * dt
+&nbsp;
+    ax.plot(x, y, z)
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    axis.clear()
+&nbsp;
+    global max
+&nbsp;
+    <i># celkový počet vypočtených bodů na Lorenzově atraktoru</i>
+    n = 10 + max * 10
+&nbsp;
+    ax = fig.gca(projection='3d')
+    max += 1
+&nbsp;
+    <i># rozměry grafu ve směru osy x</i>
+    ax.set_xlim(-30, 30)
+&nbsp;
+    <i># rozměry grafu ve směru osy y</i>
+    ax.set_ylim(-30, 30)
+&nbsp;
+    <i># rozměry grafu ve směru osy z</i>
+    ax.set_zlim(0, 50)
+&nbsp;
+    draw_attractor(ax, n, 0.0, 1.0, 0.95)
+    draw_attractor(ax, n, 0.0, 1.0, 1.25)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+<i># animation.write_gif('lorenz3.gif', fps=FPS)</i>
+animation.write_videofile('lorenz3.ogv', fps=FPS, progress_bar=True, bitrate="800000")
+</pre>
+
+
+
+<p><a name="k06"></a></p>
+<h2 id="k06">6. Aproximace funkcí Taylorovým polynomem</h2>
+
+<p>V&nbsp;další části dnešního článku si ukážeme, jak je možné vytvořit
+animovaný graf, v&nbsp;němž dochází ke stále přesnější aproximaci nějaké funkce
+ve vybraném bodě <a
+href="https://cs.wikipedia.org/wiki/Taylorova_%C5%99ada">Taylorovým
+polynomem</a>. Opět se jedná o oblast, v&nbsp;níž může být animace přehlednější
+než jediný statický graf s&nbsp;větším množstvím funkcí, jejichž průběhy se
+navíc v&nbsp;některých intervalech překrývají. Ostatně se můžeme podívat, jak
+vypadá graf, v&nbsp;níž je zobrazeno prvních pět aproximací sinusovky
+v&nbsp;bodě x=0 a následně prvních deset aproximací. Zejména druhý obrázek
+již není příliš přehledný:</p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-5.png" class="image-329215" alt="&#160;" width="543" height="412" />
+<p><i>Obrázek 8: Aproximace sinusovky &ndash; prvních pět aproximací.</i></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-6.png" class="image-329216" alt="&#160;" width="537" height="403" />
+<p><i>Obrázek 9: Aproximace sinusovky &ndash; prvních deset aproximací.</i></p>
+
+
+
+<p><a name="k07"></a></p>
+<h2 id="k07">7. Skript pro vykreslení sinusovky aproximované Taylorovým polynomem</h2>
+
+<p>Nejprve si ukažme skript, který má vykreslit sinusovku a taktéž její
+aproximace ve zvoleném bodě pomocí Taylorova polynomu určitého stupně. Jak bod
+<strong>x</strong>, v&nbsp;jehož okolí bude funkce aproximována, tak i stupeň
+Taylorova polynomu jsou volitelné. Samotný výpočet přímo odpovídá Taylorovu
+rozvoji:</p>
+
+<pre>
+def <strong>taylor_series</strong>(x, order):
+    <i>"""Výpočet aproximace hodnoty funkce pomocí Taylorovy řady."""</i>
+    a = x
+    sum = a
+    for i in range(1, order):
+        a *= -1 * x**2 / ((2 * i) * (2 * i + 1))
+        sum += a
+    return sum
+</pre>
+
+<p>Výše uvedenou funkci použijeme pro vykreslení několika aproximací
+s&nbsp;využitím polynomu různého stupně (maximální stupeň je uložen
+v&nbsp;proměnné <strong>N</strong>):</p>
+
+<pre>
+ys = np.vectorize(taylor_series)
+&nbsp;
+<i># aproximace</i>
+N = 10
+&nbsp;
+for order in range(1, N+1):
+    approx = ys(x, order)
+    plt.plot(x, approx, label='order {o}'.format(o=order))
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: funkce <strong>numpy.vectorize</strong>
+zde není použita pro urychlení výpočtů, ale proto, aby se zpřehlednil kód ve
+smyčce.</div></p>
+
+<p>Následuje výpis celého zdrojového kódu <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example12_taylor.py">tohoto
+demonstračního příkladu</a>:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+&nbsp;
+&nbsp;
+def <strong>taylor_series</strong>(x, order):
+    <i>"""Výpočet aproximace hodnoty funkce pomocí Taylorovy řady."""</i>
+    a = x
+    sum = a
+    for i in range(1, order):
+        a *= -1 * x**2 / ((2 * i) * (2 * i + 1))
+        sum += a
+    return sum
+&nbsp;
+&nbsp;
+<i># průběh nezávislé proměnné x</i>
+<i># (hodnoty na x-ové ose)</i>
+x = np.linspace(-20, 20, 500)
+&nbsp;
+<i># funkce kterou aproximujeme</i>
+y = np.sin(x)
+&nbsp;
+<i># vykreslení původní funkce</i>
+plt.plot(x, y, label='sin(x)')
+&nbsp;
+ys = np.vectorize(taylor_series)
+&nbsp;
+<i># aproximace</i>
+N = 10
+&nbsp;
+for order in range(1, N+1):
+    approx = ys(x, order)
+    plt.plot(x, approx, label='order {o}'.format(o=order))
+&nbsp;
+<i># limity na ose y</i>
+plt.ylim([-3, 3])
+&nbsp;
+<i># legenda grafu</i>
+plt.legend()
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+
+
+<p><a name="k08"></a></p>
+<h2 id="k08">8. Animace vlivu postupného přidávání členů do Taylorova polynomu na tvar aproximované funkce (sinusovky)</h2>
+
+<p>Předchozí příklad můžeme velmi snadno upravit takovým způsobem, aby se
+postupné zlepšování přesnosti aproximace zvyšováním stupně Taylorova vykreslilo
+formou animace. Vykreslování stačí umístit do nám již známé funkce
+<strong>make_frame</strong>, přičemž stupeň Taylorova polynomu je uložen
+v&nbsp;globální proměnné <strong>order</strong>, která se postupně zvyšuje:</p>
+
+<pre>
+def <strong>make_frame</strong>(t):
+    axis.clear()
+&nbsp;
+    <i># vykreslení původní funkce</i>
+    axis.plot(x, y, label='sin(x)')
+&nbsp;
+    <i># aproximace</i>
+    global order
+    approx = ys(x, order)
+&nbsp;
+    axis.plot(x, approx, label='order {o}'.format(o=order))
+    order += 1
+&nbsp;
+    <i># limity na ose y</i>
+    axis.set_ylim([-3, 3])
+    axis.legend()
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+</pre>
+
+<p><div class="rs-tip-major">Důležité upozornění: v&nbsp;předchozích příkladech
+to nebylo tak kritické, ovšem nyní se střetáváme s&nbsp;poněkud zvláštním
+chováním knihovny MoviePy, které je popsáno <a
+href="https://github.com/Zulko/moviepy/issues/155">zde</a>. Jedná se ve
+stručnosti o to, že první snímek je sice vypočítán a posléze zahozen, což
+nemusí vadit v&nbsp;případě, že je celá animace řízena pouze parametrem
+<strong>t</strong>. My ovšem používáme globální proměnnou
+<strong>order</strong>, takže by se vykreslení Taylorova polynomu stupně 1
+přeskočilo (stupeň 1 odpovídá přímce s&nbsp;určitým sklonem). Aby k&nbsp;tomu
+nedošlo, můžeme jednoduše začít s&nbsp;hodnotou <strong>order</strong>
+nastavenou na nulu a nikoli na jedničku.</div></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-7.gif" class="image-329217" alt="&#160;" width="640" height="480" />
+<p><i>Obrázek 10: Postupně vylepšovaná aproximace sinusovky Taylorovým
+polynomem.</i></p>
+
+<p>Následuje, jak již zajisté očekáváte, <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example12_taylor.py">úplný
+zdrojový kód</a> tohoto demonstračního příkladu</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># Demonstrační příklad:</i>
+<i># - vykreslení postupné aproximace funkce sin</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+&nbsp;
+<i># parametry animace</i>
+DURATION = 20
+FPS = 0.8
+&nbsp;
+&nbsp;
+def <strong>taylor_series</strong>(x, order):
+    <i>u"""Výpočet aproximace hodnoty funkce pomocí Taylorovy řady."""</i>
+    a = x
+    sum = a
+    for i in range(1, order):
+        a *= -1 * x**2 / ((2 * i) * (2 * i + 1))
+        sum += a
+    return sum
+&nbsp;
+&nbsp;
+<i># průběh nezávislé proměnné x</i>
+<i># (hodnoty na x-ové ose)</i>
+x = np.linspace(-20, 20, 500)
+&nbsp;
+<i># funkce kterou aproximujeme</i>
+y = np.sin(x)
+&nbsp;
+ys = np.vectorize(taylor_series)
+&nbsp;
+<i># vytvoření objektu reprezentujícího průběh funkce</i>
+fig, axis = plt.subplots()
+&nbsp;
+<i># zde začínáme od nuly!</i>
+<i># viz: https://github.com/Zulko/moviepy/issues/155</i>
+order = 0
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    axis.clear()
+&nbsp;
+    <i># vykreslení původní funkce</i>
+    axis.plot(x, y, label='sin(x)')
+&nbsp;
+    <i># aproximace</i>
+    global order
+    approx = ys(x, order)
+&nbsp;
+    axis.plot(x, approx, label='order {o}'.format(o=order))
+    order += 1
+&nbsp;
+    <i># limity na ose y</i>
+    axis.set_ylim([-3, 3])
+    axis.legend()
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_gif('taylor_sinus.gif', fps=FPS)
+<i># animation.write_videofile('taylor_sinus.ogv', fps=FPS)</i>
+</pre>
+
+
+
+<p><a name="k09"></a></p>
+<h2 id="k09">9. Reprezentace periodického průběhu pomocí funkcí sin a cos (Fourierova řada)</h2>
+
+<p>Dalším příkladem použití kombinace knihoven Matplotlib a MoviePy, který si
+dnes popíšeme, bude skript, v&nbsp;němž budeme reprezentovat průběh nějaké
+periodické funkce s&nbsp;využitím základních goniometrických funkcí sin a cos.
+Použijeme přitom slavnou <a
+href="https://cs.wikipedia.org/wiki/Fourierova_%C5%99ada">Fourierovu řadu</a>.
+Opět se jedná o poměrně pěkný příklad situace, v&nbsp;níž může být použití
+animace výhodnější, než zanesení průběhů několika funkcí do jediného grafu, což
+není příliš přehledné:</p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-8.png" class="image-329218" alt="&#160;" width="564" height="413" />
+<p><i>Obrázek 11: Aproximace obdélníkového signálu prvními max. čtyřmi členy
+Fourierovy řady. Nejpřesnější aproximací je zde červená křivka.</i></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-9.png" class="image-329219" alt="&#160;" width="560" height="418" />
+<p><i>Obrázek 12: Aproximace obdélníkového signálu prvními max. deseti členy
+Fourierovy řady. Nejpřesnější aproximací je zde světle modrá křivka, která se
+však v&nbsp;grafu prakticky ztrácí.</i></p>
+
+<p><div class="rs-tip-major">Poznámka: oba obrázky byly vytvořeny skriptem
+popsaným v&nbsp;navazující kapitole.</div></p>
+
+
+
+<p><a name="k10"></a></p>
+<h2 id="k10">10. Statický graf &ndash; rekonstrukce obdélníkového signálu</h2>
+
+<p>V&nbsp;případě, že budeme chtít rekonstruovat (či aproximovat) obdélníkový
+signál, budou nám k&nbsp;tomu stačit pouze liché členy Fourierovy řady
+(frekvence 1, 3, 5, 7, amplitudy 1/1, 1/3, 1/5, 1/7 atd., viz například <a
+href="http://hippo.feld.cvut.cz/vyuka/petr/04X31EO2/hovanec/index.htm">tento
+text</a> nebo ještě lépe <a
+href="https://wikimedia.org/api/rest_v1/media/math/render/svg/d3385fa3c1973dbf4c502d1872969949b749b8a6">přesný
+vzorec</a>), takže výpočet bude relativně jednoduchý:</p>
+
+<pre>
+def <strong>fourier_serie</strong>(x, order):
+    sum = 0
+    for i in range(0, order):
+        n = 2 * i + 1
+        a = np.sin(x * n) / n
+        sum += a
+    return sum
+</pre>
+
+<p>Vykreslení aproximace obdélníkového signálu s&nbsp;využitím maximálně čtyř
+lichých členů:</p>
+
+<pre>
+<i># Fourierova syntéza</i>
+N = 4
+&nbsp;
+for order in range(1, N+1):
+    approx = ys(x, order)
+    plt.plot(x, approx, label='order {o}'.format(o=order))
+</pre>
+
+<p>Samozřejmě si opět ukážeme <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example13_fourier.py">úplný
+zdrojový kód</a> tohoto skriptu:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+&nbsp;
+&nbsp;
+def <strong>fourier_serie</strong>(x, order):
+    sum = 0
+    for i in range(0, order):
+        n = 2 * i + 1
+        a = np.sin(x * n) / n
+        sum += a
+    return sum
+&nbsp;
+&nbsp;
+<i># průběh nezávislé proměnné x</i>
+<i># (hodnoty na x-ové ose)</i>
+x = np.linspace(-4, 4, 500)
+&nbsp;
+<i># funkce kterou aproximujeme</i>
+y = np.sin(x)
+&nbsp;
+ys = np.vectorize(fourier_serie)
+&nbsp;
+<i># Fourierova syntéza</i>
+N = 4
+&nbsp;
+for order in range(1, N+1):
+    approx = ys(x, order)
+    plt.plot(x, approx, label='order {o}'.format(o=order))
+&nbsp;
+<i># limity na ose y</i>
+plt.ylim([-1, 1])
+&nbsp;
+<i># legenda grafu</i>
+plt.legend()
+&nbsp;
+<i># zobrazení grafu</i>
+plt.show()
+</pre>
+
+<p><div class="rs-tip-major">Podobným způsobem lze vytvořit animaci postupné
+aproximace trojúhelníkového signálu, posunutého obdélníkového signálu,
+obdélníkového signálu &nbsp;odlišnou střídou atd. atd. Stačí jen upravit funkci
+pro výpočet koeficientů Fourierovy řady (jejich velikost, tj.&nbsp;amplitudy
+příslušných funkcí sin a cos).</div></p>
+
+
+
+<p><a name="k11"></a></p>
+<h2 id="k11">11. Animace postupného zvyšování členů ve Fourierově řadě</h2>
+
+<p>Prakticky stejným postupem, jakým jsme vytvořili animaci aproximace funkce
+pomocí Taylorova polynomu můžeme získat animaci zlepšující se aproximace
+periodického obdélníkového signály lichými členy Fourierovy řady. Opět
+použijeme globální proměnnou <strong>order</strong>, která se s&nbsp;každým
+snímkem zvýší o jedničku.</p>
+
+<pre>
+order = 0
+&nbsp;
+def <strong>make_frame</strong>(t):
+    axis.clear()
+&nbsp;
+    <i># Fourierova syntéza</i>
+    global order
+    approx = ys(x, order)
+&nbsp;
+    axis.plot(x, approx, label='order {o}'.format(o=order))
+    order += 1
+&nbsp;
+    <i># limity na ose y</i>
+    axis.set_ylim([-1, 1])
+    axis.legend()
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+</pre>
+
+<p>V&nbsp;animaci vidíme typické překmity na vzestupných i sestupných hranách
+aproximovaného signálu (souvisí s&nbsp;Gibbsovým jevem). Ty teoreticky vymizí
+při součtu všech členů Fourierovy řady (jichž je ovšem nekonečný počet).</p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-10.gif" class="image-329220" alt="&#160;" width="640" height="480" />
+<p><i>Obrázek 13: Postupné zlepšování aproximace (periodického) obdélníkového
+signálu s&nbsp;využitím lichých členů Fourierovy řady.</i></p>
+
+<p>Následuje, jak již zajisté očekáváte, <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example13_fourier.py">úplný
+zdrojový kód</a> tohoto demonstračního příkladu</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+<i># Knihovny Numpy a matplotlib</i>
+<i>#</i>
+<i># Demonstrační příklad:</i>
+<i># - vykreslení rozkladu obdélníkového signálu na sinusové průběhy</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+&nbsp;
+<i># parametry animace</i>
+DURATION = 20
+FPS = 0.8
+&nbsp;
+&nbsp;
+def <strong>fourier_serie</strong>(x, order):
+    sum = 0
+    for i in range(0, order):
+        n = 2 * i + 1
+        a = np.sin(x * n) / n
+        sum += a
+    return sum
+&nbsp;
+&nbsp;
+<i># průběh nezávislé proměnné x</i>
+<i># (hodnoty na x-ové ose)</i>
+x = np.linspace(-4, 4, 500)
+&nbsp;
+<i># funkce kterou aproximujeme</i>
+y = np.sin(x)
+&nbsp;
+ys = np.vectorize(fourier_serie)
+&nbsp;
+<i># vytvoření objektu reprezentujícího průběh funkce</i>
+fig, axis = plt.subplots()
+&nbsp;
+<i># zde začínáme od nuly!</i>
+<i># viz: https://github.com/Zulko/moviepy/issues/155</i>
+order = 0
+&nbsp;
+def <strong>make_frame</strong>(t):
+    axis.clear()
+&nbsp;
+    <i># Fourierova syntéza</i>
+    global order
+    approx = ys(x, order)
+&nbsp;
+    axis.plot(x, approx, label='order {o}'.format(o=order))
+    order += 1
+&nbsp;
+    <i># limity na ose y</i>
+    axis.set_ylim([-1, 1])
+    axis.legend()
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_gif('fourier_square_wave.gif', fps=FPS)
+</pre>
+
+
+
+<p><a name="k12"></a></p>
+<h2 id="k12">12. Problematika vykreslení komplexních funkcí</h2>
+
+<p>V&nbsp;této kapitole se alespoň ve stručnosti seznámíme s&nbsp;problematikou
+vykreslování komplexních funkcí. Současná verze knihovny Matplotlib sice
+neobsahuje přímou podporu pro tvorbu 3D grafů zobrazujících komplexní funkce
+tak, jako je tomu v&nbsp;dalších nástrojích (například v&nbsp;Matlabu), ovšem i
+přesto je možné s&nbsp;komplexními funkcemi poměrně dobře pracovat a zobrazovat
+je &ndash; a to jak v&nbsp;2D grafu, tak i v&nbsp;grafu trojrozměrném. Obě
+řešení samozřejmě mají své přednosti a zápory.</p>
+
+<p>Nejjednodušší je zobrazení 2D grafu s&nbsp;&bdquo;průběhem&ldquo; komplexní
+funkce. Princip je poměrně jednoduchý. Vstupem je matice komplexních čísel,
+které by při zobrazení v&nbsp;komplexní rovině tvořily mřížku. Čím hustší je
+mřížka, tím přesnější samozřejmě bude výsledný graf, ovšem i doba výpočtu se
+prodlouží (což bude patrné především při tvorbě animací). Vytvoření
+dvourozměrné matice komplexních čísel:</p>
+
+<pre>
+<i># rozmery mrizky</i>
+N=1000
+&nbsp;
+<i># mrizka realnych cisel</i>
+<i># (zde má 1j speciální význam při tvorbě mřížky)</i>
+x, y = np.ogrid[-5:5:N*1j, -5:5:N*1j]
+&nbsp;
+<i># prevod na komplexni cisla</i>
+z = x + 1j*y
+</pre>
+
+<p>Příklad použití při vytvoření mřížky 3&times;3 komplexních čísel, přičemž
+reálná složka je rovna -5, 0, 5 a komplexní -5j, 0j a 5j:</p>
+
+<pre>
+<strong>x, y = np.ogrid[-5:5:3j, -5:5:3j]</strong>
+&nbsp;
+<strong>x</strong>
+array([[-5.],
+       [ 0.],
+       [ 5.]])
+<strong>y</strong>
+array([[-5.,  0.,  5.]])
+&nbsp;
+<strong>z = x + 1j*y</strong>
+&nbsp;
+<strong>z</strong>
+array([[-5.-5.j, -5.+0.j, -5.+5.j],
+       [ 0.-5.j,  0.+0.j,  0.+5.j],
+       [ 5.-5.j,  5.+0.j,  5.+5.j]])
+</pre>
+
+<p>Následně je na každé komplexní číslo na vstupu (označme ho
+<strong>z</strong>) aplikovaná vybraná funkce, přičemž výsledkem je nové
+komplexní číslo <strong>w</strong>:</p>
+
+<pre>
+w = (z**2+4)/(z**2-4)
+</pre>
+
+<p>Nebo:</p>
+
+<pre>
+<strong>w=z**2</strong>
+&nbsp;
+<strong>w</strong>
+array([[  0.+50.j,  25. -0.j,   0.-50.j],
+       [-25. -0.j,   0. +0.j, -25. +0.j],
+       [  0.-50.j,  25. +0.j,   0.+50.j]])
+</pre>
+
+<p>A právě sérii těchto čísel budeme chtít nějakým způsobem vizualizovat.
+V&nbsp;2D grafu je vizualizace založena na převodu hodnoty komplexního čísla na
+barevný kód, tj.&nbsp;vlastně na aplikaci další funkce z &rarr; RGB:</p>
+
+<pre>
+show_graph(w)
+</pre>
+
+<p><div class="rs-tip-major">Důležité upozornění: komplexní hodnoty tedy
+nepovažujeme za souřadnice v&nbsp;komplexní rovině! Pouze převedeme komplexní
+hodnoty z&nbsp;mřížky/matice <strong>w</strong> na barvu s&nbsp;využitím
+mapování.</div></p>
+
+
+
+<p><a name="k13"></a></p>
+<h2 id="k13">13. Obarvení komplexních hodnot</h2>
+
+<p>Pro obarvení komplexních hodnot provedeme dvě operace. Tou první je převod
+každého komplexního čísla na jeho goniometrický tvar, tj.&nbsp;na dvojici
+hodnot představujících velikost čísla (vzdálenost od středu komplexní roviny) a
+úhel. Primitivní (nevektorizovaná) varianta převodní funkce může vypadat
+následovně:</p>
+
+<pre>
+def <strong>to_polar_form</strong>(z):
+    <i>"""Prevod komplexniho cisla na goniometricky tvar."""</i>
+    r = np.abs(z)
+    phi = np.angle(z) 
+    return r, phi
+</pre>
+
+<p>Ve druhém kroku provedeme převod z&nbsp;goniometrického tvaru na barvu
+reprezentovanou <a
+href="https://en.wikipedia.org/wiki/HSL_and_HSV">v&nbsp;barvovém prostoru
+<i>HLS</i></a>. Jedná se o jeden z&nbsp;barvových prostorů, kde má rotace
+význam změny barevného tónu:</p>
+
+<pre>
+def <strong>polar_to_hls</strong>(r, phi):
+    <i>"""Prevod na HLS."""</i>
+    h = (phi + pi)  / (2 * pi) + 0.5
+    l = 1.0 - 1.0/(1.0 + r**0.3)
+    s = 0.8
+    return h, l, s
+</pre>
+
+<p>Dále je nutné výslednou trojici převést na vektor se složkami RGB, vložit ho
+do 2D pole a změnit tvar pole takovým způsobem, aby reprezentovalo rastrový
+obrázek:</p>
+
+<pre>
+def <strong>colorize</strong>(z):
+    <i>"""Funkce pro prevod complex -&gt; HLS -&gt; RGB."""</i>
+    r, phi = to_polar_form(z)
+&nbsp;
+    h, l, s = polar_to_hls(r, phi)
+&nbsp;
+    <i># prevod na n-tici</i>
+    c = np.vectorize(hls_to_rgb) (h,l,s)
+&nbsp;
+    <i># zmena tvaru z (3,n,m) na (n,m,3)</i>
+    c = np.array(c)
+    c = c.swapaxes(0,2) 
+    return c
+</pre>
+
+
+
+<p><a name="k14"></a></p>
+<h2 id="k14">14. Zobrazení 2D grafu s&nbsp;komplexní funkcí</h2>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example14_complex_function.py">Celý
+zdrojový kód příkladu</a>, který ve 2D grafu zobrazí několik komplexních
+funkcí, je vypsán pod tímto odstavcem:</p>
+
+<pre>
+import numpy as np
+from numpy import pi
+import pylab as plt
+from colorsys import hls_to_rgb
+&nbsp;
+&nbsp;
+<i># viz https://stackoverflow.com/a/20958684</i>
+&nbsp;
+&nbsp;
+def <strong>to_polar_form</strong>(z):
+    <i>"""Prevod komplexniho cisla na goniometricky tvar."""</i>
+    r = np.abs(z)
+    phi = np.angle(z) 
+    return r, phi
+&nbsp;
+&nbsp;
+def <strong>polar_to_hls</strong>(r, phi):
+    <i>"""Prevod na HLS."""</i>
+    h = (phi + pi)  / (2 * pi) + 0.5
+    l = 1.0 - 1.0/(1.0 + r**0.3)
+    s = 0.8
+    return h, l, s
+&nbsp;
+&nbsp;
+def <strong>colorize</strong>(z):
+    <i>"""Funkce pro prevod complex -&gt; HLS -&gt; RGB."""</i>
+    r, phi = to_polar_form(z)
+&nbsp;
+    h, l, s = polar_to_hls(r, phi)
+&nbsp;
+    <i># prevod na n-tici</i>
+    c = np.vectorize(hls_to_rgb) (h,l,s)
+&nbsp;
+    <i># zmena tvaru z (3,n,m) na (n,m,3)</i>
+    c = np.array(c)
+    c = c.swapaxes(0,2) 
+    return c
+&nbsp;
+&nbsp;
+def show_graph(w):
+    <i># obarveni vysledku</i>
+    img = colorize(w)
+&nbsp;
+    <i># vykresleni grafu</i>
+    plt.imshow(img)
+    plt.show()
+&nbsp;
+<i># rozmery mrizky</i>
+N=1000
+&nbsp;
+<i># mrizka realnych cisel</i>
+x, y = np.ogrid[-5:5:N*1j, -5:5:N*1j]
+&nbsp;
+<i># prevod na komplexni cisla</i>
+z = x + 1j*y
+&nbsp;
+w = z
+show_graph(w)
+&nbsp;
+w = 1/z
+show_graph(w)
+&nbsp;
+w = z**2
+show_graph(w)
+&nbsp;
+w = z**z+z
+show_graph(w)
+&nbsp;
+w = (z**2+4)/(z**2-4)
+show_graph(w)
+&nbsp;
+w = np.tan(z)
+show_graph(w)
+&nbsp;
+w = np.tan(10/z)
+show_graph(w)
+&nbsp;
+w = np.sin(z**2)
+show_graph(w)
+&nbsp;
+w = 1/(z+1j)**2 + 1/(z-2)**2
+show_graph(w)
+</pre>
+
+<p><div class="rs-tip-major">Poznámka: ve skutečnosti by bylo možné se obejít
+bez knihovny Matplotlib a veškeré vykreslování provést rychleji jen
+s&nbsp;použitím knihoven <i>Numpy</i> a <i>MoviePy</i>.</div></p>
+
+
+
+<p><a name="k15"></a></p>
+<h2 id="k15">15. Ukázky vytvořených grafů s&nbsp;komplexními funkcemi</h2>
+
+<p>Podívejme se nyní na několik grafů zobrazujících &bdquo;průběh&ldquo;
+komplexních funkcí. U každého grafu je zapsáno, o jakou funkci se jedná.</p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-11.png" class="image-329221" alt="&#160;" width="450" height="420" />
+<p><i>Obrázek 14: Graf komplexní funkce f=z.</i></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-12.png" class="image-329222" alt="&#160;" width="450" height="420" />
+<p><i>Obrázek 15: Graf komplexní funkce f=1/z.</i></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-13.png" class="image-329223" alt="&#160;" width="450" height="420" />
+<p><i>Obrázek 16: Graf komplexní funkce f=z<sup>2</sup>.</i></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-14.png" class="image-329224" alt="&#160;" width="450" height="420" />
+<p><i>Obrázek 17: Graf komplexní funkce f=z*z=z.</i></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-15.png" class="image-329225" alt="&#160;" width="450" height="420" />
+<p><i>Obrázek 18: Graf komplexní funkce f=(z<sup>2</sup>+4) / (z<sup>2</sup>-4).</i></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-16.png" class="image-329226" alt="&#160;" width="450" height="420" />
+<p><i>Obrázek 19: Graf komplexní funkce f=tan(z).</i></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-17.png" class="image-329227" alt="&#160;" width="450" height="420" />
+<p><i>Obrázek 20: Graf komplexní funkce f=tan(10/z).</i></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-18.png" class="image-329228" alt="&#160;" width="450" height="420" />
+<p><i>Obrázek 21: Graf komplexní funkce f=sin(z<sup>2</sup>).</i></p>
+
+<img src="https://i.iinfo.cz/images/455/moviepy-3-19.png" class="image-329229" alt="&#160;" width="450" height="420" />
+<p><i>Obrázek 22: Graf komplexní funkce f=1/(z+j)<sup>2</sup> + 1/(z-2)<sup>2</sup>.</i></p>
+
+
+
+<p><a name="k16"></a></p>
+<h2 id="k16">16. Animace v&nbsp;grafech zobrazujících komplexní funkce</h2>
+
+<p>Nyní se podívejme na to, jak lze předchozí grafy s&nbsp;komplexními funkcemi
+&bdquo;rozpohybovat&ldquo;. Budeme postupně a v&nbsp;dostatečně malých krocích
+měnit nějaký parametr komplexní funkce, například následovně (měněná hodnota je
+uložena v&nbsp;globální proměnné <strong>offset</strong>):</p>
+
+<pre>
+def <strong>make_frame</strong>(t):
+    offset = 4 * t / DURATION - 2
+    print(offset)
+&nbsp;
+    w = 1/(z+2j)**2 + 1/(z-offset)**2
+    img = colorize(w)
+&nbsp;
+    fig = plt.figure(figsize=(20,20))
+&nbsp;
+    plt.subplot(111)
+&nbsp;
+    subplot = fig.add_subplot(111)
+&nbsp;
+    subplot.imshow(img)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+</pre>
+
+<p>Výsledné video:</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video8.htm">https://tisnik.github.io/moviepy-videos/video8.htm</a>
+
+<p>Opět se podívejme, jak může vypadat <a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example14_complex_function.py">úplný
+zdrojový kód</a> tohoto příkladu:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+import numpy as np
+from numpy import pi
+import pylab as plt
+from colorsys import hls_to_rgb
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+&nbsp;
+<i># viz https://stackoverflow.com/a/20958684</i>
+&nbsp;
+&nbsp;
+def <strong>to_polar_form</strong>(z):
+    <i>"""Prevod komplexniho cisla na goniometricky tvar."""</i>
+    r = np.abs(z)
+    phi = np.angle(z) 
+    return r, phi
+&nbsp;
+&nbsp;
+def <strong>polar_to_hls</strong>(r, phi):
+    <i>"""Prevod na HLS."""</i>
+    h = (phi + pi)  / (2 * pi) + 0.5
+    l = 1.0 - 1.0/(1.0 + r**0.3)
+    s = 0.8
+    return h, l, s
+&nbsp;
+&nbsp;
+def <strong>colorize</strong>(z):
+    <i>"""Funkce pro prevod complex -&gt; HLS -&gt; RGB."""</i>
+    r, phi = to_polar_form(z)
+&nbsp;
+    h, l, s = polar_to_hls(r, phi)
+&nbsp;
+    <i># prevod na n-tici</i>
+    c = np.vectorize(hls_to_rgb) (h,l,s)
+&nbsp;
+    <i># zmena tvaru z (3,n,m) na (n,m,3)</i>
+    c = np.array(c)
+    c = c.swapaxes(0,2) 
+    return c
+&nbsp;
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 12
+&nbsp;
+<i># rozmery mrizky</i>
+N=1000
+&nbsp;
+<i># mrizka realnych cisel</i>
+x, y = np.ogrid[-4:4:N*1j, -4:4:N*1j]
+&nbsp;
+<i># prevod na komplexni cisla</i>
+z = x + 1j*y
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    offset = 4 * t / DURATION - 2
+    print(offset)
+&nbsp;
+    w = 1/(z+2j)**2 + 1/(z-offset)**2
+    img = colorize(w)
+&nbsp;
+    fig = plt.figure(figsize=(20,20))
+&nbsp;
+    plt.subplot(111)
+&nbsp;
+    subplot = fig.add_subplot(111)
+&nbsp;
+    subplot.imshow(img)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_videofile('complex.ogv', fps=FPS, progress_bar=False, bitrate="800000")
+</pre>
+
+
+
+<p><a name="k17"></a></p>
+<h2 id="k17">17. Vylepšení předchozího příkladu</h2>
+
+<p>V&nbsp;předchozím příkladu se po vykreslení snímku neuvolňovala paměť
+s&nbsp;grafem. To sice většinou nemusí vadit v&nbsp;případě, kdy je animace
+krátká, ovšem pro delší animace a animace s&nbsp;velkými snímky (v&nbsp;našem
+případě pro testovací účely dokonce 2000&times;2000 pixelů) to již začíná být
+problematické. Jedno řešení spočívá v&nbsp;tom, že se vykreslování provádí
+stále do stejného grafu, popř.&nbsp;se navíc graf před vytvořením nového snímku
+smaže:</p>
+
+<pre>
+fig = plt.figure(figsize=(20,20))
+&nbsp;
+plt.subplot(111)
+&nbsp;
+subplot = fig.add_subplot(111)
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    power = 5 * t / DURATION - 2
+&nbsp;
+    w = 1/(z+2j)**power + 1/(z-2)**power
+    img = colorize(w)
+&nbsp;
+    subplot.imshow(img)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+</pre>
+
+<p>Video vytvořené tímto příkladem je zajímavější (kdo přijde na to, proč
+nejsou barvové přechody v&nbsp;celé ploše plynulé?):</p>
+
+<a href="https://tisnik.github.io/moviepy-videos/video9.htm">https://tisnik.github.io/moviepy-videos/video9.htm</a>
+
+<p>Další řešení jsme si již naznačili na konci předchozí kapitoly &ndash;
+provádět vykreslování přímo s&nbsp;využitím možností knihovny MoviePy a Numpy.
+To si ukážeme příště.</p>
+
+<p><a
+href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example14_complex_function2.py">Celý
+zdrojový kód příkladu</a> vypadá takto:</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+import numpy as np
+from numpy import pi
+import pylab as plt
+from colorsys import hls_to_rgb
+from moviepy.editor import VideoClip
+from moviepy.video.io.bindings import mplfig_to_npimage
+&nbsp;
+&nbsp;
+<i># viz https://stackoverflow.com/a/20958684</i>
+&nbsp;
+&nbsp;
+def <strong>to_polar_form</strong>(z):
+    <i>"""Prevod komplexniho cisla na goniometricky tvar."""</i>
+    r = np.abs(z)
+    phi = np.angle(z) 
+    return r, phi
+&nbsp;
+&nbsp;
+def <strong>polar_to_hls</strong>(r, phi):
+    <i>"""Prevod na HLS."""</i>
+    h = (phi + pi)  / (2 * pi) + 0.5
+    l = 1.0 - 1.0/(1.0 + r**0.3)
+    s = 0.8
+    return h, l, s
+&nbsp;
+&nbsp;
+def <strong>colorize</strong>(z):
+    <i>"""Funkce pro prevod complex -&gt; HLS -&gt; RGB."""</i>
+    r, phi = to_polar_form(z)
+&nbsp;
+    h, l, s = polar_to_hls(r, phi)
+&nbsp;
+    <i># prevod na n-tici</i>
+    c = np.vectorize(hls_to_rgb) (h,l,s)
+&nbsp;
+    <i># zmena tvaru z (3,n,m) na (n,m,3)</i>
+    c = np.array(c)
+    c = c.swapaxes(0,2) 
+    return c
+&nbsp;
+&nbsp;
+<i># parametry animace</i>
+DURATION = 10
+FPS = 10
+&nbsp;
+<i># rozmery mrizky</i>
+N = 400
+&nbsp;
+<i># mrizka realnych cisel</i>
+x, y = np.ogrid[-4:4:N*1j, -4:4:N*1j]
+&nbsp;
+<i># prevod na komplexni cisla</i>
+z = x + 1j*y
+&nbsp;
+fig = plt.figure(figsize=(20,20))
+&nbsp;
+plt.subplot(111)
+&nbsp;
+subplot = fig.add_subplot(111)
+&nbsp;
+&nbsp;
+def <strong>make_frame</strong>(t):
+    power = 5 * t / DURATION - 2
+&nbsp;
+    w = 1/(z+2j)**power + 1/(z-2)**power
+    img = colorize(w)
+&nbsp;
+    subplot.imshow(img)
+&nbsp;
+    <i># konverze na objekt typu "frame"</i>
+    return mplfig_to_npimage(fig)
+&nbsp;
+&nbsp;
+animation = VideoClip(make_frame, duration=DURATION)
+animation.write_videofile('complex2.ogv', fps=FPS, progress_bar=True, bitrate="800000")
+</pre>
+
+
+
+<p><a name="k18"></a></p>
+<h2 id="k18">18. Modul <strong>Animation</strong> dostupný v&nbsp;knihovně Matplotlib</h2>
+
+<p>Prozatím jsme se zabývali především použitím knihovny <i>Matplotlib</i>
+společně s&nbsp;knihovnou <i>MoviePy</i>, přičemž knihovna Matplotlib sloužila
+k&nbsp;vytvoření snímků s&nbsp;2D či 3D grafy a knihovna MoviePy z&nbsp;těchto
+snímků vytvářela buď animovaný GIF nebo plnohodnotné video používající zvolený
+kodek (například Ogg/Theora). Ve skutečnosti však v&nbsp;některých případech
+vůbec nemusíme knihovnu <i>MoviePy</i> použít, protože přímo v&nbsp;novějších
+verzích Matplotlibu existuje modul nazvaný <strong>Animation</strong>. Jméno
+tohoto modulu napovídá k&nbsp;čemu slouží &ndash; skutečně je možné s&nbsp;jeho
+využitím vytvářet různé animované grafy. V&nbsp;následujícím článku se
+seznámíme se základy použití tohoto modulu (i když osobně preferuji použití
+<i>MoviePy</i>, které je univerzálnější). Některé již hotové ukázky animovaných
+grafů naleznete na stránce <a
+href="https://matplotlib.org/gallery/index.html#animation">https://matplotlib.org/gallery/index.html#animation</a>
+a ukázkové skripty na <a
+href="https://matplotlib.org/examples/animation/index.html">https://matplotlib.org/examples/animation/index.html</a>.</p>
+
+<p>Jednoduchou animaci (obdobu animace <a
+href="https://www.root.cz/clanky/pouziti-moviepy-spolecne-s-matplotlibem-pro-tvorbu-animovanych-grafu/#k04">z&nbsp;předchozího
+článku</a>) můžeme vytvořit například takto (viz předchozí odkazy):</p>
+
+<pre>
+<i>#!/usr/bin/env python3</i>
+<i># vim: set fileencoding=utf-8</i>
+&nbsp;
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+&nbsp;
+fig, ax = plt.subplots()
+&nbsp;
+<i># nezávislá proměnná</i>
+x = np.arange(0, 2*np.pi, 0.01)
+line, = ax.plot(x, np.sin(x))
+&nbsp;
+&nbsp;
+def <strong>init</strong>():
+    line.set_ydata([np.nan] * len(x))
+    return line,
+&nbsp;
+&nbsp;
+def <strong>animate</strong>(i):
+    line.set_ydata(np.sin(x + i / 100))  # update the data.
+    return line,
+&nbsp;
+&nbsp;
+ani = animation.FuncAnimation(
+    fig, animate, init_func=init, interval=2, blit=True, save_count=50)
+&nbsp;
+ani.save("movie.mp4")
+</pre>
+
+
+
+<p><a name="k19"></a></p>
+<h2 id="k19">19. Repositář s&nbsp;demonstračními příklady</h2>
+
+<p>Zdrojové kódy všech jedenácti dnes popsaných demonstračních příkladů
+určených pro Python 3 byly uloženy do Git repositáře dostupného na adrese <a
+href="https://github.com/tisnik/moviepy-examples">https://github.com/tisnik/moviepy-examples</a>.
+V&nbsp;případě, že nebudete chtít klonovat celý repositář (ten je ovšem stále
+velmi malý, stále doslova několik kilobajtů), můžete namísto toho použít odkazy
+na jednotlivé příklady, které naleznete v&nbsp;následující tabulce:</p>
+
+<table>
+<tr><th>Demonstrační příklad</th><th>Cesta</th></tr>
+<tr><td>example11_Lorenz_attractor.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example11_Lorenz_attractor.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example11_Lorenz_attractor.py</a></td></tr>
+<tr><td>example12_taylor.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example12_taylor.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example12_taylor.py</a></td></tr>
+<tr><td>example13_fourier.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example13_fourier.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example13_fourier.py</a></td></tr>
+<tr><td>example14_complex_function.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example14_complex_function.py">https://github.com/tisnik/moviepy-examples/blob/master/static_plots/example14_complex_function.py</a></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>example11_Lorenz_attractor_1.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example11_Lorenz_attractor_1.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example11_Lorenz_attractor_1.py</a></td></tr>
+<tr><td>example11_Lorenz_attractor_2.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example11_Lorenz_attractor_2.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example11_Lorenz_attractor_2.py</a></td></tr>
+<tr><td>example11_Lorenz_attractor_3.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example11_Lorenz_attractor_3.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example11_Lorenz_attractor_3.py</a></td></tr>
+<tr><td>example12_taylor.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example12_taylor.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example12_taylor.py</a></td></tr>
+<tr><td>example13_fourier.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example13_fourier.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example13_fourier.py</a></td></tr>
+<tr><td>example14_complex_function.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example14_complex_function.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example14_complex_function.py</a></td></tr>
+<tr><td>example14_complex_function2.py</td><td><a href="https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example14_complex_function2.py">https://github.com/tisnik/moviepy-examples/blob/master/animated_plots/example14_complex_function2.py</a></td></tr>
+</table>
+
+
+
+<p><a name="k20"></a></p>
+<h2 id="k20">20. Odkazy na Internetu</h2>
+
+<ol>
+
+<li>MoviePy 0.2.3.3 na PyPi<br />
+<a href="https://pypi.org/project/moviepy/">https://pypi.org/project/moviepy/</a>
+</li>
+
+<li>MoviePy na GitHubu<br />
+<a href="https://github.com/Zulko/moviepy">https://github.com/Zulko/moviepy</a>
+</li>
+
+<li>MoviePy - dokumentace<br />
+<a href="http://zulko.github.io/moviepy/">http://zulko.github.io/moviepy/</a>
+</li>
+
+<li>MoviePy - galerie<br />
+<a href="http://zulko.github.io/moviepy/gallery.html">http://zulko.github.io/moviepy/gallery.html</a>
+</li>
+
+<li>Data Animations With Python and MoviePy<br />
+<a href="https://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/">https://zulko.github.io/blog/2014/11/29/data-animations-with-python-and-moviepy/</a>
+</li>
+
+<li>Porovnání formátů Ogg Theora a H.264<br />
+<a href="https://www.root.cz/zpravicky/porovnani-formatu-ogg-theora-a-h-264/">https://www.root.cz/zpravicky/porovnani-formatu-ogg-theora-a-h-264/</a>
+</li>
+
+<li>Případ GIF<br />
+<a href="https://www.root.cz/clanky/pripad-gif/">https://www.root.cz/clanky/pripad-gif/</a>
+</li>
+
+<li>Pravda a mýty o GIFu<br />
+<a href="https://www.root.cz/clanky/pravda-a-myty-o-gifu/">https://www.root.cz/clanky/pravda-a-myty-o-gifu/</a>
+</li>
+
+<li>Anatomie grafického formátu GIF<br />
+<a href="https://www.root.cz/clanky/anatomie-grafickeho-formatu-gif/">https://www.root.cz/clanky/anatomie-grafickeho-formatu-gif/</a>
+</li>
+
+<li>GIF: animace a konkurence<br />
+<a href="https://www.root.cz/clanky/gif-animace-a-konkurence/">https://www.root.cz/clanky/gif-animace-a-konkurence/</a>
+</li>
+
+<li>Two python modules : MoviePy and images2gif – part 001<br />
+<a href="http://free-tutorials.org/two-python-modules-moviepy-and-images2gif-part-001/">http://free-tutorials.org/two-python-modules-moviepy-and-images2gif-part-001/</a>
+</li>
+
+<li>images2gif<br />
+<a href="https://pypi.org/project/images2gif/">https://pypi.org/project/images2gif/</a>
+</li>
+
+<li>Making GIFs from video files with Python<br />
+<a href="https://www.devbattles.com/en/sand/post-345-Making+GIFs+From+Video+Files+With+Python">https://www.devbattles.com/en/sand/post-345-Making+GIFs+From+Video+Files+With+Python</a>
+</li>
+
+<li>GIF89a specification<br />
+<a href="https://www.w3.org/Graphics/GIF/spec-gif89a.txt">https://www.w3.org/Graphics/GIF/spec-gif89a.txt</a>
+</li>
+
+<li>MPEG-4 Part 14<br />
+<a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">https://en.wikipedia.org/wiki/MPEG-4_Part_14</a>
+</li>
+
+<li>Theora video compression<br />
+<a href="https://www.theora.org/">https://www.theora.org/</a>
+</li>
+
+<li>Theora<br />
+<a href="https://en.wikipedia.org/wiki/Theora">https://en.wikipedia.org/wiki/Theora</a>
+</li>
+
+<li>NumPy<br />
+<a href="http://www.numpy.org/">http://www.numpy.org/</a>
+</li>
+
+<li>numpy 1.14.2 (on PyPi)<br />
+<a href="https://pypi.org/project/numpy/">https://pypi.org/project/numpy/</a>
+</li>
+
+<li>Integrovaná vývojová prostředí ve Fedoře: praktické použití IPython Notebooku a knihovny Numpy<br />
+<a href="https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy/">https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy/</a>
+</li>
+
+<li>Integrovaná vývojová prostředí ve Fedoře: praktické použití IPython Notebooku a knihovny Numpy (2.část)<br />
+<a href="https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy-2-cast/">https://mojefedora.cz/integrovana-vyvojova-prostredi-ve-fedore-prakticke-pouziti-ipython-notebooku-a-knihovny-numpy-2-cast/</a>
+</li>
+
+<li>Non-linear editing system<br />
+<a href="https://en.wikipedia.org/wiki/Non-linear_editing_system">https://en.wikipedia.org/wiki/Non-linear_editing_system</a>
+</li>
+
+<li>Lorenzův atraktor<br />
+<a href="http://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-iii/#k03">http://www.root.cz/clanky/fraktaly-v-pocitacove-grafice-iii/#k03</a>
+</li>
+
+<li>Popis barvových map modulu matplotlib.cm<br />
+<a href="https://gist.github.com/endolith/2719900#id7">https://gist.github.com/endolith/2719900#id7</a>
+</li>
+
+<li>Ukázky (palety) barvových map modulu matplotlib.cm<br />
+<a href="http://matplotlib.org/examples/color/colormaps_reference.html">http://matplotlib.org/examples/color/colormaps_reference.html</a>
+</li>
+
+<li>Lorenz system<br />
+<a href="https://en.wikipedia.org/wiki/Lorenz_system">https://en.wikipedia.org/wiki/Lorenz_system</a>
+</li>
+
+<li>Customising contour plots in matplotlib<br />
+<a href="https://philbull.wordpress.com/2012/12/27/customising-contour-plots-in-matplotlib/">https://philbull.wordpress.com/2012/12/27/customising-contour-plots-in-matplotlib/</a>
+</li>
+
+<li>Graphics with Matplotlib<br />
+<a href="http://kestrel.nmt.edu/~raymond/software/python_notes/paper004.html">http://kestrel.nmt.edu/~raymond/software/python_notes/paper004.html</a>
+</li>
+
+<li>Systémy lineárních rovnic<br />
+<a href="http://www.matematika.cz/systemy-linearnich-rovnic">http://www.matematika.cz/systemy-linearnich-rovnic</a>
+</li>
+
+<li>NumPy Home Page<br />
+<a href="http://www.numpy.org/">http://www.numpy.org/</a>
+</li>
+
+<li>NumPy v1.10 Manual<br />
+<a href="http://docs.scipy.org/doc/numpy/index.html">http://docs.scipy.org/doc/numpy/index.html</a>
+</li>
+
+<li>NumPy (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/NumPy">https://en.wikipedia.org/wiki/NumPy</a>
+</li>
+
+<li>Matplotlib Home Page<br />
+<a href="http://matplotlib.org/">http://matplotlib.org/</a>
+</li>
+
+<li>matplotlib (Wikipedia)<br />
+<a href="https://en.wikipedia.org/wiki/Matplotlib">https://en.wikipedia.org/wiki/Matplotlib</a>
+</li>
+
+<li>The cell magics in IPython<br />
+<a href="http://nbviewer.jupyter.org/github/ipython/ipython/blob/1.x/examples/notebooks/Cell%20Magics.ipynb">http://nbviewer.jupyter.org/github/ipython/ipython/blob/1.x/examples/notebooks/Cell%20Magics.ipynb</a>
+</li>
+
+<li>Taylorův polynom<br />
+<a href="https://algoritmy.net/article/1576/Tayloruv-polynom">https://algoritmy.net/article/1576/Tayloruv-polynom</a>
+</li>
+
+<li>Taylor series<br />
+<a href="https://en.wikipedia.org/wiki/Taylor_series">https://en.wikipedia.org/wiki/Taylor_series</a>
+</li>
+
+<li>Taylor Series Approximation to Cosine<br />
+<a href="https://www.cut-the-knot.org/Curriculum/Calculus/TaylorSeries.shtml">https://www.cut-the-knot.org/Curriculum/Calculus/TaylorSeries.shtml</a>
+</li>
+
+<li>Fourier series<br />
+<a href="https://en.wikipedia.org/wiki/Fourier_series">https://en.wikipedia.org/wiki/Fourier_series</a>
+</li>
+
+<li>mpmath<br />
+<a href="http://mpmath.org/">http://mpmath.org/</a>
+</li>
+
+<li>Gallery of mathematical functions<br />
+<a href="http://mpmath.org/gallery/">http://mpmath.org/gallery/</a>
+</li>
+
+<li>3D visualization of complex functions with matplotlib<br />
+<a href="http://fredrikj.net/blog/2009/08/3d-visualization-of-complex-functions-with-matplotlib/">http://fredrikj.net/blog/2009/08/3d-visualization-of-complex-functions-with-matplotlib/</a>
+</li>
+
+<li>Animating the Lorenz System in 3D<br />
+<a href="https://jakevdp.github.io/blog/2013/02/16/animating-the-lorentz-system-in-3d/">https://jakevdp.github.io/blog/2013/02/16/animating-the-lorentz-system-in-3d/</a>
+</li>
+
+<li>Lorenz example<br />
+<a href="http://docs.enthought.com/mayavi/mayavi/auto/example_lorenz.html">http://docs.enthought.com/mayavi/mayavi/auto/example_lorenz.html</a>
+</li>
+
+<li>Color Graphs of Complex Functions<br />
+<a href="http://fs2.american.edu/lcrone/www/ComplexPlot.html">http://fs2.american.edu/lcrone/www/ComplexPlot.html</a>
+</li>
+
+</ol>
+
+
+
+<p></p><p></p>
+<p><small>Autor: <a href="http://www.fit.vutbr.cz/~tisnovpa">Pavel Tišnovský</a> &nbsp; 2018</small></p>
+</body>
+</html>
+
